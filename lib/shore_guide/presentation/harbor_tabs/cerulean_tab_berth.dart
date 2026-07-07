@@ -19,7 +19,7 @@ enum CeruleanTabBerth {
   pierThread(
     activeGlyph: CoastinAssetRegistry.pierThreadActive,
     quietGlyph: CoastinAssetRegistry.pierThreadQuiet,
-    spokenName: 'Pier note thread',
+    spokenName: 'My Coast profile',
   );
 
   const CeruleanTabBerth({

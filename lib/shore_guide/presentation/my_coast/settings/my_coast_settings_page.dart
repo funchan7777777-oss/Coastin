@@ -36,19 +36,22 @@ class MyCoastSettingsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   _SettingRow(
-                    icon: CupertinoIcons.person_crop_circle_badge_xmark,
+                    iconAsset: CoastinAssetRegistry.blockedPersonGlyph,
                     title: 'Blacklist',
-                    onTap: () => _openNetwork(context, MyCoastNetworkKind.blacklist),
+                    onTap: () =>
+                        _openNetwork(context, MyCoastNetworkKind.blacklist),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.documentGlyph,
                     title: 'Privacy agreement',
-                    onTap: () => _openPolicy(context, HarborPolicyKind.privacyPolicy),
+                    onTap: () =>
+                        _openPolicy(context, HarborPolicyKind.privacyPolicy),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.documentGlyph,
                     title: 'User agreement',
-                    onTap: () => _openPolicy(context, HarborPolicyKind.userAgreement),
+                    onTap: () =>
+                        _openPolicy(context, HarborPolicyKind.userAgreement),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.phoneGlyph,
@@ -56,7 +59,7 @@ class MyCoastSettingsPage extends StatelessWidget {
                     onTap: () => _showContact(context),
                   ),
                   _SettingRow(
-                    iconAsset: CoastinAssetRegistry.documentGlyph,
+                    iconAsset: CoastinAssetRegistry.settingsListGlyph,
                     title: 'Community guidelines',
                     onTap: () => _showGuidelines(context),
                   ),
@@ -191,14 +194,12 @@ class _SettingRow extends StatelessWidget {
   const _SettingRow({
     required this.title,
     required this.onTap,
-    this.icon,
-    this.iconAsset,
+    required this.iconAsset,
     this.isWarning = false,
     this.hasChevron = true,
   });
 
-  final IconData? icon;
-  final String? iconAsset;
+  final String iconAsset;
   final String title;
   final bool isWarning;
   final bool hasChevron;
@@ -218,9 +219,7 @@ class _SettingRow extends StatelessWidget {
               width: 32,
               height: 32,
               child: Center(
-                child: iconAsset != null
-                    ? Image.asset(iconAsset!, width: 21, height: 21)
-                    : Icon(icon, color: color, size: 21),
+                child: Image.asset(iconAsset, width: 21, height: 21),
               ),
             ),
             const SizedBox(width: 14),

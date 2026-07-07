@@ -7,7 +7,6 @@ import '../../../app/theme/tidewash_palette.dart';
 import '../../../arrival_gate/data/local/harbor_passage_store.dart';
 import '../../../arrival_gate/domain/entities/harbor_passage_record.dart';
 import '../../data/local/feed/seeded_coastal_feed_deck.dart';
-import '../../data/local/seeded_shore_moment_deck.dart';
 import 'edit/my_coast_edit_page.dart';
 import 'network/my_coast_network_page.dart';
 import 'settings/my_coast_settings_page.dart';
@@ -87,7 +86,10 @@ class _MyCoastPageState extends State<MyCoastPage> {
                           onEditTap: _openEdit,
                         ),
                         const SizedBox(height: 18),
-                        _ProfileStatsRow(onOpen: _openNetworkPage),
+                        _ProfileStatsRow(
+                          onOpen: _openNetworkPage,
+                          onLikesTap: _showLikesLedger,
+                        ),
                         const SizedBox(height: 16),
                         _WalletStrip(onTap: _openWallet),
                         const SizedBox(height: 18),
@@ -129,14 +131,37 @@ class _MyCoastPageState extends State<MyCoastPage> {
   }
 
   void _openWallet() {
-    Navigator.of(context).push(
-      CupertinoPageRoute<void>(builder: (_) => const MyCoastWalletPage()),
-    );
+    Navigator.of(
+      context,
+    ).push(CupertinoPageRoute<void>(builder: (_) => const MyCoastWalletPage()));
   }
 
   void _openNetworkPage(MyCoastNetworkKind kind) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(builder: (_) => MyCoastNetworkPage(kind: kind)),
+    );
+  }
+
+  void _showLikesLedger() {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: const Text('Coast likes'),
+          content: const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              'Your videos and posts have gathered 8.6w seaside likes so far.',
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -277,7 +302,8 @@ class _ProfileAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avatarPath = record?.avatarImagePath ?? '';
-    final hasLocalAvatar = avatarPath.isNotEmpty && File(avatarPath).existsSync();
+    final hasLocalAvatar =
+        avatarPath.isNotEmpty && File(avatarPath).existsSync();
 
     return Container(
       width: 106,
@@ -301,9 +327,10 @@ class _ProfileAvatar extends StatelessWidget {
 }
 
 class _ProfileStatsRow extends StatelessWidget {
-  const _ProfileStatsRow({required this.onOpen});
+  const _ProfileStatsRow({required this.onOpen, required this.onLikesTap});
 
   final ValueChanged<MyCoastNetworkKind> onOpen;
+  final VoidCallback onLikesTap;
 
   @override
   Widget build(BuildContext context) {
@@ -324,11 +351,7 @@ class _ProfileStatsRow extends StatelessWidget {
           label: 'Friends',
           onTap: () => onOpen(MyCoastNetworkKind.friend),
         ),
-        _ProfileStatTile(
-          countText: '8.6w',
-          label: 'Likes',
-          onTap: () => onOpen(MyCoastNetworkKind.fans),
-        ),
+        _ProfileStatTile(countText: '8.6w', label: 'Likes', onTap: onLikesTap),
       ],
     );
   }
@@ -488,7 +511,7 @@ class _MedalTile extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Image.asset(
-          CoastinAssetRegistry.topicArrowPill,
+          CoastinAssetRegistry.coinTrailArrow,
           width: 34,
           height: 18,
           fit: BoxFit.contain,
@@ -499,10 +522,7 @@ class _MedalTile extends StatelessWidget {
 }
 
 class _ProfilePostSwitch extends StatelessWidget {
-  const _ProfilePostSwitch({
-    required this.showVideos,
-    required this.onChanged,
-  });
+  const _ProfilePostSwitch({required this.showVideos, required this.onChanged});
 
   final bool showVideos;
   final ValueChanged<bool> onChanged;
@@ -558,9 +578,9 @@ class _ProfileGrid extends StatelessWidget {
             CoastinAssetRegistry.sunwearMood8,
           ]
         : SeededCoastalFeedDeck.coastalDispatches
-            .take(6)
-            .map((post) => post.frameAssets.first)
-            .toList();
+              .take(6)
+              .map((post) => post.frameAssets.first)
+              .toList();
 
     return GridView.builder(
       padding: EdgeInsets.zero,

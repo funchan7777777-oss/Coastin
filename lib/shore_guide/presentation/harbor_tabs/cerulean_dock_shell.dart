@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 
 import '../coastal_feed/coastal_feed_page.dart';
 import '../moments/share_moments_page.dart';
+import '../my_coast/my_coast_page.dart';
 import '../sea_buddies/sea_buddies_page.dart';
 import 'cerulean_tab_berth.dart';
-import 'pages/pier_thread_page.dart';
 import 'widgets/cerulean_trip_tabbar.dart';
 
 class CeruleanDockShell extends StatefulWidget {
@@ -34,7 +34,7 @@ class _CeruleanDockShellState extends State<CeruleanDockShell> {
                 const ShareMomentsPage(bottomDockClearance: _dockClearance),
                 const CoastalFeedPage(bottomDockClearance: _dockClearance),
                 const SeaBuddiesPage(bottomDockClearance: _dockClearance),
-                const PierThreadPage(bottomDockClearance: _dockClearance),
+                const MyCoastPage(bottomDockClearance: _dockClearance),
               ],
             ),
           ),

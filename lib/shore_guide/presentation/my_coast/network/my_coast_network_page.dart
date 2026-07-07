@@ -112,9 +112,10 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
     return switch (widget.kind) {
       MyCoastNetworkKind.blacklist => CoastinAssetRegistry.deletePill,
       MyCoastNetworkKind.follow => CoastinAssetRegistry.followedBadge,
-      MyCoastNetworkKind.fans => _followedHandles.contains(persona.tideHandle)
-          ? CoastinAssetRegistry.followedBadge
-          : CoastinAssetRegistry.followBadge,
+      MyCoastNetworkKind.fans =>
+        _followedHandles.contains(persona.tideHandle)
+            ? CoastinAssetRegistry.followedBadge
+            : CoastinAssetRegistry.followBadge,
       MyCoastNetworkKind.friend => CoastinAssetRegistry.chatPill,
     };
   }

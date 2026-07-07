@@ -34,7 +34,9 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
   void initState() {
     super.initState();
     final record = widget.initialRecord;
-    _nameController = TextEditingController(text: record?.displayName ?? 'Emilie');
+    _nameController = TextEditingController(
+      text: record?.displayName ?? 'Emilie',
+    );
     _signatureController = TextEditingController(
       text: record?.signatureLine ?? '',
     );
@@ -117,7 +119,8 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
                               child: _WakeChoiceTile(
                                 label: 'Male',
                                 asset: CoastinAssetRegistry.surferProfileTile,
-                                isSelected: _wakeChoice == ProfileWakeChoice.male,
+                                isSelected:
+                                    _wakeChoice == ProfileWakeChoice.male,
                                 onTap: () {
                                   setState(() {
                                     _wakeChoice = ProfileWakeChoice.male;
@@ -215,7 +218,11 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
         return CupertinoActionSheet(
           title: const Text('Date of Birth'),
           actions: [
-            for (final value in ['1998  05  12', '2000  00  00', '2002  08  21'])
+            for (final value in [
+              '1998  05  12',
+              '2000  00  00',
+              '2002  08  21',
+            ])
               CupertinoActionSheetAction(
                 onPressed: () {
                   setState(() => _birthLine = value);
@@ -285,11 +292,13 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
     await _passageStore.settlePassage(
       HarborPassageRecord(
         passageMarker:
-            existing?.passageMarker ?? DateTime.now().microsecondsSinceEpoch.toString(),
+            existing?.passageMarker ??
+            DateTime.now().microsecondsSinceEpoch.toString(),
         displayName: name,
         mailCurrent: existing?.mailCurrent ?? 'coastin@local',
         entryChannel: existing?.entryChannel ?? 'profile',
-        settledAtIso: existing?.settledAtIso ?? DateTime.now().toIso8601String(),
+        settledAtIso:
+            existing?.settledAtIso ?? DateTime.now().toIso8601String(),
         avatarImagePath: _avatarPath,
         profileWake: _wakeChoice.storageValue,
         signatureLine: _signatureController.text.trim(),

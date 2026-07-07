@@ -100,6 +100,8 @@ class CoastinAssetRegistry {
   static const String deletePill = 'assets/images/LatitudeSignup.png';
   static const String chatPill = 'assets/images/WatersideWave.png';
   static const String coinShell = 'assets/images/FoamMood.png';
+  static const String coinTrailArrow = 'assets/images/SolsticeBanner.png';
+  static const String balanceLowNote = 'assets/images/DriftInvite.png';
   static const String redPowerGlyph = 'assets/images/LighthouseSignal.png';
   static const String redTrashGlyph = 'assets/images/BluffWave.png';
   static const String medalNewbie = 'assets/images/DockCompanion.png';
