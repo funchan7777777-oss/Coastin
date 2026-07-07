@@ -114,6 +114,16 @@ class CoastinAssetRegistry {
   static const String cameraMedalLocked = 'assets/images/ShoreWallet.png';
   static const String summerMedalLocked = 'assets/images/PromenadeDiscover.png';
   static const String summerMedal = 'assets/images/EstuaryConnect.png';
+  static const String profileWavePanel = 'assets/images/SeafoamSmile.png';
+  static const String consumptionConfirmWordmark = 'assets/images/WavePost.png';
+  static const String pleaseConfirmWordmark = 'assets/images/LagoonGroup.png';
+  static const String safetyReportMark = 'assets/images/ShoalRipple.png';
+  static const String safetyMutedMark = 'assets/images/BuoyAlert.png';
+  static const String detailVideoCallPlate = 'assets/images/PaddleboardFit.png';
+  static const String detailChatPlate = 'assets/images/ParasailDream.png';
+  static const String goFollowPlate = 'assets/images/LongitudeSearch.png';
+  static const String topUpNowPlate = 'assets/images/MeridianLogin.png';
+  static const String detailInfoGlyph = 'assets/images/CruiseLife.png';
 
   static const String tideplayArc1 =
       'assets/images/tidepost_frames/shore_games/tideplay_arc_1.jpg';
