@@ -1,17 +1,14 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../domain/entities/shoreline_day_plan.dart';
-import '../board/shoreline_board_page.dart';
+import '../coastal_feed/coastal_feed_page.dart';
+import '../moments/share_moments_page.dart';
 import 'cerulean_tab_berth.dart';
 import 'pages/coral_gallery_page.dart';
 import 'pages/pier_thread_page.dart';
-import 'pages/sunrise_plan_page.dart';
 import 'widgets/cerulean_trip_tabbar.dart';
 
 class CeruleanDockShell extends StatefulWidget {
-  const CeruleanDockShell({super.key, required this.harborBoard});
-
-  final ShorelineDayPlan harborBoard;
+  const CeruleanDockShell({super.key});
 
   @override
   State<CeruleanDockShell> createState() => _CeruleanDockShellState();
@@ -34,11 +31,8 @@ class _CeruleanDockShellState extends State<CeruleanDockShell> {
             child: IndexedStack(
               index: _currentBerth.index,
               children: [
-                ShorelineBoardPage(
-                  harborBoard: widget.harborBoard,
-                  bottomDockClearance: _dockClearance,
-                ),
-                const SunrisePlanPage(bottomDockClearance: _dockClearance),
+                const ShareMomentsPage(bottomDockClearance: _dockClearance),
+                const CoastalFeedPage(bottomDockClearance: _dockClearance),
                 const CoralGalleryPage(bottomDockClearance: _dockClearance),
                 const PierThreadPage(bottomDockClearance: _dockClearance),
               ],

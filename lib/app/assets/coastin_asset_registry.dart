@@ -60,6 +60,83 @@ class CoastinAssetRegistry {
   static const String aquaInfoGlyph = 'assets/images/TropicJoy.png';
   static const String redReleaseCorner = 'assets/images/SandyStroll.png';
 
+  static const String coastalFeedWordmark = 'assets/images/CoveMoment.png';
+  static const String feedGuidePreview = 'assets/images/TrailMate.png';
+  static const String dressingTopicCard = 'assets/images/RouteFinder.png';
+  static const String gamesTopicCard = 'assets/images/VerandaSpot.png';
+  static const String cuisineTopicCard = 'assets/images/CompassPath.png';
+  static const String topicArrowPill = 'assets/images/LookoutTrail.png';
+  static const String sunGuideBanner = 'assets/images/PlazaTerrace.png';
+  static const String viewNowPill = 'assets/images/LanaiCorner.png';
+  static const String feedHeartFilled = 'assets/images/JettyMemory.png';
+  static const String feedHeartOutline = 'assets/images/SaltFriend.png';
+  static const String feedCommentGlyph = 'assets/images/StraitFlow.png';
+  static const String feedShareGlyph = 'assets/images/QuayJourney.png';
+  static const String feedMoreGlyph = 'assets/images/PalmLounge.png';
+
+  static const String tideplayArc1 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_1.jpg';
+  static const String tideplayArc2 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_2.jpg';
+  static const String tideplayArc3 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_3.jpg';
+  static const String tideplayArc4 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_4.jpg';
+  static const String tideplayArc5 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_5.jpg';
+  static const String tideplayArc6 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_6.jpg';
+  static const String tideplayArc7 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_7.jpg';
+  static const String tideplayArc8 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_8.jpg';
+  static const String tideplayArc9 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_9.jpg';
+  static const String tideplayArc10 =
+      'assets/images/tidepost_frames/shore_games/tideplay_arc_10.jpg';
+
+  static const String harborBite1 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_1.jpg';
+  static const String harborBite2 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_2.jpg';
+  static const String harborBite3 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_3.jpg';
+  static const String harborBite4 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_4.jpg';
+  static const String harborBite5 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_5.jpg';
+  static const String harborBite6 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_6.jpg';
+  static const String harborBite7 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_7.jpg';
+  static const String harborBite8 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_8.jpg';
+  static const String harborBite9 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_9.jpg';
+  static const String harborBite10 =
+      'assets/images/tidepost_frames/coastal_cuisine/harbor_bite_10.jpg';
+
+  static const String sunwearMood1 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_1.jpg';
+  static const String sunwearMood2 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_2.jpg';
+  static const String sunwearMood3 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_3.jpg';
+  static const String sunwearMood4 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_4.jpg';
+  static const String sunwearMood5 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_5.jpg';
+  static const String sunwearMood6 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_6.jpg';
+  static const String sunwearMood7 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_7.jpg';
+  static const String sunwearMood8 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_8.jpg';
+  static const String sunwearMood9 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_9.jpg';
+  static const String sunwearMood10 =
+      'assets/images/tidepost_frames/seaside_dressing/sunwear_mood_10.jpg';
+
   static const String marinaSunsetPortrait =
       'assets/images/tou/marinaSunsetPortrait.jpg';
   static const String atlasBreakwaterPortrait =
@@ -143,22 +220,18 @@ class CoastinAssetRegistry {
 
   static const String palmsAfterglowDrift =
       'assets/videos/palmsAfterglowDrift.mp4';
-  static const String coveHatSunsetWalk =
-      'assets/videos/coveHatSunsetWalk.mp4';
-  static const String railsideBeachTurn =
-      'assets/videos/railsideBeachTurn.mp4';
+  static const String coveHatSunsetWalk = 'assets/videos/coveHatSunsetWalk.mp4';
+  static const String railsideBeachTurn = 'assets/videos/railsideBeachTurn.mp4';
   static const String blueWaterPaddleLoop =
       'assets/videos/blueWaterPaddleLoop.mp4';
   static const String morningFoamBoardRun =
       'assets/videos/morningFoamBoardRun.mp4';
   static const String harborMarketSmileClip =
       'assets/videos/harborMarketSmileClip.mp4';
-  static const String lagoonChairBreeze =
-      'assets/videos/lagoonChairBreeze.mp4';
+  static const String lagoonChairBreeze = 'assets/videos/lagoonChairBreeze.mp4';
   static const String pierDanceSmallWave =
       'assets/videos/pierDanceSmallWave.mp4';
-  static const String outerSandSlowPan =
-      'assets/videos/outerSandSlowPan.mp4';
+  static const String outerSandSlowPan = 'assets/videos/outerSandSlowPan.mp4';
   static const String sunlitBoardwalkCatch =
       'assets/videos/sunlitBoardwalkCatch.mp4';
   static const String seaglassCafeMoment =

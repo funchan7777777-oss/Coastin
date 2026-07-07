@@ -9,7 +9,12 @@ import '../../../../app/theme/tidewash_palette.dart';
 enum ShoreReleaseKind { video, post }
 
 class ShoreReleasePage extends StatefulWidget {
-  const ShoreReleasePage({super.key});
+  const ShoreReleasePage({
+    super.key,
+    this.initialReleaseKind = ShoreReleaseKind.video,
+  });
+
+  final ShoreReleaseKind initialReleaseKind;
 
   @override
   State<ShoreReleasePage> createState() => _ShoreReleasePageState();
@@ -19,8 +24,15 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _copyController = TextEditingController();
 
-  ShoreReleaseKind _releaseKind = ShoreReleaseKind.video;
+  late ShoreReleaseKind _releaseKind;
+  String _selectedPostTopic = 'Seaside dressing';
   XFile? _pickedHarborFile;
+
+  @override
+  void initState() {
+    super.initState();
+    _releaseKind = widget.initialReleaseKind;
+  }
 
   @override
   void dispose() {
@@ -60,7 +72,9 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
                     padding: const EdgeInsets.fromLTRB(24, 54, 24, 30),
                     child: Column(
                       children: [
-                        _ReleaseTopBar(onBack: () => Navigator.of(context).pop()),
+                        _ReleaseTopBar(
+                          onBack: () => Navigator.of(context).pop(),
+                        ),
                         const SizedBox(height: 44),
                         _ReleaseKindPicker(
                           releaseKind: _releaseKind,
@@ -80,6 +94,15 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
                             setState(() => _pickedHarborFile = null);
                           },
                         ),
+                        if (_releaseKind == ShoreReleaseKind.post) ...[
+                          const SizedBox(height: 28),
+                          _ReleaseTopicChips(
+                            selectedTopic: _selectedPostTopic,
+                            onChanged: (topic) {
+                              setState(() => _selectedPostTopic = topic);
+                            },
+                          ),
+                        ],
                         const SizedBox(height: 32),
                         const Align(
                           alignment: Alignment.centerLeft,
@@ -103,7 +126,9 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
                             vertical: 16,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFFFFF).withValues(alpha: 0.94),
+                            color: const Color(
+                              0xFFFFFFFF,
+                            ).withValues(alpha: 0.94),
                             borderRadius: BorderRadius.circular(25),
                           ),
                           style: const TextStyle(
@@ -274,6 +299,90 @@ class _ReleaseKindButton extends StatelessWidget {
           asset,
           fit: BoxFit.contain,
           filterQuality: FilterQuality.high,
+        ),
+      ),
+    );
+  }
+}
+
+class _ReleaseTopicChips extends StatelessWidget {
+  const _ReleaseTopicChips({
+    required this.selectedTopic,
+    required this.onChanged,
+  });
+
+  final String selectedTopic;
+  final ValueChanged<String> onChanged;
+
+  static const List<String> _postTopics = [
+    'Seaside dressing',
+    'Seaside games',
+    'Seaside cuisine',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (var index = 0; index < _postTopics.length; index++) ...[
+          Expanded(
+            child: _ReleaseTopicChip(
+              topicLabel: _postTopics[index],
+              isSelected: selectedTopic == _postTopics[index],
+              onTap: () => onChanged(_postTopics[index]),
+            ),
+          ),
+          if (index != _postTopics.length - 1) const SizedBox(width: 8),
+        ],
+      ],
+    );
+  }
+}
+
+class _ReleaseTopicChip extends StatelessWidget {
+  const _ReleaseTopicChip({
+    required this.topicLabel,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String topicLabel;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        height: 38,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFFFE894).withValues(alpha: 0.82)
+              : const Color(0xFFFFFFFF).withValues(alpha: 0.86),
+          borderRadius: BorderRadius.circular(19),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFFE8B329)
+                : const Color(0x00FFFFFF),
+            width: 1.2,
+          ),
+        ),
+        child: Text(
+          topicLabel,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: isSelected
+                ? const Color(0xFFE3A520)
+                : TidewashPalette.harborSlate.withValues(alpha: 0.38),
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
     );

@@ -306,13 +306,16 @@ class SeededShoreMomentDeck {
         isInitiallyFollowed: index % 3 == 0,
         isInitiallyLiked: index == 1 || index == 6 || index == 11,
         replyDrifts: List.generate(5, (replyIndex) {
-          final persona = shorelinePeople[
-              (replyStart + replyIndex * 5) % shorelinePeople.length];
+          final persona =
+              shorelinePeople[(replyStart + replyIndex * 5) %
+                  shorelinePeople.length];
           return ShoreReplyDrift(
             replyMarker: 'reply-${index + 1}-$replyIndex',
             replyAuthor: persona,
-            tideMinute: _replyMinutes[(index + replyIndex) % _replyMinutes.length],
-            replyText: _replyLines[(index * 2 + replyIndex) % _replyLines.length],
+            tideMinute:
+                _replyMinutes[(index + replyIndex) % _replyMinutes.length],
+            replyText:
+                _replyLines[(index * 2 + replyIndex) % _replyLines.length],
             hasFreshSignal: replyIndex == 0 || (index + replyIndex) % 4 == 0,
           );
         }),

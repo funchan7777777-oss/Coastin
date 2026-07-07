@@ -125,9 +125,9 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
                             vertical: 13,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFFFFF).withValues(
-                              alpha: 0.94,
-                            ),
+                            color: const Color(
+                              0xFFFFFFFF,
+                            ).withValues(alpha: 0.94),
                             borderRadius: BorderRadius.circular(24),
                           ),
                           style: const TextStyle(
@@ -192,8 +192,8 @@ class _ReefCommentRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final genderGlyph =
         commentDrift.replyAuthor.profileCurrent == ShoreProfileCurrent.feminine
-            ? CoastinAssetRegistry.feminineTideGlyph
-            : CoastinAssetRegistry.masculineTideGlyph;
+        ? CoastinAssetRegistry.feminineTideGlyph
+        : CoastinAssetRegistry.masculineTideGlyph;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

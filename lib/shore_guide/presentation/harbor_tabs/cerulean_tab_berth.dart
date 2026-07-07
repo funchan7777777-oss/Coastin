@@ -4,12 +4,12 @@ enum CeruleanTabBerth {
   beaconMap(
     activeGlyph: CoastinAssetRegistry.beaconMapActive,
     quietGlyph: CoastinAssetRegistry.beaconMapQuiet,
-    spokenName: 'Coastal route board',
+    spokenName: 'Share Moments feed',
   ),
   sunrisePlan(
     activeGlyph: CoastinAssetRegistry.sunrisePlanActive,
     quietGlyph: CoastinAssetRegistry.sunrisePlanQuiet,
-    spokenName: 'Sunrise plan shelf',
+    spokenName: 'Coastal Feed',
   ),
   coralGallery(
     activeGlyph: CoastinAssetRegistry.coralGalleryActive,

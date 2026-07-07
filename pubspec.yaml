@@ -63,6 +63,9 @@ flutter:
   assets:
     - assets/images/
     - assets/images/tou/
+    - assets/images/tidepost_frames/shore_games/
+    - assets/images/tidepost_frames/coastal_cuisine/
+    - assets/images/tidepost_frames/seaside_dressing/
     - assets/videos/
 
   # An image asset can refer to one or more resolution-specific "variants", see

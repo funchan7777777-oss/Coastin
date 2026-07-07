@@ -86,8 +86,8 @@ class _MomentPortraitBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final genderGlyph =
         creatorPersona.profileCurrent == ShoreProfileCurrent.feminine
-            ? CoastinAssetRegistry.feminineTideGlyph
-            : CoastinAssetRegistry.masculineTideGlyph;
+        ? CoastinAssetRegistry.feminineTideGlyph
+        : CoastinAssetRegistry.masculineTideGlyph;
 
     return Stack(
       clipBehavior: Clip.none,
