@@ -74,6 +74,19 @@ class CoastinAssetRegistry {
   static const String feedShareGlyph = 'assets/images/QuayJourney.png';
   static const String feedMoreGlyph = 'assets/images/PalmLounge.png';
 
+  static const String seaBuddiesWordmark = 'assets/images/ShellBadge.png';
+  static const String addBuddyBadge = 'assets/images/MaritimeNews.png';
+  static const String cameraFlipMuted = 'assets/images/OpenwaterMatch.png';
+  static const String cameraVideoMuted = 'assets/images/SandcastlePlan.png';
+  static const String microphoneLive = 'assets/images/StarlitMarket.png';
+  static const String microphoneMuted = 'assets/images/DriftwoodEntry.png';
+  static const String speakerLive = 'assets/images/MoonlitGather.png';
+  static const String cameraFlipLive = 'assets/images/RivieraStyle.png';
+  static const String cameraVideoLive = 'assets/images/CoastlineAlbum.png';
+  static const String videoCallPlate = 'assets/images/CafePatio.png';
+  static const String endCallPlate = 'assets/images/SeawallPrivacy.png';
+  static const String speakerMuted = 'assets/images/SaltwaterGift.png';
+
   static const String tideplayArc1 =
       'assets/images/tidepost_frames/shore_games/tideplay_arc_1.jpg';
   static const String tideplayArc2 =

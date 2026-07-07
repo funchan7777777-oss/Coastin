@@ -14,7 +14,7 @@ enum CeruleanTabBerth {
   coralGallery(
     activeGlyph: CoastinAssetRegistry.coralGalleryActive,
     quietGlyph: CoastinAssetRegistry.coralGalleryQuiet,
-    spokenName: 'Coral memory gallery',
+    spokenName: 'Sea Buddies messages',
   ),
   pierThread(
     activeGlyph: CoastinAssetRegistry.pierThreadActive,

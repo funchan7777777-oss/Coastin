@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 
 import '../coastal_feed/coastal_feed_page.dart';
 import '../moments/share_moments_page.dart';
+import '../sea_buddies/sea_buddies_page.dart';
 import 'cerulean_tab_berth.dart';
-import 'pages/coral_gallery_page.dart';
 import 'pages/pier_thread_page.dart';
 import 'widgets/cerulean_trip_tabbar.dart';
 
@@ -33,7 +33,7 @@ class _CeruleanDockShellState extends State<CeruleanDockShell> {
               children: [
                 const ShareMomentsPage(bottomDockClearance: _dockClearance),
                 const CoastalFeedPage(bottomDockClearance: _dockClearance),
-                const CoralGalleryPage(bottomDockClearance: _dockClearance),
+                const SeaBuddiesPage(bottomDockClearance: _dockClearance),
                 const PierThreadPage(bottomDockClearance: _dockClearance),
               ],
             ),
