@@ -6,11 +6,17 @@ class BrinePrimaryButton extends StatelessWidget {
     required this.buttonLabel,
     required this.onPressed,
     this.isWorking = false,
+    this.buttonHeight = 54,
+    this.buttonWidth,
+    this.fontSize = 16,
   });
 
   final String buttonLabel;
   final VoidCallback onPressed;
   final bool isWorking;
+  final double buttonHeight;
+  final double? buttonWidth;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +27,12 @@ class BrinePrimaryButton extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         opacity: isWorking ? 0.64 : 1,
         child: Container(
-          height: 54,
+          width: buttonWidth,
+          height: buttonHeight,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: const Color(0xFF2F68CF),
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(buttonHeight / 2),
             boxShadow: [
               BoxShadow(
                 color: const Color(0xFF1E58BB).withValues(alpha: 0.22),
@@ -40,9 +47,9 @@ class BrinePrimaryButton extends StatelessWidget {
                   buttonLabel,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFFFFFFFF),
-                    fontSize: 16,
+                  style: TextStyle(
+                    color: const Color(0xFFFFFFFF),
+                    fontSize: fontSize,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0,
                   ),

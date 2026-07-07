@@ -59,8 +59,8 @@ class _HarborAccessPageState extends State<HarborAccessPage> {
                   final harborPanelWidth = (viewport.maxWidth * 0.78)
                       .clamp(294.0, 340.0)
                       .toDouble();
-                  final panelTop = (viewport.maxHeight * 0.50)
-                      .clamp(410.0, 455.0)
+                  final panelTop = (viewport.maxHeight * 0.58)
+                      .clamp(486.0, 515.0)
                       .toDouble();
                   return SingleChildScrollView(
                     padding: EdgeInsets.zero,
@@ -275,43 +275,24 @@ class _HarborAccessDock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onAccountEntryRequested,
-                child: Image.asset(
-                  CoastinAssetRegistry.activePierLogin,
-                  height: 42,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-            const SizedBox(width: 28),
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onEnrollmentRequested,
-                child: Image.asset(
-                  CoastinAssetRegistry.activePierSignup,
-                  height: 42,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ],
+        Center(
+          child: WaveArtButton(
+            buttonAsset: CoastinAssetRegistry.docksideLoginButton,
+            semanticCurrent: 'Log in',
+            buttonWidth: 236,
+            buttonHeight: 49,
+            onPressed: onAccountEntryRequested,
+          ),
         ),
-        const SizedBox(height: 30),
-        WaveArtButton(
-          buttonAsset: CoastinAssetRegistry.docksideLoginButton,
-          semanticCurrent: 'Log in',
-          onPressed: onAccountEntryRequested,
-        ),
-        const SizedBox(height: 14),
-        BrinePrimaryButton(
-          buttonLabel: 'Create coast profile',
-          onPressed: onEnrollmentRequested,
+        const SizedBox(height: 16),
+        Center(
+          child: BrinePrimaryButton(
+            buttonLabel: 'Create coast profile',
+            buttonWidth: 236,
+            buttonHeight: 49,
+            fontSize: 14,
+            onPressed: onEnrollmentRequested,
+          ),
         ),
         const SizedBox(height: 19),
         const _HarborSeparator(),

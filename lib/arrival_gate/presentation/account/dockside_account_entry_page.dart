@@ -8,6 +8,7 @@ import '../../domain/entities/harbor_passage_record.dart';
 import '../../domain/value_objects/harbor_entry_channel.dart';
 import '../../domain/value_objects/harbor_policy_kind.dart';
 import '../access/widgets/access_agreement_line.dart';
+import '../access/widgets/harbor_back_button.dart';
 import '../access/widgets/harbor_credential_field.dart';
 import '../access/widgets/harbor_notice_dialog.dart';
 import '../access/widgets/passage_loading_dialog.dart';
@@ -75,19 +76,6 @@ class _DocksideAccountEntryPageState extends State<DocksideAccountEntryPage> {
                   image: AssetImage(CoastinAssetRegistry.voyageLogBackdrop),
                   fit: BoxFit.fill,
                 ),
-                Positioned(
-                  left: 12,
-                  top: 35,
-                  child: CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size.square(44),
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Icon(
-                      CupertinoIcons.chevron_left,
-                      color: Color(0xFF17324A),
-                    ),
-                  ),
-                ),
                 LayoutBuilder(
                   builder: (context, viewport) {
                     final panelWidth = (viewport.maxWidth * 0.78)
@@ -139,6 +127,13 @@ class _DocksideAccountEntryPageState extends State<DocksideAccountEntryPage> {
                     );
                   },
                 ),
+                Positioned(
+                  left: 12,
+                  top: 62,
+                  child: HarborBackButton(
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                ),
               ],
             ),
           ),
@@ -165,7 +160,7 @@ class _DocksideAccountEntryPageState extends State<DocksideAccountEntryPage> {
     if (mailIssue != null || dockKeyIssue != null) {
       await showHarborNotice(
         context: context,
-        title: 'Missing harbor details',
+        title: 'Check email or password',
         message: mailIssue ?? dockKeyIssue!,
       );
       return;
@@ -175,7 +170,7 @@ class _DocksideAccountEntryPageState extends State<DocksideAccountEntryPage> {
     await showPassageLoadingDialog(
       context: context,
       duration: const Duration(milliseconds: 3400),
-      message: 'Checking your Coastin pass...',
+      message: 'Opening your Coastin harbor...',
     );
     await widget.passageStore.settlePassage(
       HarborPassageRecord(
@@ -293,7 +288,7 @@ class _AccountEntryPanel extends StatelessWidget {
           padding: EdgeInsets.zero,
           onPressed: onEnrollmentRequested,
           child: const Text(
-            'No coast pass yet? Sign up',
+            'Prefer a fresh profile? Sign up',
             style: TextStyle(
               color: Color(0xFF2F6ACE),
               fontSize: 13,

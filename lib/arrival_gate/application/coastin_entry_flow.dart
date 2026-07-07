@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import '../../app/navigation/coastin_home_route.dart';
 import '../data/local/harbor_passage_store.dart';
 import '../presentation/access/harbor_access_page.dart';
-import '../presentation/onboarding/shoreline_guide_deck_page.dart';
 import '../presentation/splash/sailboat_launch_page.dart';
 
 class CoastinEntryFlow extends StatefulWidget {
@@ -31,9 +30,6 @@ class _CoastinEntryFlowState extends State<CoastinEntryFlow> {
       switchOutCurve: Curves.easeInCubic,
       child: switch (_entryPhase) {
         _CoastinEntryPhase.loading => const SailboatLaunchPage(),
-        _CoastinEntryPhase.guideDeck => ShorelineGuideDeckPage(
-          onGuideDeckFinished: _finishGuideDeck,
-        ),
         _CoastinEntryPhase.harborAccess => HarborAccessPage(
           passageStore: _passageStore,
           onHarborCleared: _openMorningBoard,
@@ -54,22 +50,6 @@ class _CoastinEntryFlowState extends State<CoastinEntryFlow> {
       return;
     }
 
-    final guideDeckSeen = await _passageStore.hasFinishedGuideDeck();
-    if (!mounted) {
-      return;
-    }
-    setState(
-      () => _entryPhase = guideDeckSeen
-          ? _CoastinEntryPhase.harborAccess
-          : _CoastinEntryPhase.guideDeck,
-    );
-  }
-
-  Future<void> _finishGuideDeck() async {
-    await _passageStore.markGuideDeckFinished();
-    if (!mounted) {
-      return;
-    }
     setState(() => _entryPhase = _CoastinEntryPhase.harborAccess);
   }
 
@@ -81,4 +61,4 @@ class _CoastinEntryFlowState extends State<CoastinEntryFlow> {
   }
 }
 
-enum _CoastinEntryPhase { loading, guideDeck, harborAccess, morningBoard }
+enum _CoastinEntryPhase { loading, harborAccess, morningBoard }

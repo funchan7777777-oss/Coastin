@@ -8,6 +8,7 @@ import '../../domain/value_objects/harbor_entry_channel.dart';
 import '../../domain/value_objects/harbor_policy_kind.dart';
 import '../access/widgets/access_agreement_line.dart';
 import '../access/widgets/brine_primary_button.dart';
+import '../access/widgets/harbor_back_button.dart';
 import '../access/widgets/harbor_credential_field.dart';
 import '../access/widgets/harbor_notice_dialog.dart';
 import '../policy/harbor_policy_webview_page.dart';
@@ -71,19 +72,6 @@ class _SurfsideEnrollmentPageState extends State<SurfsideEnrollmentPage> {
                   image: AssetImage(CoastinAssetRegistry.voyageLogBackdrop),
                   fit: BoxFit.fill,
                 ),
-                Positioned(
-                  left: 12,
-                  top: 35,
-                  child: CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size.square(44),
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Icon(
-                      CupertinoIcons.chevron_left,
-                      color: Color(0xFF17324A),
-                    ),
-                  ),
-                ),
                 LayoutBuilder(
                   builder: (context, viewport) {
                     final panelWidth = (viewport.maxWidth * 0.78)
@@ -133,6 +121,13 @@ class _SurfsideEnrollmentPageState extends State<SurfsideEnrollmentPage> {
                       ),
                     );
                   },
+                ),
+                Positioned(
+                  left: 12,
+                  top: 62,
+                  child: HarborBackButton(
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
                 ),
               ],
             ),

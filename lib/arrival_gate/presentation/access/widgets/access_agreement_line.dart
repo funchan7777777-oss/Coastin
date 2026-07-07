@@ -44,7 +44,7 @@ class AccessAgreementLine extends StatelessWidget {
                 style: _AgreementTextStyles.plain,
               ),
               _PolicyTapText(
-                label: 'User Agreement',
+                label: 'Terms of Service',
                 onTap: () => onPolicyOpened(HarborPolicyKind.userAgreement),
               ),
               const Text(' and ', style: _AgreementTextStyles.plain),

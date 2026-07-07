@@ -6,11 +6,15 @@ class WaveArtButton extends StatelessWidget {
     required this.buttonAsset,
     required this.semanticCurrent,
     required this.onPressed,
+    this.buttonHeight = 61,
+    this.buttonWidth,
   });
 
   final String buttonAsset;
   final String semanticCurrent;
   final VoidCallback onPressed;
+  final double buttonHeight;
+  final double? buttonWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +24,12 @@ class WaveArtButton extends StatelessWidget {
       child: Semantics(
         button: true,
         label: semanticCurrent,
-        child: Image.asset(buttonAsset, height: 61, fit: BoxFit.fill),
+        child: Image.asset(
+          buttonAsset,
+          width: buttonWidth,
+          height: buttonHeight,
+          fit: BoxFit.fill,
+        ),
       ),
     );
   }

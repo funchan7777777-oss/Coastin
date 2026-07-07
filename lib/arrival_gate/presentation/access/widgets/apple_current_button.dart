@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
-
-import '../../../../app/assets/coastin_asset_registry.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AppleCurrentButton extends StatelessWidget {
   const AppleCurrentButton({
@@ -15,23 +14,27 @@ class AppleCurrentButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: isWorking ? null : onAppleCurrentPressed,
-        child: Semantics(
-          button: true,
-          label: 'Apple',
-          child: SizedBox(
-            width: 47,
-            height: 47,
-            child: isWorking
-                ? const CupertinoActivityIndicator(radius: 13)
-                : Image.asset(
-                    CoastinAssetRegistry.appleCurrentBadge,
-                    fit: BoxFit.fill,
-                  ),
-          ),
-        ),
+      child: SizedBox(
+        width: 236,
+        height: 44,
+        child: isWorking
+            ? Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFFFF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0x3317324A)),
+                ),
+                child: const CupertinoActivityIndicator(radius: 12),
+              )
+            : SignInWithAppleButton(
+                height: 44,
+                text: 'Sign in with Apple',
+                style: SignInWithAppleButtonStyle.whiteOutlined,
+                borderRadius: BorderRadius.circular(12),
+                iconAlignment: SignInWithAppleIconAlignment.center,
+                onPressed: onAppleCurrentPressed,
+              ),
       ),
     );
   }

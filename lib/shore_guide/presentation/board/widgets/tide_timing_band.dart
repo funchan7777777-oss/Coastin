@@ -28,7 +28,7 @@ class TideTimingBand extends StatelessWidget {
         }
 
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (var index = 0; index < tideSlots.length; index++) ...[
               Expanded(child: _TideSlotCard(tideSlot: tideSlots[index])),
@@ -58,6 +58,7 @@ class _TideSlotCard extends StatelessWidget {
         border: Border.all(color: TidewashPalette.pierLine),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -102,8 +103,7 @@ class _TideSlotCard extends StatelessWidget {
               height: 1.35,
             ),
           ),
-          const Spacer(),
-          const SizedBox(height: ShoreSpacing.tideMd),
+          const SizedBox(height: ShoreSpacing.tideLg),
           _ConfidenceRail(confidenceNotches: tideSlot.confidenceNotches),
         ],
       ),

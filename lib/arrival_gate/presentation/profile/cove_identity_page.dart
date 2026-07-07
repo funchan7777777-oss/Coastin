@@ -9,6 +9,7 @@ import '../../data/local/harbor_passage_store.dart';
 import '../../domain/entities/harbor_passage_record.dart';
 import '../../domain/value_objects/profile_wake_choice.dart';
 import '../access/widgets/brine_primary_button.dart';
+import '../access/widgets/harbor_back_button.dart';
 import '../access/widgets/harbor_credential_field.dart';
 import '../access/widgets/harbor_notice_dialog.dart';
 import '../access/widgets/passage_loading_dialog.dart';
@@ -81,19 +82,6 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
                   image: AssetImage(CoastinAssetRegistry.saltyRoamBackdrop),
                   fit: BoxFit.fill,
                 ),
-                Positioned(
-                  left: 12,
-                  top: 35,
-                  child: CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size.square(44),
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Icon(
-                      CupertinoIcons.chevron_left,
-                      color: Color(0xFF17324A),
-                    ),
-                  ),
-                ),
                 SingleChildScrollView(
                   padding: EdgeInsets.zero,
                   physics: const ClampingScrollPhysics(),
@@ -124,6 +112,13 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
                         onProfileFinished: _finishIdentityPassage,
                       ),
                     ),
+                  ),
+                ),
+                Positioned(
+                  left: 12,
+                  top: 62,
+                  child: HarborBackButton(
+                    onPressed: () => Navigator.of(context).maybePop(),
                   ),
                 ),
               ],

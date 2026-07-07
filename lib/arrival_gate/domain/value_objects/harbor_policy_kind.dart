@@ -3,7 +3,7 @@ enum HarborPolicyKind { userAgreement, privacyPolicy }
 extension HarborPolicyKindCopy on HarborPolicyKind {
   String get title {
     return switch (this) {
-      HarborPolicyKind.userAgreement => 'User Agreement',
+      HarborPolicyKind.userAgreement => 'Terms of Service',
       HarborPolicyKind.privacyPolicy => 'Privacy Policy',
     };
   }

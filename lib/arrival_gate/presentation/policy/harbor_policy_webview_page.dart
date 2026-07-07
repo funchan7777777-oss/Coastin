@@ -41,27 +41,29 @@ class _HarborPolicyWebviewPageState extends State<HarborPolicyWebviewPage> {
       child: CupertinoPageScaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: const Color(0xFFEAFDF7),
-        child: MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                top: 72,
-                child: WebViewWidget(controller: _policyController),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                top: 0,
-                child: _PolicyTopBar(
-                  title: widget.policyKind.title,
-                  loadProgress: _loadProgress,
+        child: Builder(
+          builder: (context) {
+            final topInset = MediaQuery.viewPaddingOf(context).top;
+            final barHeight = topInset + 52;
+            return Stack(
+              children: [
+                Positioned.fill(
+                  top: barHeight,
+                  child: WebViewWidget(controller: _policyController),
                 ),
-              ),
-            ],
-          ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  child: _PolicyTopBar(
+                    title: widget.policyKind.title,
+                    loadProgress: _loadProgress,
+                    topInset: topInset,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -69,16 +71,21 @@ class _HarborPolicyWebviewPageState extends State<HarborPolicyWebviewPage> {
 }
 
 class _PolicyTopBar extends StatelessWidget {
-  const _PolicyTopBar({required this.title, required this.loadProgress});
+  const _PolicyTopBar({
+    required this.title,
+    required this.loadProgress,
+    required this.topInset,
+  });
 
   final String title;
   final int loadProgress;
+  final double topInset;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 72,
-      padding: const EdgeInsets.fromLTRB(10, 24, 14, 0),
+      height: topInset + 52,
+      padding: EdgeInsets.fromLTRB(10, topInset + 4, 14, 0),
       decoration: BoxDecoration(
         color: const Color(0xF7F8FFFC),
         boxShadow: [
@@ -96,7 +103,7 @@ class _PolicyTopBar extends StatelessWidget {
               CupertinoButton(
                 padding: EdgeInsets.zero,
                 minimumSize: const Size.square(42),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => Navigator.of(context).maybePop(),
                 child: const Icon(
                   CupertinoIcons.chevron_left,
                   color: Color(0xFF17324A),

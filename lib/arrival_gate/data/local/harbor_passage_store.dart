@@ -5,7 +5,6 @@ import '../../domain/entities/harbor_passage_record.dart';
 class HarborPassageStore {
   const HarborPassageStore();
 
-  static const String _guideDeckSeenKey = 'coastin.guideDeckSeen';
   static const String _passageMarkerKey = 'coastin.passage.marker';
   static const String _displayNameKey = 'coastin.passage.displayName';
   static const String _mailCurrentKey = 'coastin.passage.mailCurrent';
@@ -14,16 +13,6 @@ class HarborPassageStore {
   static const String _avatarImagePathKey = 'coastin.passage.avatarImagePath';
   static const String _profileWakeKey = 'coastin.passage.profileWake';
   static const String _signatureLineKey = 'coastin.passage.signatureLine';
-
-  Future<bool> hasFinishedGuideDeck() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_guideDeckSeenKey) ?? false;
-  }
-
-  Future<void> markGuideDeckFinished() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_guideDeckSeenKey, true);
-  }
 
   Future<HarborPassageRecord?> restoreSettledPassage() async {
     final prefs = await SharedPreferences.getInstance();
