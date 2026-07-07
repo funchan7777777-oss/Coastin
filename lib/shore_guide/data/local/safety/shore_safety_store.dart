@@ -103,6 +103,15 @@ class ShoreSafetyStore {
     );
     await prefs.setStringList(_reportLedgerKey, ledger);
   }
+
+  Future<void> clearLocalLedger() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_blockedHandlesKey);
+    await prefs.remove(_reportedContentKey);
+    await prefs.remove(_reportLedgerKey);
+    await prefs.remove(_followingKey);
+    await prefs.remove(_approvedFollowersKey);
+  }
 }
 
 class ShoreSafetySnapshot {

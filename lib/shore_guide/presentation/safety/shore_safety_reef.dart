@@ -308,10 +308,11 @@ class _SafetyWavePanelState extends State<_SafetyWavePanel> {
     if (!mounted) {
       return;
     }
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
     Navigator.of(
       context,
     ).pop(_isReport ? ShoreSafetyOutcome.reported : ShoreSafetyOutcome.blocked);
-    await _showSavedNotice(context, isReport: _isReport);
+    await _showSavedNotice(rootContext, isReport: _isReport);
   }
 
   Future<void> _showSavedNotice(

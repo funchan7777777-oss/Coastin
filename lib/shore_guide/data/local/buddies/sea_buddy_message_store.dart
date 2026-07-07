@@ -52,6 +52,15 @@ class SeaBuddyMessageStore {
     await prefs.setStringList(_threadKeysKey, threadKeys.toList()..sort());
   }
 
+  Future<void> clearAllThreads() async {
+    final prefs = await SharedPreferences.getInstance();
+    final threadKeys = prefs.getStringList(_threadKeysKey) ?? [];
+    for (final threadKey in threadKeys) {
+      await prefs.remove(_threadNotesKey(threadKey));
+    }
+    await prefs.remove(_threadKeysKey);
+  }
+
   SeaBuddyNote? _decodeNote(String encoded) {
     try {
       final decoded = jsonDecode(encoded) as Map<String, dynamic>;
