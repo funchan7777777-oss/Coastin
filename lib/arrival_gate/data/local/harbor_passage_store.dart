@@ -41,4 +41,16 @@ class HarborPassageStore {
     await prefs.setString(_profileWakeKey, record.profileWake);
     await prefs.setString(_signatureLineKey, record.signatureLine);
   }
+
+  Future<void> clearSettledPassage() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_passageMarkerKey);
+    await prefs.remove(_displayNameKey);
+    await prefs.remove(_mailCurrentKey);
+    await prefs.remove(_entryChannelKey);
+    await prefs.remove(_settledAtIsoKey);
+    await prefs.remove(_avatarImagePathKey);
+    await prefs.remove(_profileWakeKey);
+    await prefs.remove(_signatureLineKey);
+  }
 }
