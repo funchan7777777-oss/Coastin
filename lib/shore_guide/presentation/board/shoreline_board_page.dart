@@ -11,9 +11,14 @@ import 'widgets/shoreline_header_band.dart';
 import 'widgets/tide_timing_band.dart';
 
 class ShorelineBoardPage extends StatefulWidget {
-  const ShorelineBoardPage({super.key, required this.harborBoard});
+  const ShorelineBoardPage({
+    super.key,
+    required this.harborBoard,
+    this.bottomDockClearance = 0,
+  });
 
   final ShorelineDayPlan harborBoard;
+  final double bottomDockClearance;
 
   @override
   State<ShorelineBoardPage> createState() => _ShorelineBoardPageState();
@@ -25,10 +30,6 @@ class _ShorelineBoardPageState extends State<ShorelineBoardPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Coastin'),
-        trailing: Icon(CupertinoIcons.compass),
-      ),
       backgroundColor: TidewashPalette.canvasFoam,
       child: MediaQuery(
         data: MediaQuery.of(
@@ -61,7 +62,9 @@ class _ShorelineBoardPageState extends State<ShorelineBoardPage> {
                       harborBoard: widget.harborBoard,
                       selectedBoardFocus: _selectedBoardFocus,
                     ),
-                    const SizedBox(height: ShoreSpacing.tideXl),
+                    SizedBox(
+                      height: ShoreSpacing.tideXl + widget.bottomDockClearance,
+                    ),
                   ],
                 ),
               ),

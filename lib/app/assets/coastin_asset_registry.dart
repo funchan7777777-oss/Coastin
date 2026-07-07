@@ -23,4 +23,14 @@ class CoastinAssetRegistry {
   static const String surferProfileTile = 'assets/images/SurfNotice.png';
   static const String sundanceProfileTile = 'assets/images/CurrentPulse.png';
   static const String beachClubPlus = 'assets/images/BeachClub.png';
+
+  static const String ceruleanTripDock = 'assets/images/CeruleanTrip.png';
+  static const String beaconMapActive = 'assets/images/BeaconMap.png';
+  static const String beaconMapQuiet = 'assets/images/SunsetEvent.png';
+  static const String sunrisePlanActive = 'assets/images/SunrisePlan.png';
+  static const String sunrisePlanQuiet = 'assets/images/SandbarCircle.png';
+  static const String coralGalleryActive = 'assets/images/CoralGallery.png';
+  static const String coralGalleryQuiet = 'assets/images/CoastComment.png';
+  static const String pierThreadActive = 'assets/images/PierThread.png';
+  static const String pierThreadQuiet = 'assets/images/DuneTopic.png';
 }
