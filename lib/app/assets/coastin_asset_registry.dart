@@ -87,6 +87,32 @@ class CoastinAssetRegistry {
   static const String endCallPlate = 'assets/images/SeawallPrivacy.png';
   static const String speakerMuted = 'assets/images/SaltwaterGift.png';
 
+  static const String myCoastWordmark = 'assets/images/BreezeInbox.png';
+  static const String myWalletWordmark = 'assets/images/BoardwalkMeet.png';
+  static const String myCoastBackdrop = 'assets/images/ShorelineDiary.png';
+  static const String walletBackdrop = 'assets/images/SailRoute.png';
+  static const String editProfilePill = 'assets/images/OceansideNote.png';
+  static const String saveProfilePlate = 'assets/images/BoatlineTicket.png';
+  static const String settingsHexBadge = 'assets/images/HorizonGuide.png';
+  static const String settingsListGlyph = 'assets/images/InletSpark.png';
+  static const String blockedPersonGlyph = 'assets/images/ChannelBuzz.png';
+  static const String walletInlinePlate = 'assets/images/MarketDeck.png';
+  static const String deletePill = 'assets/images/LatitudeSignup.png';
+  static const String chatPill = 'assets/images/WatersideWave.png';
+  static const String coinShell = 'assets/images/FoamMood.png';
+  static const String redPowerGlyph = 'assets/images/LighthouseSignal.png';
+  static const String redTrashGlyph = 'assets/images/BluffWave.png';
+  static const String medalNewbie = 'assets/images/DockCompanion.png';
+  static const String medalPhotographer = 'assets/images/MarinaProfile.png';
+  static const String medalSurfer = 'assets/images/BayShare.png';
+  static const String medalPalmLocked = 'assets/images/PebbleLike.png';
+  static const String medalBoardLocked = 'assets/images/CliffCheckIn.png';
+  static const String documentGlyph = 'assets/images/AtollToast.png';
+  static const String phoneGlyph = 'assets/images/VistaMessage.png';
+  static const String cameraMedalLocked = 'assets/images/ShoreWallet.png';
+  static const String summerMedalLocked = 'assets/images/PromenadeDiscover.png';
+  static const String summerMedal = 'assets/images/EstuaryConnect.png';
+
   static const String tideplayArc1 =
       'assets/images/tidepost_frames/shore_games/tideplay_arc_1.jpg';
   static const String tideplayArc2 =
