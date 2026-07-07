@@ -15,6 +15,7 @@ class CoastalPostCard extends StatelessWidget {
     required this.onLoveTap,
     required this.onFollowTap,
     required this.onMoreTap,
+    required this.onAuthorTap,
   });
 
   final CoastalPostDispatch postDispatch;
@@ -24,6 +25,7 @@ class CoastalPostCard extends StatelessWidget {
   final VoidCallback onLoveTap;
   final VoidCallback onFollowTap;
   final VoidCallback onMoreTap;
+  final VoidCallback onAuthorTap;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,7 @@ class CoastalPostCard extends StatelessWidget {
               postDispatch: postDispatch,
               isFollowed: isFollowed,
               onFollowTap: onFollowTap,
+              onAuthorTap: onAuthorTap,
             ),
             const SizedBox(height: 12),
             Text(
@@ -99,11 +102,13 @@ class _AuthorRow extends StatelessWidget {
     required this.postDispatch,
     required this.isFollowed,
     required this.onFollowTap,
+    required this.onAuthorTap,
   });
 
   final CoastalPostDispatch postDispatch;
   final bool isFollowed;
   final VoidCallback onFollowTap;
+  final VoidCallback onAuthorTap;
 
   @override
   Widget build(BuildContext context) {
@@ -115,24 +120,28 @@ class _AuthorRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            ClipOval(
-              child: Image.asset(
-                author.avatarAsset,
-                width: 52,
-                height: 52,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onAuthorTap,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ClipOval(
+                child: Image.asset(
+                  author.avatarAsset,
+                  width: 52,
+                  height: 52,
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                ),
               ),
-            ),
-            Positioned(
-              right: -4,
-              bottom: -3,
-              child: Image.asset(genderGlyph, width: 17, height: 17),
-            ),
-          ],
+              Positioned(
+                right: -4,
+                bottom: -3,
+                child: Image.asset(genderGlyph, width: 17, height: 17),
+              ),
+            ],
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -142,14 +151,18 @@ class _AuthorRow extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      author.displayHarborName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: TidewashPalette.inkBlue,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onAuthorTap,
+                      child: Text(
+                        author.displayHarborName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: TidewashPalette.inkBlue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),

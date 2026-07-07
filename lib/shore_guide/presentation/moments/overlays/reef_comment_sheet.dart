@@ -2,9 +2,13 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
+import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/shore_reply_drift.dart';
 import '../../../domain/entities/shoreline_persona.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
+import '../../people/shore_persona_detail_page.dart';
+import '../../safety/shore_safety_action.dart';
+import '../../safety/shore_safety_reef.dart';
 
 class ReefCommentSheet extends StatefulWidget {
   const ReefCommentSheet({
@@ -13,18 +17,21 @@ class ReefCommentSheet extends StatefulWidget {
     required this.commentDrifts,
     required this.viewerPersona,
     required this.onClose,
+    required this.onChanged,
   });
 
   final bool isOpen;
   final List<ShoreReplyDrift> commentDrifts;
   final ShorelinePersona viewerPersona;
   final VoidCallback onClose;
+  final VoidCallback onChanged;
 
   @override
   State<ReefCommentSheet> createState() => _ReefCommentSheetState();
 }
 
 class _ReefCommentSheetState extends State<ReefCommentSheet> {
+  final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   late List<ShoreReplyDrift> _visibleComments;
   final TextEditingController _commentController = TextEditingController();
 
@@ -32,6 +39,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
   void initState() {
     super.initState();
     _visibleComments = List.of(widget.commentDrifts);
+    _restoreVisibleComments();
   }
 
   @override
@@ -40,6 +48,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     if (oldWidget.commentDrifts != widget.commentDrifts) {
       _visibleComments = List.of(widget.commentDrifts);
       _commentController.clear();
+      _restoreVisibleComments();
     }
   }
 
@@ -109,6 +118,10 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
                       itemBuilder: (context, index) {
                         return _ReefCommentRow(
                           commentDrift: _visibleComments[index],
+                          onPersonaTap: () =>
+                              _openPersona(_visibleComments[index]),
+                          onReportTap: () =>
+                              _reportComment(_visibleComments[index]),
                         );
                       },
                     ),
@@ -181,12 +194,65 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
       _commentController.clear();
     });
   }
+
+  Future<void> _restoreVisibleComments() async {
+    final snapshot = await _safetyStore.restoreSnapshot();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _visibleComments = widget.commentDrifts
+          .where(
+            (comment) => snapshot.isVisibleContent(
+              'comment:${comment.replyMarker}',
+              comment.replyAuthor.tideHandle,
+            ),
+          )
+          .toList();
+    });
+  }
+
+  void _openPersona(ShoreReplyDrift commentDrift) {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => ShorePersonaDetailPage(
+          persona: commentDrift.replyAuthor,
+          placeRibbon: '23 - Australia',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _reportComment(ShoreReplyDrift commentDrift) async {
+    final outcome = await ShoreSafetyReef.showGuard(
+      context: context,
+      contentId: 'comment:${commentDrift.replyMarker}',
+      contentKind: ShoreSafetyContentKind.comment,
+      ownerName: commentDrift.replyAuthor.displayHarborName,
+      ownerHandle: commentDrift.replyAuthor.tideHandle,
+    );
+    if (!mounted || outcome == null) {
+      return;
+    }
+    setState(() {
+      _visibleComments.removeWhere(
+        (comment) => comment.replyMarker == commentDrift.replyMarker,
+      );
+    });
+    widget.onChanged();
+  }
 }
 
 class _ReefCommentRow extends StatelessWidget {
-  const _ReefCommentRow({required this.commentDrift});
+  const _ReefCommentRow({
+    required this.commentDrift,
+    required this.onPersonaTap,
+    required this.onReportTap,
+  });
 
   final ShoreReplyDrift commentDrift;
+  final VoidCallback onPersonaTap;
+  final VoidCallback onReportTap;
 
   @override
   Widget build(BuildContext context) {
@@ -198,24 +264,28 @@ class _ReefCommentRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            ClipOval(
-              child: Image.asset(
-                commentDrift.replyAuthor.avatarAsset,
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onPersonaTap,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ClipOval(
+                child: Image.asset(
+                  commentDrift.replyAuthor.avatarAsset,
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                ),
               ),
-            ),
-            Positioned(
-              right: -3,
-              bottom: -2,
-              child: Image.asset(genderGlyph, width: 16, height: 16),
-            ),
-          ],
+              Positioned(
+                right: -3,
+                bottom: -2,
+                child: Image.asset(genderGlyph, width: 16, height: 16),
+              ),
+            ],
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -225,14 +295,18 @@ class _ReefCommentRow extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      commentDrift.replyAuthor.displayHarborName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: TidewashPalette.inkBlue,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onPersonaTap,
+                      child: Text(
+                        commentDrift.replyAuthor.displayHarborName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: TidewashPalette.inkBlue,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
@@ -254,6 +328,16 @@ class _ReefCommentRow extends StatelessWidget {
                       fit: BoxFit.contain,
                     ),
                   ],
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onReportTap,
+                    child: const Icon(
+                      CupertinoIcons.exclamationmark_circle,
+                      color: Color(0xFF41C7D2),
+                      size: 17,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 4),

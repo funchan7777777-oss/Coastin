@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:camera/camera.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
@@ -15,10 +16,60 @@ class SeaBuddyCallPage extends StatefulWidget {
 }
 
 class _SeaBuddyCallPageState extends State<SeaBuddyCallPage> {
+  CameraController? _cameraController;
+  List<CameraDescription> _availableCameras = const [];
   bool _cameraOn = true;
   bool _microphoneOn = true;
   bool _speakerOn = true;
   bool _frontCamera = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _prepareCamera();
+  }
+
+  @override
+  void dispose() {
+    _cameraController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _prepareCamera() async {
+    try {
+      _availableCameras = await availableCameras();
+      await _startCamera(isFront: _frontCamera);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => _cameraOn = false);
+    }
+  }
+
+  Future<void> _startCamera({required bool isFront}) async {
+    if (_availableCameras.isEmpty) {
+      return;
+    }
+    final selectedCamera = _availableCameras.firstWhere(
+      (camera) =>
+          camera.lensDirection ==
+          (isFront ? CameraLensDirection.front : CameraLensDirection.back),
+      orElse: () => _availableCameras.first,
+    );
+    await _cameraController?.dispose();
+    final controller = CameraController(
+      selectedCamera,
+      ResolutionPreset.medium,
+      enableAudio: true,
+    );
+    _cameraController = controller;
+    await controller.initialize();
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +130,16 @@ class _SeaBuddyCallPageState extends State<SeaBuddyCallPage> {
                   border: Border.all(color: const Color(0xFF2F68D3), width: 3),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  viewerPersona.avatarAsset,
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.high,
-                ),
+                child:
+                    _cameraOn &&
+                        _cameraController != null &&
+                        _cameraController!.value.isInitialized
+                    ? CameraPreview(_cameraController!)
+                    : Image.asset(
+                        viewerPersona.avatarAsset,
+                        fit: BoxFit.cover,
+                        filterQuality: FilterQuality.high,
+                      ),
               ),
             ),
             Positioned(
@@ -99,8 +155,7 @@ class _SeaBuddyCallPageState extends State<SeaBuddyCallPage> {
                         asset: _frontCamera
                             ? CoastinAssetRegistry.cameraFlipLive
                             : CoastinAssetRegistry.cameraFlipMuted,
-                        onTap: () =>
-                            setState(() => _frontCamera = !_frontCamera),
+                        onTap: _flipCamera,
                       ),
                       _CallRoundControl(
                         asset: _cameraOn
@@ -172,6 +227,11 @@ class _SeaBuddyCallPageState extends State<SeaBuddyCallPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _flipCamera() async {
+    setState(() => _frontCamera = !_frontCamera);
+    await _startCamera(isFront: _frontCamera);
   }
 }
 

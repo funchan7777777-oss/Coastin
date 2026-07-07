@@ -1,6 +1,5 @@
 import '../../domain/entities/buddies/sea_buddy_thread.dart';
 import '../../domain/entities/shoreline_persona.dart';
-import '../../domain/value_objects/shore_profile_current.dart';
 import 'buddies/seeded_sea_buddy_deck.dart';
 import 'seeded_shore_moment_deck.dart';
 

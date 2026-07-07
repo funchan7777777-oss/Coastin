@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 
+import '../../data/local/safety/shore_safety_store.dart';
 import '../../data/local/seeded_shore_moment_deck.dart';
 import '../../domain/entities/shore_video_moment.dart';
 import 'overlays/reef_comment_sheet.dart';
-import 'overlays/undertow_guard_sheet.dart';
+import '../people/shore_persona_detail_page.dart';
+import '../safety/shore_safety_action.dart';
+import '../safety/shore_safety_reef.dart';
 import 'release/shore_release_page.dart';
 import 'widgets/moment_action_rail.dart';
 import 'widgets/moment_caption_panel.dart';
@@ -23,10 +26,16 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
   final PageController _momentController = PageController();
   final List<ShoreVideoMoment> _moments =
       SeededShoreMomentDeck.shoreVideoMoments;
+  final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
 
   late final Map<String, bool> _likedMoments;
-  late final Map<String, bool> _followedCreators;
   late final Map<String, bool> _pausedMoments;
+  ShoreSafetySnapshot _safetySnapshot = const ShoreSafetySnapshot(
+    blockedHandles: {},
+    reportedContentIds: {},
+    followingHandles: {},
+    approvedFollowerHandles: {},
+  );
 
   int _currentMomentIndex = 0;
   bool _commentsOpen = false;
@@ -38,11 +47,8 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     _likedMoments = {
       for (final moment in _moments) moment.momentKey: moment.isInitiallyLiked,
     };
-    _followedCreators = {
-      for (final moment in _moments)
-        moment.creatorPersona.tideHandle: moment.isInitiallyFollowed,
-    };
     _pausedMoments = {for (final moment in _moments) moment.momentKey: false};
+    _restoreSafety();
   }
 
   @override
@@ -53,7 +59,14 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final activeMoment = _moments[_currentMomentIndex];
+    final visibleMoments = _visibleMoments;
+    if (_currentMomentIndex >= visibleMoments.length &&
+        visibleMoments.isNotEmpty) {
+      _currentMomentIndex = visibleMoments.length - 1;
+    }
+    final activeMoment = visibleMoments.isEmpty
+        ? null
+        : visibleMoments[_currentMomentIndex];
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFF061821),
@@ -63,50 +76,58 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
         ).copyWith(padding: EdgeInsets.zero, viewPadding: EdgeInsets.zero),
         child: Stack(
           children: [
-            PageView.builder(
-              controller: _momentController,
-              scrollDirection: Axis.vertical,
-              physics: _commentsOpen || _guardOpen
-                  ? const NeverScrollableScrollPhysics()
-                  : const BouncingScrollPhysics(),
-              itemCount: _moments.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentMomentIndex = index;
-                  _commentsOpen = false;
-                  _guardOpen = false;
-                });
-              },
-              itemBuilder: (context, index) {
-                final moment = _moments[index];
-                return _ShareMomentPane(
-                  shoreMoment: moment,
-                  isActive: index == _currentMomentIndex,
-                  isLiked: _likedMoments[moment.momentKey] ?? false,
-                  isFollowed:
-                      _followedCreators[moment.creatorPersona.tideHandle] ??
-                      false,
-                  isPaused: _pausedMoments[moment.momentKey] ?? false,
-                  bottomDockClearance: widget.bottomDockClearance,
-                  onLikeTap: () => _toggleLike(moment),
-                  onPlayTap: () => _togglePlayback(moment),
-                  onFollowTap: () => _toggleFollow(moment),
-                  onCommentTap: () {
-                    setState(() {
-                      _commentsOpen = true;
-                      _guardOpen = false;
-                    });
-                  },
-                  onInfoTap: () {
-                    setState(() {
-                      _guardOpen = true;
-                      _commentsOpen = false;
-                    });
-                  },
-                  onReleaseTap: _openReleasePage,
-                );
-              },
-            ),
+            if (visibleMoments.isEmpty)
+              const Center(
+                child: Text(
+                  'No content',
+                  style: TextStyle(
+                    color: Color(0xFFFFFFFF),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              )
+            else
+              PageView.builder(
+                controller: _momentController,
+                scrollDirection: Axis.vertical,
+                physics: _commentsOpen || _guardOpen
+                    ? const NeverScrollableScrollPhysics()
+                    : const BouncingScrollPhysics(),
+                itemCount: visibleMoments.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentMomentIndex = index;
+                    _commentsOpen = false;
+                    _guardOpen = false;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final moment = visibleMoments[index];
+                  return _ShareMomentPane(
+                    shoreMoment: moment,
+                    isActive: index == _currentMomentIndex,
+                    isLiked: _likedMoments[moment.momentKey] ?? false,
+                    isFollowed: _safetySnapshot.isFollowing(
+                      moment.creatorPersona.tideHandle,
+                    ),
+                    isPaused: _pausedMoments[moment.momentKey] ?? false,
+                    bottomDockClearance: widget.bottomDockClearance,
+                    onLikeTap: () => _toggleLike(moment),
+                    onPlayTap: () => _togglePlayback(moment),
+                    onFollowTap: () => _toggleFollow(moment),
+                    onCommentTap: () {
+                      setState(() {
+                        _commentsOpen = true;
+                        _guardOpen = false;
+                      });
+                    },
+                    onInfoTap: () => _openMomentSafety(moment),
+                    onReleaseTap: _openReleasePage,
+                    onPersonaTap: () => _openPersona(moment),
+                  );
+                },
+              ),
             IgnorePointer(
               ignoring: !_commentsOpen,
               child: AnimatedOpacity(
@@ -119,21 +140,37 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
                 ),
               ),
             ),
-            ReefCommentSheet(
-              isOpen: _commentsOpen,
-              commentDrifts: activeMoment.replyDrifts,
-              viewerPersona: SeededShoreMomentDeck.shorelinePeople[36],
-              onClose: () => setState(() => _commentsOpen = false),
-            ),
-            UndertowGuardSheet(
-              isOpen: _guardOpen,
-              onClose: () => setState(() => _guardOpen = false),
-              onConfirmed: _confirmGuardChoice,
-            ),
+            if (activeMoment != null)
+              ReefCommentSheet(
+                isOpen: _commentsOpen,
+                commentDrifts: activeMoment.replyDrifts,
+                viewerPersona: SeededShoreMomentDeck.shorelinePeople[36],
+                onClose: () => setState(() => _commentsOpen = false),
+                onChanged: _restoreSafety,
+              ),
           ],
         ),
       ),
     );
+  }
+
+  List<ShoreVideoMoment> get _visibleMoments {
+    return _moments
+        .where(
+          (moment) => _safetySnapshot.isVisibleContent(
+            'moment:${moment.momentKey}',
+            moment.creatorPersona.tideHandle,
+          ),
+        )
+        .toList();
+  }
+
+  Future<void> _restoreSafety() async {
+    final snapshot = await _safetyStore.restoreSnapshot();
+    if (!mounted) {
+      return;
+    }
+    setState(() => _safetySnapshot = snapshot);
   }
 
   void _toggleLike(ShoreVideoMoment moment) {
@@ -150,11 +187,14 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     });
   }
 
-  void _toggleFollow(ShoreVideoMoment moment) {
-    setState(() {
-      final handle = moment.creatorPersona.tideHandle;
-      _followedCreators[handle] = !(_followedCreators[handle] ?? false);
-    });
+  Future<void> _toggleFollow(ShoreVideoMoment moment) async {
+    final handle = moment.creatorPersona.tideHandle;
+    if (_safetySnapshot.isFollowing(handle)) {
+      await _safetyStore.unfollow(handle);
+    } else {
+      await _safetyStore.follow(handle);
+    }
+    await _restoreSafety();
   }
 
   void _openReleasePage() {
@@ -163,31 +203,27 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     ).push(CupertinoPageRoute<void>(builder: (_) => const ShoreReleasePage()));
   }
 
-  void _confirmGuardChoice(UndertowGuardChoice choice) {
-    setState(() => _guardOpen = false);
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (context) {
-        final isReport = choice == UndertowGuardChoice.report;
-        return CupertinoAlertDialog(
-          title: Text(isReport ? 'Report received' : 'Profile hidden'),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              isReport
-                  ? 'Thanks. This shoreline moment has been marked for review.'
-                  : 'This creator will stay out of your Coastin feed.',
-            ),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+  void _openPersona(ShoreVideoMoment moment) {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => ShorePersonaDetailPage(
+          persona: moment.creatorPersona,
+          placeRibbon: moment.placeRibbon,
+        ),
+      ),
     );
+  }
+
+  Future<void> _openMomentSafety(ShoreVideoMoment moment) async {
+    setState(() => _commentsOpen = false);
+    await ShoreSafetyReef.showGuard(
+      context: context,
+      contentId: 'moment:${moment.momentKey}',
+      contentKind: ShoreSafetyContentKind.moment,
+      ownerName: moment.creatorPersona.displayHarborName,
+      ownerHandle: moment.creatorPersona.tideHandle,
+    );
+    await _restoreSafety();
   }
 }
 
@@ -205,6 +241,7 @@ class _ShareMomentPane extends StatelessWidget {
     required this.onCommentTap,
     required this.onInfoTap,
     required this.onReleaseTap,
+    required this.onPersonaTap,
   });
 
   final ShoreVideoMoment shoreMoment;
@@ -219,6 +256,7 @@ class _ShareMomentPane extends StatelessWidget {
   final VoidCallback onCommentTap;
   final VoidCallback onInfoTap;
   final VoidCallback onReleaseTap;
+  final VoidCallback onPersonaTap;
 
   @override
   Widget build(BuildContext context) {
@@ -254,12 +292,14 @@ class _ShareMomentPane extends StatelessWidget {
           onPlayTap: onPlayTap,
           onCommentTap: onCommentTap,
           onInfoTap: onInfoTap,
+          onPersonaTap: onPersonaTap,
         ),
         MomentCaptionPanel(
           shoreMoment: shoreMoment,
           isFollowed: isFollowed,
           bottomDockClearance: bottomDockClearance,
           onFollowTap: onFollowTap,
+          onPersonaTap: onPersonaTap,
         ),
       ],
     );

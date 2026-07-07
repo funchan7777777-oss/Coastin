@@ -247,7 +247,9 @@ class _SafetyWavePanelState extends State<_SafetyWavePanel> {
                     Text(
                       'Blocked people and their content will be hidden across Coastin, including feeds, comments, and messages.',
                       style: TextStyle(
-                        color: TidewashPalette.harborSlate.withValues(alpha: 0.78),
+                        color: TidewashPalette.harborSlate.withValues(
+                          alpha: 0.78,
+                        ),
                         fontSize: 14,
                         height: 1.35,
                         fontWeight: FontWeight.w700,
@@ -265,7 +267,9 @@ class _SafetyWavePanelState extends State<_SafetyWavePanel> {
                         borderRadius: BorderRadius.circular(27),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF2F68D3).withValues(alpha: 0.2),
+                            color: const Color(
+                              0xFF2F68D3,
+                            ).withValues(alpha: 0.2),
                             blurRadius: 18,
                             offset: const Offset(0, 8),
                           ),
@@ -402,7 +406,9 @@ class _ReasonChip extends StatelessWidget {
               : const Color(0xFFFFFFFF).withValues(alpha: 0.76),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected ? const Color(0xFFE9B22A) : const Color(0x00FFFFFF),
+            color: isSelected
+                ? const Color(0xFFE9B22A)
+                : const Color(0x00FFFFFF),
           ),
         ),
         child: Text(

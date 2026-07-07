@@ -6,9 +6,11 @@ import '../../../../arrival_gate/application/coastin_entry_flow.dart';
 import '../../../../arrival_gate/data/local/harbor_passage_store.dart';
 import '../../../../arrival_gate/domain/value_objects/harbor_policy_kind.dart';
 import '../../../../arrival_gate/presentation/policy/harbor_policy_webview_page.dart';
+import '../../safety/shore_safety_reef.dart';
 import '../network/my_coast_network_page.dart';
 import '../widgets/my_coast_top_bar.dart';
 import '../widgets/my_coast_wash.dart';
+import 'community_guidelines_page.dart';
 
 class MyCoastSettingsPage extends StatelessWidget {
   const MyCoastSettingsPage({super.key});
@@ -54,14 +56,9 @@ class MyCoastSettingsPage extends StatelessWidget {
                         _openPolicy(context, HarborPolicyKind.userAgreement),
                   ),
                   _SettingRow(
-                    iconAsset: CoastinAssetRegistry.phoneGlyph,
-                    title: 'Contact Us',
-                    onTap: () => _showContact(context),
-                  ),
-                  _SettingRow(
                     iconAsset: CoastinAssetRegistry.settingsListGlyph,
                     title: 'Community guidelines',
-                    onTap: () => _showGuidelines(context),
+                    onTap: () => _openGuidelines(context),
                   ),
                   const SizedBox(height: 20),
                   _SettingRow(
@@ -101,37 +98,9 @@ class MyCoastSettingsPage extends StatelessWidget {
     );
   }
 
-  static void _showContact(BuildContext context) {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (context) {
-        return const CupertinoAlertDialog(
-          title: Text('Contact Coastin'),
-          content: Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text('Send shoreline support notes to support@coastin.app.'),
-          ),
-          actions: [_CloseDialogAction()],
-        );
-      },
-    );
-  }
-
-  static void _showGuidelines(BuildContext context) {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (context) {
-        return const CupertinoAlertDialog(
-          title: Text('Community guidelines'),
-          content: Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text(
-              'Keep every beach note kind, lawful, original, and safe for the Coastin community.',
-            ),
-          ),
-          actions: [_CloseDialogAction()],
-        );
-      },
+  static void _openGuidelines(BuildContext context) {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(builder: (_) => const CommunityGuidelinesPage()),
     );
   }
 
@@ -157,11 +126,24 @@ class MyCoastSettingsPage extends StatelessWidget {
             CupertinoDialogAction(
               isDestructiveAction: true,
               onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                _showBusyTide(context, isDeletion: isDeletion);
+                await Future<void>.delayed(const Duration(milliseconds: 900));
                 await _passageStore.clearSettledPassage();
                 if (!context.mounted) {
                   return;
                 }
-                Navigator.of(dialogContext).pop();
+                Navigator.of(context, rootNavigator: true).pop();
+                await ShoreSafetyReef.showAccountDone(
+                  context: context,
+                  title: isDeletion ? 'Account deleted' : 'Logged out',
+                  message: isDeletion
+                      ? 'Your local Coastin profile has been cleared on this device.'
+                      : 'You have signed out of Coastin on this device.',
+                );
+                if (!context.mounted) {
+                  return;
+                }
                 Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
                   CupertinoPageRoute<void>(
                     builder: (_) => const CoastinEntryFlow(),
@@ -176,16 +158,20 @@ class MyCoastSettingsPage extends StatelessWidget {
       },
     );
   }
-}
 
-class _CloseDialogAction extends StatelessWidget {
-  const _CloseDialogAction();
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoDialogAction(
-      onPressed: () => Navigator.of(context).pop(),
-      child: const Text('OK'),
+  static void _showBusyTide(BuildContext context, {required bool isDeletion}) {
+    showCupertinoDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: Text(isDeletion ? 'Deleting account' : 'Logging out'),
+          content: const Padding(
+            padding: EdgeInsets.only(top: 16),
+            child: CupertinoActivityIndicator(radius: 13),
+          ),
+        );
+      },
     );
   }
 }

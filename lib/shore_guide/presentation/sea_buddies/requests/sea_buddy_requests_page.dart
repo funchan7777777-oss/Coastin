@@ -3,8 +3,10 @@ import 'package:flutter/cupertino.dart';
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../data/local/buddies/seeded_sea_buddy_deck.dart';
+import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/buddies/sea_buddy_request.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
+import '../../people/shore_persona_detail_page.dart';
 import '../widgets/sea_buddy_top_bar.dart';
 import '../widgets/sea_buddy_wash.dart';
 
@@ -16,10 +18,19 @@ class SeaBuddyRequestsPage extends StatefulWidget {
 }
 
 class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
-  late final Map<String, bool> _followedRequests = {
-    for (final request in SeededSeaBuddyDeck.buddyRequests)
-      request.requestKey: request.isInitiallyFollowed,
-  };
+  final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
+  ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
+    blockedHandles: {},
+    reportedContentIds: {},
+    followingHandles: {},
+    approvedFollowerHandles: {},
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreSafety();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +55,31 @@ class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
                           onBack: () => Navigator.of(context).pop(),
                         ),
                         const SizedBox(height: 24),
-                        for (final request
-                            in SeededSeaBuddyDeck.buddyRequests) ...[
+                        for (final request in _visibleRequests) ...[
                           _SeaRequestTile(
                             request: request,
-                            isFollowed:
-                                _followedRequests[request.requestKey] ?? false,
-                            onFollowTap: () => _toggleFollow(request),
-                            onOpen: () => _showRequestProfile(request),
+                            isAccepted: _snapshot.isFollowedBy(
+                              request.requestPersona.tideHandle,
+                            ),
+                            onAcceptTap: () => _acceptRequest(request),
+                            onOpen: () => _openRequestProfile(request),
                           ),
                           const SizedBox(height: 22),
                         ],
+                        if (_visibleRequests.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 170),
+                            child: Text(
+                              'No content',
+                              style: TextStyle(
+                                color: TidewashPalette.harborSlate.withValues(
+                                  alpha: 0.3,
+                                ),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -67,46 +92,52 @@ class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
     );
   }
 
-  void _toggleFollow(SeaBuddyRequest request) {
-    setState(() {
-      _followedRequests[request.requestKey] =
-          !(_followedRequests[request.requestKey] ?? false);
-    });
+  List<SeaBuddyRequest> get _visibleRequests {
+    return SeededSeaBuddyDeck.buddyRequests
+        .where(
+          (request) => !_snapshot.blockedHandles.contains(
+            request.requestPersona.tideHandle,
+          ),
+        )
+        .toList();
   }
 
-  void _showRequestProfile(SeaBuddyRequest request) {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (context) {
-        return CupertinoAlertDialog(
-          title: Text(request.requestPersona.displayHarborName),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(request.requestLine),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
+  Future<void> _acceptRequest(SeaBuddyRequest request) async {
+    await _safetyStore.approveFollower(request.requestPersona.tideHandle);
+    await _restoreSafety();
+  }
+
+  void _openRequestProfile(SeaBuddyRequest request) {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => ShorePersonaDetailPage(
+          persona: request.requestPersona,
+          placeRibbon: request.placeRibbon,
+        ),
+      ),
     );
+  }
+
+  Future<void> _restoreSafety() async {
+    final snapshot = await _safetyStore.restoreSnapshot();
+    if (!mounted) {
+      return;
+    }
+    setState(() => _snapshot = snapshot);
   }
 }
 
 class _SeaRequestTile extends StatelessWidget {
   const _SeaRequestTile({
     required this.request,
-    required this.isFollowed,
-    required this.onFollowTap,
+    required this.isAccepted,
+    required this.onAcceptTap,
     required this.onOpen,
   });
 
   final SeaBuddyRequest request;
-  final bool isFollowed;
-  final VoidCallback onFollowTap;
+  final bool isAccepted;
+  final VoidCallback onAcceptTap;
   final VoidCallback onOpen;
 
   @override
@@ -162,12 +193,12 @@ class _SeaRequestTile extends StatelessWidget {
                     ),
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: onFollowTap,
+                      onTap: onAcceptTap,
                       child: SizedBox(
                         width: 70,
                         height: 30,
                         child: Image.asset(
-                          isFollowed
+                          isAccepted
                               ? CoastinAssetRegistry.followedBadge
                               : CoastinAssetRegistry.followBadge,
                           fit: BoxFit.contain,

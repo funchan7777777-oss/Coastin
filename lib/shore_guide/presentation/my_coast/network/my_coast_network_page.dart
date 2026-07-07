@@ -3,8 +3,10 @@ import 'package:flutter/cupertino.dart';
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../data/local/buddies/seeded_sea_buddy_deck.dart';
-import '../../../data/local/seeded_shore_moment_deck.dart';
+import '../../../data/local/safety/shore_safety_store.dart';
+import '../../../data/local/shore_persona_catalog.dart';
 import '../../../domain/entities/shoreline_persona.dart';
+import '../../people/shore_persona_detail_page.dart';
 import '../../sea_buddies/chat/sea_buddy_chat_page.dart';
 import '../widgets/coast_person_row.dart';
 import '../widgets/my_coast_top_bar.dart';
@@ -31,15 +33,23 @@ class MyCoastNetworkPage extends StatefulWidget {
 }
 
 class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
-  late final List<ShorelinePersona> _people = _peopleForKind(widget.kind);
-  final Set<String> _hiddenHandles = {};
-  final Set<String> _followedHandles = {};
+  final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
+  ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
+    blockedHandles: {},
+    reportedContentIds: {},
+    followingHandles: {},
+    approvedFollowerHandles: {},
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreSafety();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final visiblePeople = _people
-        .where((persona) => !_hiddenHandles.contains(persona.tideHandle))
-        .toList();
+    final visiblePeople = _peopleForKind(widget.kind, _snapshot);
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFFFF7DA),
@@ -70,7 +80,7 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
                                 'Breeze by shore, collect seaside romance today. Long coastline, slow down for coastal tiny joys.',
                             actionAsset: _actionAsset(persona),
                             onActionTap: () => _handleAction(persona),
-                            onOpen: () => _openPersonaNote(persona),
+                            onOpen: () => _openPersona(persona),
                           ),
                         if (visiblePeople.isEmpty)
                           Padding(
@@ -113,16 +123,19 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
       MyCoastNetworkKind.blacklist => CoastinAssetRegistry.deletePill,
       MyCoastNetworkKind.follow => CoastinAssetRegistry.followedBadge,
       MyCoastNetworkKind.fans =>
-        _followedHandles.contains(persona.tideHandle)
+        _snapshot.isFollowing(persona.tideHandle)
             ? CoastinAssetRegistry.followedBadge
             : CoastinAssetRegistry.followBadge,
       MyCoastNetworkKind.friend => CoastinAssetRegistry.chatPill,
     };
   }
 
-  void _handleAction(ShorelinePersona persona) {
+  Future<void> _handleAction(ShorelinePersona persona) async {
     if (widget.kind == MyCoastNetworkKind.friend) {
-      final thread = SeededSeaBuddyDeck.buddyThreads.first;
+      final thread = SeededSeaBuddyDeck.buddyThreads.firstWhere(
+        (thread) => thread.buddyPersona.tideHandle == persona.tideHandle,
+        orElse: () => ShorePersonaCatalog.threadForPersona(persona),
+      );
       Navigator.of(context).push(
         CupertinoPageRoute<void>(
           builder: (_) => SeaBuddyChatPage(thread: thread),
@@ -130,46 +143,74 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
       );
       return;
     }
-    if (widget.kind == MyCoastNetworkKind.fans) {
-      setState(() {
-        if (!_followedHandles.add(persona.tideHandle)) {
-          _followedHandles.remove(persona.tideHandle);
-        }
-      });
+    if (widget.kind == MyCoastNetworkKind.blacklist) {
+      await _safetyStore.unblockHandle(persona.tideHandle);
+      await _restoreSafety();
       return;
     }
-    setState(() => _hiddenHandles.add(persona.tideHandle));
+    if (widget.kind == MyCoastNetworkKind.fans) {
+      if (_snapshot.isFollowing(persona.tideHandle)) {
+        await _safetyStore.unfollow(persona.tideHandle);
+      } else {
+        await _safetyStore.follow(persona.tideHandle);
+      }
+      await _restoreSafety();
+      return;
+    }
+    if (widget.kind == MyCoastNetworkKind.follow) {
+      await _safetyStore.unfollow(persona.tideHandle);
+      await _restoreSafety();
+    }
   }
 
-  void _openPersonaNote(ShorelinePersona persona) {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (context) {
-        return CupertinoAlertDialog(
-          title: Text(persona.displayHarborName),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(persona.coastalStamp),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
+  void _openPersona(ShorelinePersona persona) {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => ShorePersonaDetailPage(
+          persona: persona,
+          placeRibbon: _placeForPersona(persona),
+        ),
+      ),
     );
+  }
+
+  Future<void> _restoreSafety() async {
+    final snapshot = await _safetyStore.restoreSnapshot();
+    if (!mounted) {
+      return;
+    }
+    setState(() => _snapshot = snapshot);
   }
 }
 
-List<ShorelinePersona> _peopleForKind(MyCoastNetworkKind kind) {
-  final people = SeededShoreMomentDeck.shorelinePeople;
+List<ShorelinePersona> _peopleForKind(
+  MyCoastNetworkKind kind,
+  ShoreSafetySnapshot snapshot,
+) {
+  final people = ShorePersonaCatalog.people;
+  bool contains(Set<String> handles, ShorelinePersona persona) {
+    return handles.contains(persona.tideHandle);
+  }
+
   return switch (kind) {
-    MyCoastNetworkKind.blacklist => [people[24], people[12]],
-    MyCoastNetworkKind.follow => [people[24]],
-    MyCoastNetworkKind.fans => [people[24], people[6]],
-    MyCoastNetworkKind.friend => [people[24]],
+    MyCoastNetworkKind.blacklist =>
+      people
+          .where((persona) => contains(snapshot.blockedHandles, persona))
+          .toList(),
+    MyCoastNetworkKind.follow =>
+      people
+          .where((persona) => contains(snapshot.followingHandles, persona))
+          .toList(),
+    MyCoastNetworkKind.fans =>
+      people
+          .where(
+            (persona) => contains(snapshot.approvedFollowerHandles, persona),
+          )
+          .toList(),
+    MyCoastNetworkKind.friend =>
+      people
+          .where((persona) => snapshot.isMutualWith(persona.tideHandle))
+          .toList(),
   };
 }
 

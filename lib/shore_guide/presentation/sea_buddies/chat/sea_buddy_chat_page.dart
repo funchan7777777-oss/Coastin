@@ -2,8 +2,12 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
+import '../../../data/local/buddies/sea_buddy_message_store.dart';
+import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/buddies/sea_buddy_note.dart';
 import '../../../domain/entities/buddies/sea_buddy_thread.dart';
+import '../../people/shore_persona_detail_page.dart';
+import '../../safety/shore_safety_reef.dart';
 import '../call/sea_buddy_call_page.dart';
 import '../widgets/sea_buddy_top_bar.dart';
 import '../widgets/sea_buddy_wash.dart';
@@ -18,8 +22,16 @@ class SeaBuddyChatPage extends StatefulWidget {
 }
 
 class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
-  late final List<SeaBuddyNote> _notes = List.of(widget.thread.notes);
+  final SeaBuddyMessageStore _messageStore = const SeaBuddyMessageStore();
+  final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
+  List<SeaBuddyNote> _notes = const [];
   final TextEditingController _replyController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreNotes();
+  }
 
   @override
   void dispose() {
@@ -54,12 +66,28 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
                         _ChatBuddyHeader(
                           thread: widget.thread,
                           onVideoTap: _openVideoCall,
+                          onPersonaTap: _openPersona,
                         ),
                         const SizedBox(height: 26),
-                        for (final note in _notes) ...[
-                          _SeaChatBubble(note: note),
-                          const SizedBox(height: 20),
-                        ],
+                        if (_notes.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 80),
+                            child: Text(
+                              'No messages yet',
+                              style: TextStyle(
+                                color: TidewashPalette.harborSlate.withValues(
+                                  alpha: 0.42,
+                                ),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          )
+                        else
+                          for (final note in _notes) ...[
+                            _SeaChatBubble(note: note),
+                            const SizedBox(height: 20),
+                          ],
                       ],
                     ),
                   ),
@@ -81,27 +109,77 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     );
   }
 
-  void _sendNote() {
+  Future<void> _restoreNotes() async {
+    final notes = await _messageStore.restoreNotes(widget.thread.threadKey);
+    if (!mounted) {
+      return;
+    }
+    setState(() => _notes = notes);
+  }
+
+  Future<bool> _ensureMutual() async {
+    final handle = widget.thread.buddyPersona.tideHandle;
+    final canChat = await _safetyStore.isMutual(handle);
+    if (canChat) {
+      return true;
+    }
+    if (!mounted) {
+      return false;
+    }
+    await ShoreSafetyReef.showFollowRequired(
+      context: context,
+      displayName: widget.thread.buddyPersona.displayHarborName,
+      onGoFollow: () async {
+        await _safetyStore.follow(handle);
+      },
+    );
+    return false;
+  }
+
+  Future<void> _sendNote() async {
+    if (!await _ensureMutual()) {
+      return;
+    }
     final text = _replyController.text.trim();
     if (text.isEmpty) {
       return;
     }
+    final note = SeaBuddyNote(
+      noteKey: 'local-${DateTime.now().microsecondsSinceEpoch}',
+      noteText: text,
+      sentByViewer: true,
+    );
+    await _messageStore.appendNote(widget.thread.threadKey, note);
+    if (!mounted) {
+      return;
+    }
     setState(() {
-      _notes.add(
-        SeaBuddyNote(
-          noteKey: 'local-${DateTime.now().microsecondsSinceEpoch}',
-          noteText: text,
-          sentByViewer: true,
-        ),
-      );
+      _notes = [..._notes, note];
       _replyController.clear();
     });
   }
 
-  void _openVideoCall() {
+  Future<void> _openVideoCall() async {
+    if (!await _ensureMutual()) {
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => SeaBuddyCallPage(thread: widget.thread),
+      ),
+    );
+  }
+
+  void _openPersona() {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => ShorePersonaDetailPage(
+          persona: widget.thread.buddyPersona,
+          placeRibbon: widget.thread.placeRibbon,
+        ),
       ),
     );
   }
@@ -115,12 +193,19 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
           message: Text(widget.thread.buddyPersona.coastalStamp),
           actions: [
             CupertinoActionSheetAction(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _openVideoCall();
+              },
               child: const Text('Start video call'),
             ),
             CupertinoActionSheetAction(
               isDestructiveAction: true,
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _messageStore.clearThread(widget.thread.threadKey);
+                await _restoreNotes();
+              },
               child: const Text('Clear conversation'),
             ),
           ],
@@ -135,31 +220,44 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
 }
 
 class _ChatBuddyHeader extends StatelessWidget {
-  const _ChatBuddyHeader({required this.thread, required this.onVideoTap});
+  const _ChatBuddyHeader({
+    required this.thread,
+    required this.onVideoTap,
+    required this.onPersonaTap,
+  });
 
   final SeaBuddyThread thread;
   final VoidCallback onVideoTap;
+  final VoidCallback onPersonaTap;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ClipOval(
-          child: Image.asset(
-            thread.buddyPersona.avatarAsset,
-            width: 92,
-            height: 92,
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onPersonaTap,
+          child: ClipOval(
+            child: Image.asset(
+              thread.buddyPersona.avatarAsset,
+              width: 92,
+              height: 92,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+            ),
           ),
         ),
         const SizedBox(height: 14),
-        Text(
-          thread.buddyPersona.displayHarborName,
-          style: const TextStyle(
-            color: TidewashPalette.inkBlue,
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onPersonaTap,
+          child: Text(
+            thread.buddyPersona.displayHarborName,
+            style: const TextStyle(
+              color: TidewashPalette.inkBlue,
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
         const SizedBox(height: 10),

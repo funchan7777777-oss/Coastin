@@ -27,7 +27,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Coastin uses the camera when you choose to take a profile photo.</string>
+	<string>Coastin uses the camera when you take a profile photo or preview yourself during a video call.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Coastin uses the microphone for video calls between mutual Coastin friends.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Coastin uses your photo library when you choose a profile image.</string>
 	<key>UIApplicationSceneManifest</key>

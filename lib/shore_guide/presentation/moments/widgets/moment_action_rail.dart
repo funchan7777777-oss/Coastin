@@ -18,6 +18,7 @@ class MomentActionRail extends StatelessWidget {
     required this.onPlayTap,
     required this.onCommentTap,
     required this.onInfoTap,
+    required this.onPersonaTap,
   });
 
   final ShorelinePersona creatorPersona;
@@ -30,6 +31,7 @@ class MomentActionRail extends StatelessWidget {
   final VoidCallback onPlayTap;
   final VoidCallback onCommentTap;
   final VoidCallback onInfoTap;
+  final VoidCallback onPersonaTap;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,11 @@ class MomentActionRail extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _MomentPortraitBubble(creatorPersona: creatorPersona),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onPersonaTap,
+            child: _MomentPortraitBubble(creatorPersona: creatorPersona),
+          ),
           const SizedBox(height: 24),
           _MomentImageButton(
             asset: isLiked

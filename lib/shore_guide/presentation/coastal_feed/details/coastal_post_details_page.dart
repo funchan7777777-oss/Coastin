@@ -2,10 +2,14 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
+import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../data/local/seeded_shore_moment_deck.dart';
 import '../../../domain/entities/feed/coastal_post_dispatch.dart';
 import '../../../domain/entities/shore_reply_drift.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
+import '../../people/shore_persona_detail_page.dart';
+import '../../safety/shore_safety_action.dart';
+import '../../safety/shore_safety_reef.dart';
 
 class CoastalPostDetailsPage extends StatefulWidget {
   const CoastalPostDetailsPage({
@@ -28,12 +32,19 @@ class CoastalPostDetailsPage extends StatefulWidget {
 }
 
 class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
+  final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   late bool _isLoved = widget.isLoved;
   late bool _isFollowed = widget.isFollowed;
   late final List<ShoreReplyDrift> _visibleReplies = List.of(
     widget.postDispatch.replyDrifts,
   );
   final TextEditingController _replyController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreReplies();
+  }
 
   @override
   void dispose() {
@@ -70,6 +81,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                           postDispatch: post,
                           isFollowed: _isFollowed,
                           onFollowTap: _toggleFollow,
+                          onAuthorTap: _openAuthor,
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -102,7 +114,11 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                         ),
                         const SizedBox(height: 18),
                         for (final reply in _visibleReplies) ...[
-                          _DetailReplyRow(replyDrift: reply),
+                          _DetailReplyRow(
+                            replyDrift: reply,
+                            onPersonaTap: () => _openReplyAuthor(reply),
+                            onReportTap: () => _reportReply(reply),
+                          ),
                           const SizedBox(height: 20),
                         ],
                       ],
@@ -131,7 +147,13 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     widget.onLoveChanged(_isLoved);
   }
 
-  void _toggleFollow() {
+  Future<void> _toggleFollow() async {
+    final handle = widget.postDispatch.authorHarbor.tideHandle;
+    if (_isFollowed) {
+      await _safetyStore.unfollow(handle);
+    } else {
+      await _safetyStore.follow(handle);
+    }
     setState(() => _isFollowed = !_isFollowed);
     widget.onFollowChanged(_isFollowed);
   }
@@ -156,6 +178,61 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     });
   }
 
+  void _openAuthor() {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => ShorePersonaDetailPage(
+          persona: widget.postDispatch.authorHarbor,
+          placeRibbon: widget.postDispatch.placeRibbon,
+        ),
+      ),
+    );
+  }
+
+  void _openReplyAuthor(ShoreReplyDrift reply) {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => ShorePersonaDetailPage(
+          persona: reply.replyAuthor,
+          placeRibbon: '23 - Australia',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _reportReply(ShoreReplyDrift reply) async {
+    final outcome = await ShoreSafetyReef.showGuard(
+      context: context,
+      contentId: 'comment:${reply.replyMarker}',
+      contentKind: ShoreSafetyContentKind.comment,
+      ownerName: reply.replyAuthor.displayHarborName,
+      ownerHandle: reply.replyAuthor.tideHandle,
+    );
+    if (!mounted || outcome == null) {
+      return;
+    }
+    await _restoreReplies();
+  }
+
+  Future<void> _restoreReplies() async {
+    final snapshot = await _safetyStore.restoreSnapshot();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _visibleReplies
+        ..clear()
+        ..addAll(
+          widget.postDispatch.replyDrifts.where(
+            (reply) => snapshot.isVisibleContent(
+              'comment:${reply.replyMarker}',
+              reply.replyAuthor.tideHandle,
+            ),
+          ),
+        );
+    });
+  }
+
   void _showPostInfo() {
     showCupertinoModalPopup<void>(
       context: context,
@@ -170,7 +247,19 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
             ),
             CupertinoActionSheetAction(
               isDestructiveAction: true,
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await ShoreSafetyReef.showGuard(
+                  context: this.context,
+                  contentId: 'post:${widget.postDispatch.dispatchKey}',
+                  contentKind: ShoreSafetyContentKind.post,
+                  ownerName: widget.postDispatch.authorHarbor.displayHarborName,
+                  ownerHandle: widget.postDispatch.authorHarbor.tideHandle,
+                );
+                if (mounted) {
+                  Navigator.of(this.context).pop();
+                }
+              },
               child: const Text('Report post'),
             ),
           ],
@@ -266,11 +355,13 @@ class _DetailAuthorRow extends StatelessWidget {
     required this.postDispatch,
     required this.isFollowed,
     required this.onFollowTap,
+    required this.onAuthorTap,
   });
 
   final CoastalPostDispatch postDispatch;
   final bool isFollowed;
   final VoidCallback onFollowTap;
+  final VoidCallback onAuthorTap;
 
   @override
   Widget build(BuildContext context) {
@@ -281,24 +372,28 @@ class _DetailAuthorRow extends StatelessWidget {
 
     return Row(
       children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            ClipOval(
-              child: Image.asset(
-                author.avatarAsset,
-                width: 56,
-                height: 56,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onAuthorTap,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ClipOval(
+                child: Image.asset(
+                  author.avatarAsset,
+                  width: 56,
+                  height: 56,
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
+                ),
               ),
-            ),
-            Positioned(
-              right: -4,
-              bottom: -3,
-              child: Image.asset(genderGlyph, width: 18, height: 18),
-            ),
-          ],
+              Positioned(
+                right: -4,
+                bottom: -3,
+                child: Image.asset(genderGlyph, width: 18, height: 18),
+              ),
+            ],
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -308,14 +403,18 @@ class _DetailAuthorRow extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      author.displayHarborName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: TidewashPalette.inkBlue,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onAuthorTap,
+                      child: Text(
+                        author.displayHarborName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: TidewashPalette.inkBlue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
@@ -508,22 +607,32 @@ class _DetailCountGlyph extends StatelessWidget {
 }
 
 class _DetailReplyRow extends StatelessWidget {
-  const _DetailReplyRow({required this.replyDrift});
+  const _DetailReplyRow({
+    required this.replyDrift,
+    required this.onPersonaTap,
+    required this.onReportTap,
+  });
 
   final ShoreReplyDrift replyDrift;
+  final VoidCallback onPersonaTap;
+  final VoidCallback onReportTap;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ClipOval(
-          child: Image.asset(
-            replyDrift.replyAuthor.avatarAsset,
-            width: 48,
-            height: 48,
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onPersonaTap,
+          child: ClipOval(
+            child: Image.asset(
+              replyDrift.replyAuthor.avatarAsset,
+              width: 48,
+              height: 48,
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -534,14 +643,18 @@ class _DetailReplyRow extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      replyDrift.replyAuthor.displayHarborName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: TidewashPalette.inkBlue,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onPersonaTap,
+                      child: Text(
+                        replyDrift.replyAuthor.displayHarborName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: TidewashPalette.inkBlue,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
@@ -561,6 +674,16 @@ class _DetailReplyRow extends StatelessWidget {
                       height: 13,
                     ),
                   ],
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onReportTap,
+                    child: const Icon(
+                      CupertinoIcons.exclamationmark_circle,
+                      color: Color(0xFF41C7D2),
+                      size: 17,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 4),

@@ -9,7 +9,8 @@ class ShoreSafetyStore {
   static const String _reportedContentKey = 'coastin.safety.reportedContent';
   static const String _reportLedgerKey = 'coastin.safety.reportLedger';
   static const String _followingKey = 'coastin.relations.following';
-  static const String _approvedFollowersKey = 'coastin.relations.approvedFollowers';
+  static const String _approvedFollowersKey =
+      'coastin.relations.approvedFollowers';
 
   Future<ShoreSafetySnapshot> restoreSnapshot() async {
     final prefs = await SharedPreferences.getInstance();
@@ -82,7 +83,8 @@ class ShoreSafetyStore {
     required String? ownerHandle,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final hiddenContent = prefs.getStringList(_reportedContentKey)?.toSet() ?? {};
+    final hiddenContent =
+        prefs.getStringList(_reportedContentKey)?.toSet() ?? {};
     hiddenContent.add(contentId);
     await prefs.setStringList(
       _reportedContentKey,

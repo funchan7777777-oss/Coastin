@@ -11,12 +11,14 @@ class MomentCaptionPanel extends StatelessWidget {
     required this.isFollowed,
     required this.bottomDockClearance,
     required this.onFollowTap,
+    required this.onPersonaTap,
   });
 
   final ShoreVideoMoment shoreMoment;
   final bool isFollowed;
   final double bottomDockClearance;
   final VoidCallback onFollowTap;
+  final VoidCallback onPersonaTap;
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +33,19 @@ class MomentCaptionPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: Text(
-                  shoreMoment.creatorPersona.displayHarborName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: TidewashPalette.saltCard,
-                    fontSize: 19,
-                    fontWeight: FontWeight.w900,
-                    shadows: [_darkShoreShadow],
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onPersonaTap,
+                  child: Text(
+                    shoreMoment.creatorPersona.displayHarborName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: TidewashPalette.saltCard,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                      shadows: [_darkShoreShadow],
+                    ),
                   ),
                 ),
               ),

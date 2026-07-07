@@ -59,7 +59,8 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
   Widget build(BuildContext context) {
     final persona = widget.persona;
     final isFollowing = _snapshot.isFollowing(persona.tideHandle);
-    final placeRibbon = widget.placeRibbon ??
+    final placeRibbon =
+        widget.placeRibbon ??
         (persona.profileCurrent == ShoreProfileCurrent.feminine
             ? '23 - Australia'
             : 'Reef Rail');
@@ -103,7 +104,8 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
                           children: [
                             Expanded(
                               child: _ImageActionPlate(
-                                asset: CoastinAssetRegistry.detailVideoCallPlate,
+                                asset:
+                                    CoastinAssetRegistry.detailVideoCallPlate,
                                 onTap: _openVideoCall,
                               ),
                             ),
@@ -178,7 +180,9 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     }
     final thread = ShorePersonaCatalog.threadForPersona(widget.persona);
     Navigator.of(context).push(
-      CupertinoPageRoute<void>(builder: (_) => SeaBuddyChatPage(thread: thread)),
+      CupertinoPageRoute<void>(
+        builder: (_) => SeaBuddyChatPage(thread: thread),
+      ),
     );
   }
 
@@ -195,7 +199,9 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     }
     final thread = ShorePersonaCatalog.threadForPersona(widget.persona);
     Navigator.of(context).push(
-      CupertinoPageRoute<void>(builder: (_) => SeaBuddyCallPage(thread: thread)),
+      CupertinoPageRoute<void>(
+        builder: (_) => SeaBuddyCallPage(thread: thread),
+      ),
     );
   }
 

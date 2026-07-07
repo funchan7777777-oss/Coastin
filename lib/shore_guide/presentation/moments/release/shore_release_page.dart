@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
+import '../../safety/shore_safety_reef.dart';
 
 enum ShoreReleaseKind { video, post }
 
@@ -174,9 +175,8 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
       );
       return;
     }
-    _showReleaseNote(
-      title: 'Moment queued',
-      message: 'Your coast update is ready for the next shoreline refresh.',
+    ShoreSafetyReef.showModerationQueued(
+      context: context,
       onDone: () => Navigator.of(context).pop(),
     );
   }

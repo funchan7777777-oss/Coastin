@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../app/theme/tidewash_palette.dart';
+import '../../data/local/safety/shore_safety_store.dart';
 import '../../data/local/buddies/seeded_sea_buddy_deck.dart';
 import '../../domain/entities/buddies/sea_buddy_thread.dart';
 import '../../domain/value_objects/shore_profile_current.dart';
+import '../people/shore_persona_detail_page.dart';
 import 'chat/sea_buddy_chat_page.dart';
 import 'requests/sea_buddy_requests_page.dart';
 import 'widgets/sea_buddy_wash.dart';
@@ -19,8 +21,21 @@ class SeaBuddiesPage extends StatefulWidget {
 }
 
 class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
+  final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   final TextEditingController _searchController = TextEditingController();
   String _searchTide = '';
+  ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
+    blockedHandles: {},
+    reportedContentIds: {},
+    followingHandles: {},
+    approvedFollowerHandles: {},
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreSafety();
+  }
 
   @override
   void dispose() {
@@ -30,10 +45,15 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
 
   List<SeaBuddyThread> get _filteredThreads {
     final query = _searchTide.trim().toLowerCase();
+    final threads = SeededSeaBuddyDeck.buddyThreads.where((thread) {
+      final handle = thread.buddyPersona.tideHandle;
+      return _snapshot.isMutualWith(handle) &&
+          !_snapshot.blockedHandles.contains(handle);
+    });
     if (query.isEmpty) {
-      return SeededSeaBuddyDeck.buddyThreads;
+      return threads.toList();
     }
-    return SeededSeaBuddyDeck.buddyThreads.where((thread) {
+    return threads.where((thread) {
       return thread.buddyPersona.displayHarborName.toLowerCase().contains(
             query,
           ) ||
@@ -77,6 +97,7 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
                         _SeaBuddyThreadRow(
                           thread: thread,
                           onTap: () => _openChat(thread),
+                          onPersonaTap: () => _openPersona(thread),
                         ),
                         const SizedBox(height: 22),
                       ],
@@ -106,17 +127,44 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
   }
 
   void _openChat(SeaBuddyThread thread) {
-    Navigator.of(context).push(
-      CupertinoPageRoute<void>(
-        builder: (_) => SeaBuddyChatPage(thread: thread),
-      ),
-    );
+    Navigator.of(context)
+        .push(
+          CupertinoPageRoute<void>(
+            builder: (_) => SeaBuddyChatPage(thread: thread),
+          ),
+        )
+        .then((_) => _restoreSafety());
+  }
+
+  void _openPersona(SeaBuddyThread thread) {
+    Navigator.of(context)
+        .push(
+          CupertinoPageRoute<void>(
+            builder: (_) => ShorePersonaDetailPage(
+              persona: thread.buddyPersona,
+              placeRibbon: thread.placeRibbon,
+            ),
+          ),
+        )
+        .then((_) => _restoreSafety());
   }
 
   void _openRequests() {
-    Navigator.of(context).push(
-      CupertinoPageRoute<void>(builder: (_) => const SeaBuddyRequestsPage()),
-    );
+    Navigator.of(context)
+        .push(
+          CupertinoPageRoute<void>(
+            builder: (_) => const SeaBuddyRequestsPage(),
+          ),
+        )
+        .then((_) => _restoreSafety());
+  }
+
+  Future<void> _restoreSafety() async {
+    final snapshot = await _safetyStore.restoreSnapshot();
+    if (!mounted) {
+      return;
+    }
+    setState(() => _snapshot = snapshot);
   }
 }
 
@@ -187,10 +235,15 @@ class _SeaSearchField extends StatelessWidget {
 }
 
 class _SeaBuddyThreadRow extends StatelessWidget {
-  const _SeaBuddyThreadRow({required this.thread, required this.onTap});
+  const _SeaBuddyThreadRow({
+    required this.thread,
+    required this.onTap,
+    required this.onPersonaTap,
+  });
 
   final SeaBuddyThread thread;
   final VoidCallback onTap;
+  final VoidCallback onPersonaTap;
 
   @override
   Widget build(BuildContext context) {
@@ -204,24 +257,28 @@ class _SeaBuddyThreadRow extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              ClipOval(
-                child: Image.asset(
-                  thread.buddyPersona.avatarAsset,
-                  width: 56,
-                  height: 56,
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.high,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onPersonaTap,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipOval(
+                  child: Image.asset(
+                    thread.buddyPersona.avatarAsset,
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
+                  ),
                 ),
-              ),
-              Positioned(
-                right: -3,
-                bottom: -2,
-                child: Image.asset(genderGlyph, width: 17, height: 17),
-              ),
-            ],
+                Positioned(
+                  right: -3,
+                  bottom: -2,
+                  child: Image.asset(genderGlyph, width: 17, height: 17),
+                ),
+              ],
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -231,14 +288,18 @@ class _SeaBuddyThreadRow extends StatelessWidget {
                 Row(
                   children: [
                     Flexible(
-                      child: Text(
-                        thread.buddyPersona.displayHarborName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: TidewashPalette.inkBlue,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: onPersonaTap,
+                        child: Text(
+                          thread.buddyPersona.displayHarborName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: TidewashPalette.inkBlue,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
                     ),

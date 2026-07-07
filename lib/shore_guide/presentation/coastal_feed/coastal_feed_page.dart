@@ -4,9 +4,13 @@ import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../app/theme/tidewash_palette.dart';
 import '../../../shared/ui/tokens/shore_spacing.dart';
 import '../../data/local/feed/seeded_coastal_feed_deck.dart';
+import '../../data/local/safety/shore_safety_store.dart';
 import '../../domain/entities/feed/coastal_post_dispatch.dart';
 import '../../domain/entities/feed/coastal_topic_lane.dart';
 import '../moments/release/shore_release_page.dart';
+import '../people/shore_persona_detail_page.dart';
+import '../safety/shore_safety_action.dart';
+import '../safety/shore_safety_reef.dart';
 import 'details/coastal_post_details_page.dart';
 import 'guide/sun_guard_guide_page.dart';
 import 'widgets/coastal_post_card.dart';
@@ -21,24 +25,39 @@ class CoastalFeedPage extends StatefulWidget {
 }
 
 class _CoastalFeedPageState extends State<CoastalFeedPage> {
+  final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   final Map<String, bool> _lovedDispatches = {
     for (final post in SeededCoastalFeedDeck.coastalDispatches)
       post.dispatchKey: post.isInitiallyLoved,
   };
-  final Map<String, bool> _followedAuthors = {
-    for (final post in SeededCoastalFeedDeck.coastalDispatches)
-      post.authorHarbor.tideHandle: post.isInitiallyFollowed,
-  };
+  ShoreSafetySnapshot _safetySnapshot = const ShoreSafetySnapshot(
+    blockedHandles: {},
+    reportedContentIds: {},
+    followingHandles: {},
+    approvedFollowerHandles: {},
+  );
 
   String? _selectedTopicKey;
 
   List<CoastalPostDispatch> get _visibleDispatches {
-    if (_selectedTopicKey == null) {
-      return SeededCoastalFeedDeck.coastalDispatches;
-    }
     return SeededCoastalFeedDeck.coastalDispatches
-        .where((post) => post.topicKey == _selectedTopicKey)
+        .where(
+          (post) =>
+              _selectedTopicKey == null || post.topicKey == _selectedTopicKey,
+        )
+        .where(
+          (post) => _safetySnapshot.isVisibleContent(
+            'post:${post.dispatchKey}',
+            post.authorHarbor.tideHandle,
+          ),
+        )
         .toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreSafety();
   }
 
   @override
@@ -76,13 +95,14 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
                         CoastalPostCard(
                           postDispatch: post,
                           isLoved: _lovedDispatches[post.dispatchKey] ?? false,
-                          isFollowed:
-                              _followedAuthors[post.authorHarbor.tideHandle] ??
-                              false,
+                          isFollowed: _safetySnapshot.isFollowing(
+                            post.authorHarbor.tideHandle,
+                          ),
                           onOpen: () => _openPostDetails(post),
                           onLoveTap: () => _toggleLove(post),
                           onFollowTap: () => _toggleFollow(post),
                           onMoreTap: () => _showPostHarborMenu(post),
+                          onAuthorTap: () => _openAuthor(post),
                         ),
                     ],
                   ),
@@ -110,11 +130,14 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     });
   }
 
-  void _toggleFollow(CoastalPostDispatch post) {
-    setState(() {
-      final handle = post.authorHarbor.tideHandle;
-      _followedAuthors[handle] = !(_followedAuthors[handle] ?? false);
-    });
+  Future<void> _toggleFollow(CoastalPostDispatch post) async {
+    final handle = post.authorHarbor.tideHandle;
+    if (_safetySnapshot.isFollowing(handle)) {
+      await _safetyStore.unfollow(handle);
+    } else {
+      await _safetyStore.follow(handle);
+    }
+    await _restoreSafety();
   }
 
   void _openPostRelease() {
@@ -132,15 +155,11 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
         builder: (_) => CoastalPostDetailsPage(
           postDispatch: post,
           isLoved: _lovedDispatches[post.dispatchKey] ?? false,
-          isFollowed: _followedAuthors[post.authorHarbor.tideHandle] ?? false,
+          isFollowed: _safetySnapshot.isFollowing(post.authorHarbor.tideHandle),
           onLoveChanged: (isLoved) {
             setState(() => _lovedDispatches[post.dispatchKey] = isLoved);
           },
-          onFollowChanged: (isFollowed) {
-            setState(
-              () => _followedAuthors[post.authorHarbor.tideHandle] = isFollowed,
-            );
-          },
+          onFollowChanged: (_) => _restoreSafety(),
         ),
       ),
     );
@@ -150,6 +169,25 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     Navigator.of(
       context,
     ).push(CupertinoPageRoute<void>(builder: (_) => const SunGuardGuidePage()));
+  }
+
+  void _openAuthor(CoastalPostDispatch post) {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => ShorePersonaDetailPage(
+          persona: post.authorHarbor,
+          placeRibbon: post.placeRibbon,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _restoreSafety() async {
+    final snapshot = await _safetyStore.restoreSnapshot();
+    if (!mounted) {
+      return;
+    }
+    setState(() => _safetySnapshot = snapshot);
   }
 
   void _showPostHarborMenu(CoastalPostDispatch post) {
@@ -168,19 +206,29 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
               child: const Text('View details'),
             ),
             CupertinoActionSheetAction(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                _toggleFollow(post);
+                await _toggleFollow(post);
               },
               child: Text(
-                (_followedAuthors[post.authorHarbor.tideHandle] ?? false)
+                _safetySnapshot.isFollowing(post.authorHarbor.tideHandle)
                     ? 'Unfollow'
                     : 'Follow creator',
               ),
             ),
             CupertinoActionSheetAction(
               isDestructiveAction: true,
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await ShoreSafetyReef.showGuard(
+                  context: this.context,
+                  contentId: 'post:${post.dispatchKey}',
+                  contentKind: ShoreSafetyContentKind.post,
+                  ownerName: post.authorHarbor.displayHarborName,
+                  ownerHandle: post.authorHarbor.tideHandle,
+                );
+                await _restoreSafety();
+              },
               child: const Text('Report post'),
             ),
           ],
