@@ -14,9 +14,13 @@ class ShoreShellReef {
     required BuildContext context,
     required ShoreShellExpense expense,
   }) async {
+    final isUnlocked = await _walletStore.isExpenseUnlocked(expense);
     final balance = await _walletStore.restoreBalance();
     if (!context.mounted) {
       return false;
+    }
+    if (isUnlocked) {
+      return true;
     }
     if (balance < expense.cost) {
       await showInsufficient(context: context, expense: expense);
@@ -41,6 +45,9 @@ class ShoreShellReef {
     }
 
     final spent = await _walletStore.spend(expense);
+    if (spent) {
+      await _walletStore.rememberExpenseUnlock(expense);
+    }
     if (!context.mounted) {
       return false;
     }

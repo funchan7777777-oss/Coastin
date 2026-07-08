@@ -16,17 +16,22 @@ enum ShoreShellExpense {
     cost: 35,
     label: 'Open sun guide',
     routeLine: 'Unlock the summer sun protection guide.',
+    shorelineUnlockKey: 'summerSunProtectionGuide',
   );
 
   const ShoreShellExpense({
     required this.cost,
     required this.label,
     required this.routeLine,
+    this.shorelineUnlockKey,
   });
 
   final int cost;
   final String label;
   final String routeLine;
+  final String? shorelineUnlockKey;
+
+  bool get isReusableUnlock => shorelineUnlockKey != null;
 }
 
 class ShoreShellParcel {
@@ -54,6 +59,7 @@ class ShoreShellWalletStore {
   static const String _balanceKey = 'coastin.wallet.shellBalance';
   static const String _welcomeGiftKey = 'coastin.wallet.welcomeGiftClaimed';
   static const String _purchaseLedgerKey = 'coastin.wallet.purchaseLedger';
+  static const String _unlockedExpenseKey = 'coastin.wallet.unlockedExpenses';
 
   static final ValueNotifier<int> balanceSignal = ValueNotifier<int>(0);
 
@@ -146,6 +152,33 @@ class ShoreShellWalletStore {
     return true;
   }
 
+  Future<bool> isExpenseUnlocked(ShoreShellExpense expense) async {
+    final unlockKey = expense.shorelineUnlockKey;
+    if (unlockKey == null) {
+      return false;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_unlockedExpenseKey)?.contains(unlockKey) ??
+        false;
+  }
+
+  Future<void> rememberExpenseUnlock(ShoreShellExpense expense) async {
+    final unlockKey = expense.shorelineUnlockKey;
+    if (unlockKey == null) {
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    final unlockedExpenses =
+        prefs.getStringList(_unlockedExpenseKey)?.toSet() ?? {};
+    if (!unlockedExpenses.add(unlockKey)) {
+      return;
+    }
+    await prefs.setStringList(
+      _unlockedExpenseKey,
+      unlockedExpenses.toList()..sort(),
+    );
+  }
+
   Future<bool> markPurchaseIfFresh(String purchaseToken) async {
     final prefs = await SharedPreferences.getInstance();
     final ledger = prefs.getStringList(_purchaseLedgerKey)?.toSet() ?? {};
@@ -162,6 +195,7 @@ class ShoreShellWalletStore {
     await prefs.remove(_balanceKey);
     await prefs.remove(_welcomeGiftKey);
     await prefs.remove(_purchaseLedgerKey);
+    await prefs.remove(_unlockedExpenseKey);
     balanceSignal.value = 0;
   }
 }
