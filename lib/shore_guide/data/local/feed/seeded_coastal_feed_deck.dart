@@ -83,9 +83,7 @@ class SeededCoastalFeedDeck {
       clockRibbon: '1h ago',
       captionCurrent:
           'Citrus bowl, cold juice, and a bench with just enough shade to stay longer.',
-      frameAssets: const [
-        CoastinAssetRegistry.harborBite1,
-      ],
+      frameAssets: const [CoastinAssetRegistry.harborBite1],
       heartTally: 31,
       replyTally: 6,
       relayTally: 9,
@@ -143,9 +141,7 @@ class SeededCoastalFeedDeck {
       clockRibbon: '4h ago',
       captionCurrent:
           'Late lunch tasted better with salty hair and a chair facing the harbor.',
-      frameAssets: const [
-        CoastinAssetRegistry.harborBite4,
-      ],
+      frameAssets: const [CoastinAssetRegistry.harborBite4],
       heartTally: 22,
       replyTally: 5,
       relayTally: 8,
@@ -203,9 +199,7 @@ class SeededCoastalFeedDeck {
       clockRibbon: 'Yesterday',
       captionCurrent:
           'A tiny pastry, cold coffee, and the table closest to the open window.',
-      frameAssets: const [
-        CoastinAssetRegistry.harborBite7,
-      ],
+      frameAssets: const [CoastinAssetRegistry.harborBite7],
       heartTally: 28,
       replyTally: 6,
       relayTally: 6,

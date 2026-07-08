@@ -1,7 +1,8 @@
 import '../../../domain/entities/feed/coastal_post_dispatch.dart';
 
 String coastalPostOriginLine(CoastalPostDispatch post) {
-  final age = _ageFromPlaceRibbon(post.placeRibbon) ??
+  final age =
+      _ageFromPlaceRibbon(post.placeRibbon) ??
       _fallbackAgeForHandle(post.authorHarbor.tideHandle);
   final country = _countryFromPlaceRibbon(post.placeRibbon);
   return '$age · $country';

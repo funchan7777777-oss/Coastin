@@ -16,6 +16,7 @@ import '../safety/shore_safety_reef.dart';
 import 'details/coastal_post_details_page.dart';
 import 'guide/sun_guard_guide_page.dart';
 import 'widgets/coastal_post_card.dart';
+import 'widgets/coastal_post_meta.dart';
 
 class CoastalFeedPage extends StatefulWidget {
   const CoastalFeedPage({super.key, required this.bottomDockClearance});
@@ -34,7 +35,7 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
   };
   final Map<String, int> _replyCounts = {
     for (final post in SeededCoastalFeedDeck.coastalDispatches)
-      post.dispatchKey: post.replyDrifts.length,
+      post.dispatchKey: coastalPostReplyCount(post),
   };
   ShoreSafetySnapshot _safetySnapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
@@ -117,7 +118,7 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
                           ),
                           replyCount:
                               _replyCounts[post.dispatchKey] ??
-                              post.replyDrifts.length,
+                              coastalPostReplyCount(post),
                           onOpen: () => _openPostDetails(post),
                           onLoveTap: () => _toggleLove(post),
                           onFollowTap: () => _toggleFollow(post),
