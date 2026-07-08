@@ -11,7 +11,7 @@ class MomentActionRail extends StatelessWidget {
     required this.shorelineKeeper,
     required this.isLiked,
     required this.likeCount,
-    required this.replyCount,
+    required this.commentCount,
     required this.bottomDockClearance,
     required this.onLikeTap,
     required this.onCommentTap,
@@ -22,7 +22,7 @@ class MomentActionRail extends StatelessWidget {
   final ShorelinePersona shorelineKeeper;
   final bool isLiked;
   final int likeCount;
-  final int replyCount;
+  final int commentCount;
   final double bottomDockClearance;
   final VoidCallback onLikeTap;
   final VoidCallback onCommentTap;
@@ -57,7 +57,7 @@ class MomentActionRail extends StatelessWidget {
             spokenLabel: 'Open comments',
             onTap: onCommentTap,
           ),
-          _CountWash(count: replyCount),
+          _CountWash(count: commentCount),
           const SizedBox(height: 10),
           _MomentImageButton(
             asset: CoastinAssetRegistry.infoRoundBadge,

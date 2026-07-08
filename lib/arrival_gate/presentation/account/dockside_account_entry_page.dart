@@ -6,7 +6,7 @@ import '../../application/harbor_credential_checks.dart';
 import '../../data/local/harbor_passage_store.dart';
 import '../../domain/entities/harbor_passage_record.dart';
 import '../../domain/value_objects/harbor_entry_channel.dart';
-import '../../domain/value_objects/harbor_policy_kind.dart';
+import '../../domain/value_objects/harbor_policy_channel.dart';
 import '../access/widgets/access_agreement_line.dart';
 import '../access/widgets/harbor_back_button.dart';
 import '../access/widgets/harbor_credential_field.dart';
@@ -201,10 +201,10 @@ class _DocksideAccountEntryPageState extends State<DocksideAccountEntryPage> {
     );
   }
 
-  void _openPolicyPage(HarborPolicyKind policyKind) {
+  void _openPolicyPage(HarborPolicyChannel policyChannel) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => HarborPolicyWebviewPage(policyKind: policyKind),
+        builder: (_) => HarborPolicyWebviewPage(policyChannel: policyChannel),
       ),
     );
   }
@@ -231,7 +231,7 @@ class _AccountEntryPanel extends StatelessWidget {
   final bool dockKeyVisible;
   final bool startingPassage;
   final ValueChanged<bool> onAgreementChanged;
-  final ValueChanged<HarborPolicyKind> onPolicyOpened;
+  final ValueChanged<HarborPolicyChannel> onPolicyOpened;
   final VoidCallback onDockKeyVisibilityChanged;
   final VoidCallback onMailCleared;
   final VoidCallback onStartRequested;

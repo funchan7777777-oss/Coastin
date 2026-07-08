@@ -2,12 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-import '../../domain/value_objects/harbor_policy_kind.dart';
+import '../../domain/value_objects/harbor_policy_channel.dart';
 
 class HarborPolicyWebviewPage extends StatefulWidget {
-  const HarborPolicyWebviewPage({super.key, required this.policyKind});
+  const HarborPolicyWebviewPage({super.key, required this.policyChannel});
 
-  final HarborPolicyKind policyKind;
+  final HarborPolicyChannel policyChannel;
 
   @override
   State<HarborPolicyWebviewPage> createState() =>
@@ -29,7 +29,7 @@ class _HarborPolicyWebviewPageState extends State<HarborPolicyWebviewPage> {
           onProgress: (progress) => setState(() => _loadProgress = progress),
         ),
       )
-      ..loadRequest(widget.policyKind.publishedUri);
+      ..loadRequest(widget.policyChannel.publishedUri);
   }
 
   @override
@@ -56,7 +56,7 @@ class _HarborPolicyWebviewPageState extends State<HarborPolicyWebviewPage> {
                   right: 0,
                   top: 0,
                   child: _PolicyTopBar(
-                    title: widget.policyKind.title,
+                    title: widget.policyChannel.title,
                     loadProgress: _loadProgress,
                     topInset: topInset,
                   ),

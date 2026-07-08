@@ -223,7 +223,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
       contentId: 'profile:${widget.persona.tideHandle}',
-      contentKind: ShoreSafetyContentKind.profile,
+      contentChannel: ShoreSafetyContentChannel.profile,
       ownerName: widget.persona.displayHarborName,
       ownerHandle: widget.persona.tideHandle,
     );
@@ -628,7 +628,7 @@ class _PersonaWorkGrid extends StatelessWidget {
                     onLoveChanged: (isLoved) =>
                         onPostLoveChanged(post, isLoved),
                     onFollowChanged: onPostFollowChanged,
-                    onReplyCountChanged: (_) {},
+                    onCommentCountChanged: (_) {},
                   ),
                 ),
               );

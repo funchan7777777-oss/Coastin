@@ -87,7 +87,7 @@ class ShoreSafetyStore {
 
   Future<void> reportContent({
     required String contentId,
-    required String contentKind,
+    required String contentChannel,
     required String reason,
     required String? ownerHandle,
   }) async {
@@ -104,7 +104,7 @@ class ShoreSafetyStore {
     ledger.add(
       jsonEncode({
         'contentId': contentId,
-        'contentKind': contentKind,
+        'contentChannel': contentChannel,
         'reason': reason,
         'ownerHandle': ownerHandle ?? '',
         'createdAt': DateTime.now().toIso8601String(),

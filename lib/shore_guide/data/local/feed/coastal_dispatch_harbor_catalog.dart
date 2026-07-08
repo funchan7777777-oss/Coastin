@@ -52,7 +52,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 7,
       startsShellLiked: false,
       startsFollowed: false,
-      commentTideMarks: _commentDrifts(0, count: 5),
+      commentTideMarks: _commentTideMarks(0, count: 5),
     ),
     CoastalPostDispatch(
       shoreDispatchMarker: 'milo-paddle-games',
@@ -72,7 +72,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 5,
       startsShellLiked: false,
       startsFollowed: true,
-      commentTideMarks: _commentDrifts(3, count: 3),
+      commentTideMarks: _commentTideMarks(3, count: 3),
     ),
     CoastalPostDispatch(
       shoreDispatchMarker: 'vivian-citrus-cuisine',
@@ -89,7 +89,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 9,
       startsShellLiked: false,
       startsFollowed: false,
-      commentTideMarks: _commentDrifts(5, count: 6),
+      commentTideMarks: _commentTideMarks(5, count: 6),
     ),
     CoastalPostDispatch(
       shoreDispatchMarker: 'sienna-sunwear-loop',
@@ -110,7 +110,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 6,
       startsShellLiked: false,
       startsFollowed: true,
-      commentTideMarks: _commentDrifts(8, count: 4),
+      commentTideMarks: _commentTideMarks(8, count: 4),
     ),
     CoastalPostDispatch(
       shoreDispatchMarker: 'kai-reef-games',
@@ -130,7 +130,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 4,
       startsShellLiked: false,
       startsFollowed: false,
-      commentTideMarks: _commentDrifts(10, count: 2),
+      commentTideMarks: _commentTideMarks(10, count: 2),
     ),
     CoastalPostDispatch(
       shoreDispatchMarker: 'elena-pier-bites',
@@ -147,7 +147,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 8,
       startsShellLiked: false,
       startsFollowed: false,
-      commentTideMarks: _commentDrifts(13, count: 5),
+      commentTideMarks: _commentTideMarks(13, count: 5),
     ),
     CoastalPostDispatch(
       shoreDispatchMarker: 'aurora-light-dressing',
@@ -168,7 +168,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 5,
       startsShellLiked: false,
       startsFollowed: false,
-      commentTideMarks: _commentDrifts(16, count: 3),
+      commentTideMarks: _commentTideMarks(16, count: 3),
     ),
     CoastalPostDispatch(
       shoreDispatchMarker: 'river-sunset-games',
@@ -188,7 +188,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 3,
       startsShellLiked: false,
       startsFollowed: true,
-      commentTideMarks: _commentDrifts(19, count: 4),
+      commentTideMarks: _commentTideMarks(19, count: 4),
     ),
     CoastalPostDispatch(
       shoreDispatchMarker: 'nora-salt-bites',
@@ -205,7 +205,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 6,
       startsShellLiked: false,
       startsFollowed: false,
-      commentTideMarks: _commentDrifts(22, count: 6),
+      commentTideMarks: _commentTideMarks(22, count: 6),
     ),
     CoastalPostDispatch(
       shoreDispatchMarker: 'jade-last-shoreline',
@@ -225,7 +225,7 @@ class CoastalDispatchHarborCatalog {
       shoreShareCount: 4,
       startsShellLiked: false,
       startsFollowed: true,
-      commentTideMarks: _commentDrifts(25, count: 2),
+      commentTideMarks: _commentTideMarks(25, count: 2),
     ),
   ]);
 
@@ -262,9 +262,9 @@ class CoastalDispatchHarborCatalog {
     ),
   ];
 
-  static List<ShoreCommentTideMark> _commentDrifts(int offset, {int count = 4}) {
+  static List<ShoreCommentTideMark> _commentTideMarks(int offset, {int count = 4}) {
     const replies = [
-      'This looks like the kind of spot that makes the whole walk slower.',
+      'This spot makes the whole walk slow down in the best way.',
       'The color is so clean today; saving this route for the weekend.',
       'That little shore corner is better before the afternoon crowd.',
       'I need the exact snack stop near this beach.',
@@ -284,7 +284,7 @@ class CoastalDispatchHarborCatalog {
     return List.generate(count, (index) {
       final people = ShoreMomentHarborCatalog.shorelinePeople;
       return ShoreCommentTideMark(
-        commentMarker: 'feed-reply-$offset-$index',
+        commentMarker: 'feed-commentTideMark-$offset-$index',
         commentHarbor: people[(offset + index * 4) % people.length],
         commentClock: commentClocks[index % commentClocks.length],
         commentText: replies[(offset + index) % replies.length],

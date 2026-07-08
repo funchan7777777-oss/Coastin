@@ -5,7 +5,7 @@ import '../../../app/assets/coastin_asset_registry.dart';
 import '../../domain/entities/harbor_passage_record.dart';
 import '../../data/local/harbor_passage_store.dart';
 import '../../domain/value_objects/harbor_entry_channel.dart';
-import '../../domain/value_objects/harbor_policy_kind.dart';
+import '../../domain/value_objects/harbor_policy_channel.dart';
 import '../enrollment/surfside_enrollment_page.dart';
 import '../policy/harbor_policy_webview_page.dart';
 import 'widgets/access_agreement_line.dart';
@@ -185,10 +185,10 @@ class _HarborAccessPageState extends State<HarborAccessPage> {
     return false;
   }
 
-  void _openPolicyPage(HarborPolicyKind policyKind) {
+  void _openPolicyPage(HarborPolicyChannel policyChannel) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => HarborPolicyWebviewPage(policyKind: policyKind),
+        builder: (_) => HarborPolicyWebviewPage(policyChannel: policyChannel),
       ),
     );
   }
@@ -208,7 +208,7 @@ class _HarborAccessDock extends StatelessWidget {
   final bool agreementAnchored;
   final bool appleCurrentWorking;
   final ValueChanged<bool> onAgreementChanged;
-  final ValueChanged<HarborPolicyKind> onPolicyOpened;
+  final ValueChanged<HarborPolicyChannel> onPolicyOpened;
   final VoidCallback onAccountEntryRequested;
   final VoidCallback onEnrollmentRequested;
   final VoidCallback onAppleCurrentRequested;

@@ -4,7 +4,7 @@ import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../../arrival_gate/application/coastin_entry_flow.dart';
 import '../../../../arrival_gate/data/local/harbor_passage_store.dart';
-import '../../../../arrival_gate/domain/value_objects/harbor_policy_kind.dart';
+import '../../../../arrival_gate/domain/value_objects/harbor_policy_channel.dart';
 import '../../../../arrival_gate/presentation/policy/harbor_policy_webview_page.dart';
 import '../../../data/local/buddies/sea_buddy_message_store.dart';
 import '../../../data/local/buddies/shore_system_notice_store.dart';
@@ -55,13 +55,13 @@ class MyCoastSettingsPage extends StatelessWidget {
                     iconAsset: CoastinAssetRegistry.documentGlyph,
                     ledgerTitle: 'Privacy Policy',
                     onTap: () =>
-                        _openPolicy(context, HarborPolicyKind.privacyPolicy),
+                        _openPolicy(context, HarborPolicyChannel.privacyPolicy),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.documentGlyph,
                     ledgerTitle: 'Terms of Service',
                     onTap: () =>
-                        _openPolicy(context, HarborPolicyKind.userAgreement),
+                        _openPolicy(context, HarborPolicyChannel.userAgreement),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.settingsListGlyph,
@@ -98,10 +98,10 @@ class MyCoastSettingsPage extends StatelessWidget {
     );
   }
 
-  static void _openPolicy(BuildContext context, HarborPolicyKind policyKind) {
+  static void _openPolicy(BuildContext context, HarborPolicyChannel policyChannel) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => HarborPolicyWebviewPage(policyKind: policyKind),
+        builder: (_) => HarborPolicyWebviewPage(policyChannel: policyChannel),
       ),
     );
   }

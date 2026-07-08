@@ -35,9 +35,9 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     for (final post in CoastalDispatchHarborCatalog.coastalDispatches)
       post.shoreDispatchMarker: post.startsShellLiked,
   };
-  final Map<String, int> _replyCounts = {
+  final Map<String, int> _commentCounts = {
     for (final post in CoastalDispatchHarborCatalog.coastalDispatches)
-      post.shoreDispatchMarker: coastalPostReplyCount(post),
+      post.shoreDispatchMarker: coastalPostCommentCount(post),
   };
   ShoreSafetySnapshot _safetySnapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
@@ -121,9 +121,9 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
                           isFollowed: _safetySnapshot.isFollowing(
                             post.shorelineKeeper.tideHandle,
                           ),
-                          replyCount:
-                              _replyCounts[post.shoreDispatchMarker] ??
-                              coastalPostReplyCount(post),
+                          commentCount:
+                              _commentCounts[post.shoreDispatchMarker] ??
+                              coastalPostCommentCount(post),
                           onOpen: () => _openPostDetails(post),
                           onLoveTap: () => _toggleLove(post),
                           onFollowTap: () => _toggleFollow(post),
@@ -170,7 +170,7 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
 
   int _topicParticipationCount(String tideTopicMarker) {
     final authorHandles = <String>{};
-    var replySignals = 0;
+    var commentSignals = 0;
     var localLoveSignals = 0;
     var relaySignals = 0;
 
@@ -183,8 +183,8 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
         continue;
       }
       authorHandles.add(post.shorelineKeeper.tideHandle);
-      replySignals +=
-          _replyCounts[post.shoreDispatchMarker] ?? coastalPostReplyCount(post);
+      commentSignals +=
+          _commentCounts[post.shoreDispatchMarker] ?? coastalPostCommentCount(post);
       if (_lovedDispatches[post.shoreDispatchMarker] == true) {
         localLoveSignals += 1;
       }
@@ -192,7 +192,7 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     }
 
     return authorHandles.length +
-        replySignals +
+        commentSignals +
         localLoveSignals +
         relaySignals;
   }
@@ -211,7 +211,7 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) =>
-            const ShoreReleasePage(initialReleaseKind: ShoreReleaseKind.post),
+            const ShoreReleasePage(initialReleaseChannel: ShoreReleaseChannel.post),
       ),
     );
   }
@@ -227,8 +227,8 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
             setState(() => _lovedDispatches[post.shoreDispatchMarker] = isLoved);
           },
           onFollowChanged: (_) => _restoreSafety(),
-          onReplyCountChanged: (replyCount) {
-            setState(() => _replyCounts[post.shoreDispatchMarker] = replyCount);
+          onCommentCountChanged: (commentCount) {
+            setState(() => _commentCounts[post.shoreDispatchMarker] = commentCount);
           },
         ),
       ),
@@ -288,7 +288,7 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     await ShoreSafetyReef.showGuard(
       context: context,
       contentId: 'post:${post.shoreDispatchMarker}',
-      contentKind: ShoreSafetyContentKind.post,
+      contentChannel: ShoreSafetyContentChannel.post,
       ownerName: post.shorelineKeeper.displayHarborName,
       ownerHandle: post.shorelineKeeper.tideHandle,
     );

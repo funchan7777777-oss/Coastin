@@ -10,15 +10,15 @@ import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../my_coast/wallet/shore_shell_reef.dart';
 import '../../safety/shore_safety_reef.dart';
 
-enum ShoreReleaseKind { video, post }
+enum ShoreReleaseChannel { video, post }
 
 class ShoreReleasePage extends StatefulWidget {
   const ShoreReleasePage({
     super.key,
-    this.initialReleaseKind = ShoreReleaseKind.video,
+    this.initialReleaseChannel = ShoreReleaseChannel.video,
   });
 
-  final ShoreReleaseKind initialReleaseKind;
+  final ShoreReleaseChannel initialReleaseChannel;
 
   @override
   State<ShoreReleasePage> createState() => _ShoreReleasePageState();
@@ -28,14 +28,14 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _copyController = TextEditingController();
 
-  late ShoreReleaseKind _releaseKind;
+  late ShoreReleaseChannel _releaseChannel;
   String _selectedPostTopic = 'Seaside dressing';
   XFile? _pickedHarborFile;
 
   @override
   void initState() {
     super.initState();
-    _releaseKind = widget.initialReleaseKind;
+    _releaseChannel = widget.initialReleaseChannel;
   }
 
   @override
@@ -80,11 +80,11 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
                           onBack: () => Navigator.of(context).pop(),
                         ),
                         const SizedBox(height: 44),
-                        _ReleaseKindPicker(
-                          releaseKind: _releaseKind,
-                          onChanged: (kind) {
+                        _ReleaseChannelPicker(
+                          releaseChannel: _releaseChannel,
+                          onChanged: (releaseChannel) {
                             setState(() {
-                              _releaseKind = kind;
+                              _releaseChannel = releaseChannel;
                               _pickedHarborFile = null;
                             });
                           },
@@ -92,13 +92,13 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
                         const SizedBox(height: 38),
                         _HarborMediaDropZone(
                           pickedFile: _pickedHarborFile,
-                          releaseKind: _releaseKind,
+                          releaseChannel: _releaseChannel,
                           onPickTap: _pickHarborFile,
                           onClearTap: () {
                             setState(() => _pickedHarborFile = null);
                           },
                         ),
-                        if (_releaseKind == ShoreReleaseKind.post) ...[
+                        if (_releaseChannel == ShoreReleaseChannel.post) ...[
                           const SizedBox(height: 28),
                           _ReleaseTopicChips(
                             selectedTopic: _selectedPostTopic,
@@ -159,7 +159,7 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
   Future<void> _pickHarborFile() async {
     XFile? nextFile;
     try {
-      nextFile = _releaseKind == ShoreReleaseKind.video
+      nextFile = _releaseChannel == ShoreReleaseChannel.video
           ? await _pickVideoFile()
           : await _pickPostImageFile();
     } catch (_) {
@@ -266,7 +266,7 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
       );
       return;
     }
-    final expense = _releaseKind == ShoreReleaseKind.video
+    final expense = _releaseChannel == ShoreReleaseChannel.video
         ? ShoreShellExpense.publishVideo
         : ShoreShellExpense.publishPost;
     final canRelease = await ShoreShellReef.confirmAndSpend(
@@ -460,40 +460,40 @@ class _ReleaseTopBar extends StatelessWidget {
   }
 }
 
-class _ReleaseKindPicker extends StatelessWidget {
-  const _ReleaseKindPicker({
-    required this.releaseKind,
+class _ReleaseChannelPicker extends StatelessWidget {
+  const _ReleaseChannelPicker({
+    required this.releaseChannel,
     required this.onChanged,
   });
 
-  final ShoreReleaseKind releaseKind;
-  final ValueChanged<ShoreReleaseKind> onChanged;
+  final ShoreReleaseChannel releaseChannel;
+  final ValueChanged<ShoreReleaseChannel> onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _ReleaseKindButton(
-          asset: releaseKind == ShoreReleaseKind.video
+        _ReleaseChannelButton(
+          asset: releaseChannel == ShoreReleaseChannel.video
               ? CoastinAssetRegistry.videosTabActive
               : CoastinAssetRegistry.videosTabResting,
-          onTap: () => onChanged(ShoreReleaseKind.video),
+          onTap: () => onChanged(ShoreReleaseChannel.video),
         ),
         const SizedBox(width: 44),
-        _ReleaseKindButton(
-          asset: releaseKind == ShoreReleaseKind.post
+        _ReleaseChannelButton(
+          asset: releaseChannel == ShoreReleaseChannel.post
               ? CoastinAssetRegistry.postsTabActive
               : CoastinAssetRegistry.postsTabResting,
-          onTap: () => onChanged(ShoreReleaseKind.post),
+          onTap: () => onChanged(ShoreReleaseChannel.post),
         ),
       ],
     );
   }
 }
 
-class _ReleaseKindButton extends StatelessWidget {
-  const _ReleaseKindButton({required this.asset, required this.onTap});
+class _ReleaseChannelButton extends StatelessWidget {
+  const _ReleaseChannelButton({required this.asset, required this.onTap});
 
   final String asset;
   final VoidCallback onTap;
@@ -603,13 +603,13 @@ class _ReleaseTopicChip extends StatelessWidget {
 class _HarborMediaDropZone extends StatelessWidget {
   const _HarborMediaDropZone({
     required this.pickedFile,
-    required this.releaseKind,
+    required this.releaseChannel,
     required this.onPickTap,
     required this.onClearTap,
   });
 
   final XFile? pickedFile;
-  final ShoreReleaseKind releaseKind;
+  final ShoreReleaseChannel releaseChannel;
   final VoidCallback onPickTap;
   final VoidCallback onClearTap;
 
@@ -639,10 +639,10 @@ class _HarborMediaDropZone extends StatelessWidget {
               ),
             ),
             child: pickedFile == null
-                ? _EmptyReleaseCue(releaseKind: releaseKind)
+                ? _EmptyReleaseCue(releaseChannel: releaseChannel)
                 : _PickedReleasePreview(
                     pickedFile: pickedFile!,
-                    releaseKind: releaseKind,
+                    releaseChannel: releaseChannel,
                   ),
           ),
         ),
@@ -667,9 +667,9 @@ class _HarborMediaDropZone extends StatelessWidget {
 }
 
 class _EmptyReleaseCue extends StatelessWidget {
-  const _EmptyReleaseCue({required this.releaseKind});
+  const _EmptyReleaseCue({required this.releaseChannel});
 
-  final ShoreReleaseKind releaseKind;
+  final ShoreReleaseChannel releaseChannel;
 
   @override
   Widget build(BuildContext context) {
@@ -685,7 +685,7 @@ class _EmptyReleaseCue extends StatelessWidget {
         ),
         const SizedBox(height: 34),
         Text(
-          releaseKind == ShoreReleaseKind.video
+          releaseChannel == ShoreReleaseChannel.video
               ? 'Please add a shoreline video'
               : 'Please add a shoreline picture',
           style: TextStyle(
@@ -702,15 +702,15 @@ class _EmptyReleaseCue extends StatelessWidget {
 class _PickedReleasePreview extends StatelessWidget {
   const _PickedReleasePreview({
     required this.pickedFile,
-    required this.releaseKind,
+    required this.releaseChannel,
   });
 
   final XFile pickedFile;
-  final ShoreReleaseKind releaseKind;
+  final ShoreReleaseChannel releaseChannel;
 
   @override
   Widget build(BuildContext context) {
-    if (releaseKind == ShoreReleaseKind.post) {
+    if (releaseChannel == ShoreReleaseChannel.post) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: Image.file(

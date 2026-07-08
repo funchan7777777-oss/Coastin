@@ -1,8 +1,8 @@
-import '../value_objects/cove_pause_kind.dart';
+import '../value_objects/cove_pause_berth.dart';
 
 class CovePause {
   const CovePause({
-    required this.pauseKind,
+    required this.pauseBerth,
     required this.coveName,
     required this.approachHint,
     required this.locallyKnownFor,
@@ -12,7 +12,7 @@ class CovePause {
     required this.keepsSunsetView,
   });
 
-  final CovePauseKind pauseKind;
+  final CovePauseBerth pauseBerth;
   final String coveName;
   final String approachHint;
   final String locallyKnownFor;

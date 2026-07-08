@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../../domain/value_objects/harbor_policy_kind.dart';
+import '../../../domain/value_objects/harbor_policy_channel.dart';
 import '../../policy/harbor_policy_webview_page.dart';
 
 Future<void> showHarborNotice({
@@ -116,7 +116,7 @@ Future<void> showAgreementRequiredNotice(BuildContext context) {
       Navigator.of(context).push(
         CupertinoPageRoute<void>(
           builder: (_) => const HarborPolicyWebviewPage(
-            policyKind: HarborPolicyKind.userAgreement,
+            policyChannel: HarborPolicyChannel.userAgreement,
           ),
         ),
       );

@@ -292,18 +292,18 @@ class ShoreMomentHarborCatalog {
 
   static final List<ShoreVideoMoment> shoreVideoMoments = List.unmodifiable(
     List.generate(_momentVideoAssets.length, (index) {
-      final replyStart = (index * 3 + 8) % shorelinePeople.length;
-      final commentTideMarks = List.generate(_replyCounts[index], (replyIndex) {
+      final commentStart = (index * 3 + 8) % shorelinePeople.length;
+      final commentTideMarks = List.generate(_commentCounts[index], (commentIndex) {
         final persona =
-            shorelinePeople[(replyStart + replyIndex * 5) %
+            shorelinePeople[(commentStart + commentIndex * 5) %
                 shorelinePeople.length];
         return ShoreCommentTideMark(
-          commentMarker: 'comment-${index + 1}-$replyIndex',
+          commentMarker: 'comment-${index + 1}-$commentIndex',
           commentHarbor: persona,
           commentClock:
-              _replyMinutes[(index + replyIndex) % _replyMinutes.length],
-          commentText: _replyLines[(index * 2 + replyIndex) % _replyLines.length],
-          hasFreshSignal: replyIndex == 0 || (index + replyIndex) % 4 == 0,
+              _commentClockMarks[(index + commentIndex) % _commentClockMarks.length],
+          commentText: _commentLines[(index * 2 + commentIndex) % _commentLines.length],
+          hasFreshSignal: commentIndex == 0 || (index + commentIndex) % 4 == 0,
         );
       });
       return ShoreVideoMoment(
@@ -388,7 +388,7 @@ class ShoreMomentHarborCatalog {
     'A quick turn on the pier before the sunset crowd claimed every bench.',
     'Outer sand stayed cool under the wind, so we kept walking past the flags.',
     'Boardwalk light landed perfectly for three seconds and then disappeared.',
-    'Cold jasmine coffee after a bright walk is a small kind of victory.',
+    'Cold jasmine coffee after a bright walk feels like a small win.',
     'Skate wheels sounded like rain on the warm path beside the water.',
     'Marina light went gold just as the boats started leaning into the breeze.',
     'Reef picnic note: bring extra water and never skip the mango slices.',
@@ -413,7 +413,7 @@ class ShoreMomentHarborCatalog {
     19,
   ];
 
-  static const List<int> _replyCounts = [
+  static const List<int> _commentCounts = [
     4,
     3,
     5,
@@ -431,7 +431,7 @@ class ShoreMomentHarborCatalog {
     2,
   ];
 
-  static const List<String> _replyMinutes = [
+  static const List<String> _commentClockMarks = [
     '08:45',
     '09:12',
     '10:03',
@@ -441,7 +441,7 @@ class ShoreMomentHarborCatalog {
     '18:22',
   ];
 
-  static const List<String> _replyLines = [
+  static const List<String> _commentLines = [
     'That cove line looks calm enough for a slow swim.',
     'The light at that rail is unreal when the wind drops.',
     'Saved this spot for my next slow walk.',

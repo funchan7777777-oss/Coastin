@@ -23,7 +23,7 @@ class CoastalPostDetailsPage extends StatefulWidget {
     required this.isFollowed,
     required this.onLoveChanged,
     required this.onFollowChanged,
-    required this.onReplyCountChanged,
+    required this.onCommentCountChanged,
   });
 
   final CoastalPostDispatch shoreDispatch;
@@ -31,7 +31,7 @@ class CoastalPostDetailsPage extends StatefulWidget {
   final bool isFollowed;
   final ValueChanged<bool> onLoveChanged;
   final ValueChanged<bool> onFollowChanged;
-  final ValueChanged<int> onReplyCountChanged;
+  final ValueChanged<int> onCommentCountChanged;
 
   @override
   State<CoastalPostDetailsPage> createState() => _CoastalPostDetailsPageState();
@@ -44,10 +44,10 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
   final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
   late bool _isLoved = widget.isLoved;
   late bool _isFollowed = widget.isFollowed;
-  late final List<ShoreCommentTideMark> _visibleReplies = List.of(
+  late final List<ShoreCommentTideMark> _visibleCommentTideMarks = List.of(
     widget.shoreDispatch.commentTideMarks,
   );
-  final TextEditingController _replyController = TextEditingController();
+  final TextEditingController _commentController = TextEditingController();
 
   @override
   void initState() {
@@ -59,7 +59,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
   @override
   void dispose() {
     ShoreSafetyStore.safetyRevision.removeListener(_handleSafetyRevision);
-    _replyController.dispose();
+    _commentController.dispose();
     super.dispose();
   }
 
@@ -117,7 +117,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                         _DetailActionRow(
                           isLoved: _isLoved,
                           heartCount: post.shellLikeCount + (_isLoved ? 1 : 0),
-                          replyCount: _visibleReplies.length,
+                          commentCount: _visibleCommentTideMarks.length,
                           shoreShareCount: post.shoreShareCount,
                           tideTopicLabel: post.tideTopicLabel,
                           onLoveTap: _toggleLove,
@@ -133,11 +133,11 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                           filterQuality: FilterQuality.high,
                         ),
                         const SizedBox(height: 18),
-                        for (final reply in _visibleReplies) ...[
-                          _DetailReplyRow(
-                            replyDrift: reply,
-                            onPersonaTap: () => _openReplyAuthor(reply),
-                            onReportTap: () => _reportReply(reply),
+                        for (final commentTideMark in _visibleCommentTideMarks) ...[
+                          _DetailCommentRow(
+                            commentTideMark: commentTideMark,
+                            onPersonaTap: () => _openCommentHarbor(commentTideMark),
+                            onReportTap: () => _reportComment(commentTideMark),
                           ),
                           const SizedBox(height: 20),
                         ],
@@ -151,9 +151,9 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
               left: 20,
               right: 20,
               bottom: 24,
-              child: _ReplyComposer(
-                controller: _replyController,
-                onSend: _sendReply,
+              child: _CommentComposer(
+                controller: _commentController,
+                onSend: _sendComment,
               ),
             ),
           ],
@@ -178,8 +178,8 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     widget.onFollowChanged(_isFollowed);
   }
 
-  Future<void> _sendReply() async {
-    final text = _replyController.text.trim();
+  Future<void> _sendComment() async {
+    final text = _commentController.text.trim();
     if (text.isEmpty) {
       return;
     }
@@ -196,7 +196,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
       return;
     }
     setState(() {
-      _visibleReplies.insert(
+      _visibleCommentTideMarks.insert(
         0,
         ShoreCommentTideMark(
           commentMarker: 'detail-${DateTime.now().microsecondsSinceEpoch}',
@@ -206,9 +206,9 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
           hasFreshSignal: true,
         ),
       );
-      _replyController.clear();
+      _commentController.clear();
     });
-    widget.onReplyCountChanged(_visibleReplies.length);
+    widget.onCommentCountChanged(_visibleCommentTideMarks.length);
     _noticeStore.recordCommentNotice(
       actorHandle: widget.shoreDispatch.shorelineKeeper.tideHandle,
       noticeLine: 'Your comment was added under this Coastin post.',
@@ -226,24 +226,24 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     );
   }
 
-  void _openReplyAuthor(ShoreCommentTideMark reply) {
+  void _openCommentHarbor(ShoreCommentTideMark commentTideMark) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
-          persona: reply.commentHarbor,
+          persona: commentTideMark.commentHarbor,
           localApproachRibbon: '23 - Australia',
         ),
       ),
     );
   }
 
-  Future<void> _reportReply(ShoreCommentTideMark reply) async {
+  Future<void> _reportComment(ShoreCommentTideMark commentTideMark) async {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
-      contentId: 'comment:${reply.commentMarker}',
-      contentKind: ShoreSafetyContentKind.comment,
-      ownerName: reply.commentHarbor.displayHarborName,
-      ownerHandle: reply.commentHarbor.tideHandle,
+      contentId: 'comment:${commentTideMark.commentMarker}',
+      contentChannel: ShoreSafetyContentChannel.comment,
+      ownerName: commentTideMark.commentHarbor.displayHarborName,
+      ownerHandle: commentTideMark.commentHarbor.tideHandle,
     );
     if (!mounted || outcome == null) {
       return;
@@ -260,18 +260,18 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
       _isFollowed = snapshot.isFollowing(
         widget.shoreDispatch.shorelineKeeper.tideHandle,
       );
-      _visibleReplies
+      _visibleCommentTideMarks
         ..clear()
         ..addAll(
           widget.shoreDispatch.commentTideMarks.where(
-            (reply) => snapshot.isVisibleContent(
-              'comment:${reply.commentMarker}',
-              reply.commentHarbor.tideHandle,
+            (commentTideMark) => snapshot.isVisibleContent(
+              'comment:${commentTideMark.commentMarker}',
+              commentTideMark.commentHarbor.tideHandle,
             ),
           ),
         );
     });
-    widget.onReplyCountChanged(_visibleReplies.length);
+    widget.onCommentCountChanged(_visibleCommentTideMarks.length);
   }
 
   void _openFramePreview(int initialIndex) {
@@ -312,7 +312,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
       contentId: 'post:${widget.shoreDispatch.shoreDispatchMarker}',
-      contentKind: ShoreSafetyContentKind.post,
+      contentChannel: ShoreSafetyContentChannel.post,
       ownerName: widget.shoreDispatch.shorelineKeeper.displayHarborName,
       ownerHandle: widget.shoreDispatch.shorelineKeeper.tideHandle,
     );
@@ -672,7 +672,7 @@ class _DetailActionRow extends StatelessWidget {
   const _DetailActionRow({
     required this.isLoved,
     required this.heartCount,
-    required this.replyCount,
+    required this.commentCount,
     required this.shoreShareCount,
     required this.tideTopicLabel,
     required this.onLoveTap,
@@ -682,7 +682,7 @@ class _DetailActionRow extends StatelessWidget {
 
   final bool isLoved;
   final int heartCount;
-  final int replyCount;
+  final int commentCount;
   final int shoreShareCount;
   final String tideTopicLabel;
   final VoidCallback onLoveTap;
@@ -719,7 +719,7 @@ class _DetailActionRow extends StatelessWidget {
         const SizedBox(width: 22),
         _DetailCountGlyph(
           asset: CoastinAssetRegistry.feedCommentGlyph,
-          count: replyCount,
+          count: commentCount,
         ),
         const SizedBox(width: 22),
         _DetailCountGlyph(
@@ -778,14 +778,14 @@ class _DetailCountGlyph extends StatelessWidget {
   }
 }
 
-class _DetailReplyRow extends StatelessWidget {
-  const _DetailReplyRow({
-    required this.replyDrift,
+class _DetailCommentRow extends StatelessWidget {
+  const _DetailCommentRow({
+    required this.commentTideMark,
     required this.onPersonaTap,
     required this.onReportTap,
   });
 
-  final ShoreCommentTideMark replyDrift;
+  final ShoreCommentTideMark commentTideMark;
   final VoidCallback onPersonaTap;
   final VoidCallback onReportTap;
 
@@ -799,7 +799,7 @@ class _DetailReplyRow extends StatelessWidget {
           onTap: onPersonaTap,
           child: ClipOval(
             child: Image.asset(
-              replyDrift.commentHarbor.avatarAsset,
+              commentTideMark.commentHarbor.avatarAsset,
               width: 48,
               height: 48,
               fit: BoxFit.cover,
@@ -819,7 +819,7 @@ class _DetailReplyRow extends StatelessWidget {
                       behavior: HitTestBehavior.opaque,
                       onTap: onPersonaTap,
                       child: Text(
-                        replyDrift.commentHarbor.displayHarborName,
+                        commentTideMark.commentHarbor.displayHarborName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -831,7 +831,7 @@ class _DetailReplyRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    replyDrift.commentClock,
+                    commentTideMark.commentClock,
                     style: const TextStyle(
                       color: TidewashPalette.harborSlate,
                       fontSize: 12,
@@ -852,7 +852,7 @@ class _DetailReplyRow extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                replyDrift.commentText,
+                commentTideMark.commentText,
                 style: const TextStyle(
                   color: TidewashPalette.inkBlue,
                   fontSize: 14,
@@ -868,8 +868,8 @@ class _DetailReplyRow extends StatelessWidget {
   }
 }
 
-class _ReplyComposer extends StatelessWidget {
-  const _ReplyComposer({required this.controller, required this.onSend});
+class _CommentComposer extends StatelessWidget {
+  const _CommentComposer({required this.controller, required this.onSend});
 
   final TextEditingController controller;
   final VoidCallback onSend;

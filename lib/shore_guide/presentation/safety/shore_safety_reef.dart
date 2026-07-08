@@ -13,7 +13,7 @@ class ShoreSafetyReef {
   static Future<ShoreSafetyOutcome?> showGuard({
     required BuildContext context,
     required String contentId,
-    required ShoreSafetyContentKind contentKind,
+    required ShoreSafetyContentChannel contentChannel,
     required String ownerName,
     required String? ownerHandle,
   }) async {
@@ -23,7 +23,7 @@ class ShoreSafetyReef {
       builder: (context) {
         return _SafetyWavePanel(
           contentId: contentId,
-          contentKind: contentKind,
+          contentChannel: contentChannel,
           ownerName: ownerName,
           ownerHandle: ownerHandle,
           store: _store,
@@ -104,14 +104,14 @@ class ShoreSafetyReef {
 class _SafetyWavePanel extends StatefulWidget {
   const _SafetyWavePanel({
     required this.contentId,
-    required this.contentKind,
+    required this.contentChannel,
     required this.ownerName,
     required this.ownerHandle,
     required this.store,
   });
 
   final String contentId;
-  final ShoreSafetyContentKind contentKind;
+  final ShoreSafetyContentChannel contentChannel;
   final String ownerName;
   final String? ownerHandle;
   final ShoreSafetyStore store;
@@ -254,7 +254,7 @@ class _SafetyWavePanelState extends State<_SafetyWavePanel> {
     if (_isReport) {
       await widget.store.reportContent(
         contentId: widget.contentId,
-        contentKind: widget.contentKind.label,
+        contentChannel: widget.contentChannel.label,
         reason: _defaultReportReason,
         ownerHandle: widget.ownerHandle,
       );

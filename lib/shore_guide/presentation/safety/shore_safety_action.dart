@@ -1,12 +1,12 @@
 enum ShoreSafetyOutcome { reported, blocked }
 
-enum ShoreSafetyContentKind {
+enum ShoreSafetyContentChannel {
   moment('video moment'),
   post('post'),
   comment('comment'),
   profile('profile');
 
-  const ShoreSafetyContentKind(this.label);
+  const ShoreSafetyContentChannel(this.label);
 
   final String label;
 }

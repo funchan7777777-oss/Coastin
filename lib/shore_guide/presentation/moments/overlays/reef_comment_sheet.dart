@@ -247,7 +247,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
       contentId: 'comment:${commentDrift.commentMarker}',
-      contentKind: ShoreSafetyContentKind.comment,
+      contentChannel: ShoreSafetyContentChannel.comment,
       ownerName: commentDrift.commentHarbor.displayHarborName,
       ownerHandle: commentDrift.commentHarbor.tideHandle,
     );

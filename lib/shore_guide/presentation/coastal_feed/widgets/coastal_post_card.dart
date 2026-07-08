@@ -12,7 +12,7 @@ class CoastalPostCard extends StatelessWidget {
     required this.shoreDispatch,
     required this.isLoved,
     required this.isFollowed,
-    required this.replyCount,
+    required this.commentCount,
     required this.onOpen,
     required this.onLoveTap,
     required this.onFollowTap,
@@ -23,7 +23,7 @@ class CoastalPostCard extends StatelessWidget {
   final CoastalPostDispatch shoreDispatch;
   final bool isLoved;
   final bool isFollowed;
-  final int replyCount;
+  final int commentCount;
   final VoidCallback onOpen;
   final VoidCallback onLoveTap;
   final VoidCallback onFollowTap;
@@ -66,7 +66,7 @@ class CoastalPostCard extends StatelessWidget {
             _ActionCountRow(
               isLoved: isLoved,
               heartCount: adjustedHeart,
-              replyCount: replyCount,
+              commentCount: commentCount,
               relayCount: shoreDispatch.shoreShareCount,
               onLoveTap: onLoveTap,
               onMoreTap: onMoreTap,
@@ -275,7 +275,7 @@ class _ActionCountRow extends StatelessWidget {
   const _ActionCountRow({
     required this.isLoved,
     required this.heartCount,
-    required this.replyCount,
+    required this.commentCount,
     required this.relayCount,
     required this.onLoveTap,
     required this.onMoreTap,
@@ -283,7 +283,7 @@ class _ActionCountRow extends StatelessWidget {
 
   final bool isLoved;
   final int heartCount;
-  final int replyCount;
+  final int commentCount;
   final int relayCount;
   final VoidCallback onLoveTap;
   final VoidCallback onMoreTap;
@@ -302,7 +302,7 @@ class _ActionCountRow extends StatelessWidget {
         const SizedBox(width: 26),
         _FeedActionCount(
           asset: CoastinAssetRegistry.feedCommentGlyph,
-          count: replyCount,
+          count: commentCount,
         ),
         const SizedBox(width: 26),
         _FeedActionCount(

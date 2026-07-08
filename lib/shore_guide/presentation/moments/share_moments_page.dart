@@ -136,9 +136,9 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
                       moment.shorelineKeeper.tideHandle,
                     ),
                     isPaused: _pausedMoments[moment.shoreMomentMarker] ?? false,
-                    replyCount:
+                    commentCount:
                         _commentCountOverrides[moment.shoreMomentMarker] ??
-                        _visibleReplyCount(moment),
+                        _visibleCommentCount(moment),
                     bottomDockClearance: widget.bottomDockClearance,
                     onLikeTap: () => _toggleLike(moment),
                     onPlayTap: () => _togglePlayback(moment),
@@ -202,7 +202,7 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
         .toList();
   }
 
-  int _visibleReplyCount(ShoreVideoMoment moment) {
+  int _visibleCommentCount(ShoreVideoMoment moment) {
     return moment.commentTideMarks
         .where(
           (comment) => _safetySnapshot.isVisibleContent(
@@ -346,7 +346,7 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
       contentId: 'moment:${moment.shoreMomentMarker}',
-      contentKind: ShoreSafetyContentKind.moment,
+      contentChannel: ShoreSafetyContentChannel.moment,
       ownerName: moment.shorelineKeeper.displayHarborName,
       ownerHandle: moment.shorelineKeeper.tideHandle,
     );
@@ -369,7 +369,7 @@ class _ShareMomentPane extends StatelessWidget {
     required this.isLiked,
     required this.isFollowed,
     required this.isPaused,
-    required this.replyCount,
+    required this.commentCount,
     required this.bottomDockClearance,
     required this.onLikeTap,
     required this.onPlayTap,
@@ -387,7 +387,7 @@ class _ShareMomentPane extends StatelessWidget {
   final bool isLiked;
   final bool isFollowed;
   final bool isPaused;
-  final int replyCount;
+  final int commentCount;
   final double bottomDockClearance;
   final VoidCallback onLikeTap;
   final VoidCallback onPlayTap;
@@ -422,7 +422,7 @@ class _ShareMomentPane extends StatelessWidget {
           shorelineKeeper: shoreMoment.shorelineKeeper,
           isLiked: isLiked,
           likeCount: adjustedLikeCount,
-          replyCount: replyCount,
+          commentCount: commentCount,
           bottomDockClearance: bottomDockClearance,
           onLikeTap: onLikeTap,
           onCommentTap: onCommentTap,

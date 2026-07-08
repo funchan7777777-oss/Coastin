@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../../shared/ui/tokens/shore_spacing.dart';
 import '../../../domain/entities/cove_pause.dart';
-import '../../../domain/value_objects/cove_pause_kind.dart';
+import '../../../domain/value_objects/cove_pause_berth.dart';
 
 class CovePauseCard extends StatelessWidget {
   const CovePauseCard({super.key, required this.coastalPause});
@@ -25,7 +25,7 @@ class CovePauseCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _PauseKindBadge(pauseKind: coastalPause.pauseKind),
+              _PauseBerthBadge(pauseBerth: coastalPause.pauseBerth),
               const SizedBox(width: ShoreSpacing.tideMd),
               Expanded(
                 child: Column(
@@ -106,10 +106,10 @@ class CovePauseCard extends StatelessWidget {
   }
 }
 
-class _PauseKindBadge extends StatelessWidget {
-  const _PauseKindBadge({required this.pauseKind});
+class _PauseBerthBadge extends StatelessWidget {
+  const _PauseBerthBadge({required this.pauseBerth});
 
-  final CovePauseKind pauseKind;
+  final CovePauseBerth pauseBerth;
 
   @override
   Widget build(BuildContext context) {
@@ -125,13 +125,13 @@ class _PauseKindBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            _glyphForPauseKind(pauseKind),
+            _glyphForPauseBerth(pauseBerth),
             size: 18,
             color: TidewashPalette.channelTeal,
           ),
           const SizedBox(height: 2),
           Text(
-            pauseKind.harborLabel,
+            pauseBerth.harborLabel,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -145,13 +145,13 @@ class _PauseKindBadge extends StatelessWidget {
     );
   }
 
-  IconData _glyphForPauseKind(CovePauseKind pauseKind) {
-    return switch (pauseKind) {
-      CovePauseKind.boardwalk => CupertinoIcons.map,
-      CovePauseKind.overlook => CupertinoIcons.eye,
-      CovePauseKind.swimBreak => CupertinoIcons.drop,
-      CovePauseKind.marketStop => CupertinoIcons.bag,
-      CovePauseKind.quietTable => CupertinoIcons.table,
+  IconData _glyphForPauseBerth(CovePauseBerth pauseBerth) {
+    return switch (pauseBerth) {
+      CovePauseBerth.boardwalk => CupertinoIcons.map,
+      CovePauseBerth.overlook => CupertinoIcons.eye,
+      CovePauseBerth.swimBreak => CupertinoIcons.drop,
+      CovePauseBerth.marketStop => CupertinoIcons.bag,
+      CovePauseBerth.quietTable => CupertinoIcons.table,
     };
   }
 }

@@ -1,7 +1,7 @@
 import '../../domain/entities/cove_pause.dart';
 import '../../domain/entities/harbor_readiness_note.dart';
 import '../../domain/entities/shoreline_day_plan.dart';
-import '../../domain/value_objects/cove_pause_kind.dart';
+import '../../domain/value_objects/cove_pause_berth.dart';
 import '../../domain/value_objects/tide_window_slot.dart';
 
 class HarborReadinessTideCatalog {
@@ -42,7 +42,7 @@ class HarborReadinessTideCatalog {
     ],
     covePauses: [
       CovePause(
-        pauseKind: CovePauseKind.boardwalk,
+        pauseBerth: CovePauseBerth.boardwalk,
         coveName: 'Twin Palms Rail',
         approachHint: 'Enter from the quiet lane behind the bakery.',
         locallyKnownFor: 'Long shade, good benches, steady surf sound.',
@@ -52,7 +52,7 @@ class HarborReadinessTideCatalog {
         keepsSunsetView: false,
       ),
       CovePause(
-        pauseKind: CovePauseKind.marketStop,
+        pauseBerth: CovePauseBerth.marketStop,
         coveName: 'Harbor Crate Stand',
         approachHint: 'Use the side gate near the blue loading doors.',
         locallyKnownFor: 'Cold fruit cups and simple picnic wraps.',
@@ -62,7 +62,7 @@ class HarborReadinessTideCatalog {
         keepsSunsetView: false,
       ),
       CovePause(
-        pauseKind: CovePauseKind.overlook,
+        pauseBerth: CovePauseBerth.overlook,
         coveName: 'Pelican Step View',
         approachHint: 'Climb the short stairs after the last mooring post.',
         locallyKnownFor: 'Open horizon and low wind after late afternoon.',

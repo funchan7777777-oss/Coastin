@@ -53,8 +53,7 @@ class ShoreSystemNotice {
       final createdAt =
           DateTime.tryParse(decoded['createdAt'] as String? ?? '') ??
           DateTime.now();
-      final storedChannel =
-          decoded['noticeChannel'] as String? ?? decoded['kind'] as String? ?? '';
+      final storedChannel = decoded['noticeChannel'] as String? ?? '';
       return ShoreSystemNotice(
         noticeKey: decoded['noticeKey'] as String? ?? '',
         noticeChannel: ShoreSystemNoticeChannel.fromStorage(storedChannel),

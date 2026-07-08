@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../../domain/value_objects/harbor_policy_kind.dart';
+import '../../../domain/value_objects/harbor_policy_channel.dart';
 
 class AccessAgreementLine extends StatelessWidget {
   const AccessAgreementLine({
@@ -12,7 +12,7 @@ class AccessAgreementLine extends StatelessWidget {
 
   final bool agreementAnchored;
   final ValueChanged<bool> onAgreementChanged;
-  final ValueChanged<HarborPolicyKind> onPolicyOpened;
+  final ValueChanged<HarborPolicyChannel> onPolicyOpened;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +45,12 @@ class AccessAgreementLine extends StatelessWidget {
               ),
               _PolicyTapText(
                 label: 'Terms of Service',
-                onTap: () => onPolicyOpened(HarborPolicyKind.userAgreement),
+                onTap: () => onPolicyOpened(HarborPolicyChannel.userAgreement),
               ),
               const Text(' and ', style: _AgreementTextStyles.plain),
               _PolicyTapText(
                 label: 'Privacy Policy',
-                onTap: () => onPolicyOpened(HarborPolicyKind.privacyPolicy),
+                onTap: () => onPolicyOpened(HarborPolicyChannel.privacyPolicy),
               ),
               const Text('.', style: _AgreementTextStyles.plain),
             ],

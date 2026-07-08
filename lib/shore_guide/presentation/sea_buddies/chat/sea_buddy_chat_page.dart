@@ -28,7 +28,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   final SeaBuddyMessageStore _messageStore = const SeaBuddyMessageStore();
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   List<SeaBuddySignalNote> _signals = const [];
-  final TextEditingController _replyController = TextEditingController();
+  final TextEditingController _signalController = TextEditingController();
 
   @override
   void initState() {
@@ -38,7 +38,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
 
   @override
   void dispose() {
-    _replyController.dispose();
+    _signalController.dispose();
     super.dispose();
   }
 
@@ -92,8 +92,8 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
               left: 20,
               right: 20,
               bottom: 24,
-              child: _SeaReplyComposer(
-                controller: _replyController,
+              child: _SeaSignalComposer(
+                controller: _signalController,
                 onSend: _sendSignal,
               ),
             ),
@@ -131,7 +131,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   }
 
   Future<void> _sendSignal() async {
-    final text = _replyController.text.trim();
+    final text = _signalController.text.trim();
     if (text.isEmpty) {
       return;
     }
@@ -161,7 +161,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     }
     setState(() {
       _signals = [..._signals, signal];
-      _replyController.clear();
+      _signalController.clear();
     });
   }
 
@@ -194,7 +194,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
       contentId: 'profile:${widget.buddyThread.buddyHarbor.tideHandle}',
-      contentKind: ShoreSafetyContentKind.profile,
+      contentChannel: ShoreSafetyContentChannel.profile,
       ownerName: widget.buddyThread.buddyHarbor.displayHarborName,
       ownerHandle: widget.buddyThread.buddyHarbor.tideHandle,
     );
@@ -316,8 +316,8 @@ class _SeaChatBubble extends StatelessWidget {
   }
 }
 
-class _SeaReplyComposer extends StatelessWidget {
-  const _SeaReplyComposer({required this.controller, required this.onSend});
+class _SeaSignalComposer extends StatelessWidget {
+  const _SeaSignalComposer({required this.controller, required this.onSend});
 
   final TextEditingController controller;
   final VoidCallback onSend;

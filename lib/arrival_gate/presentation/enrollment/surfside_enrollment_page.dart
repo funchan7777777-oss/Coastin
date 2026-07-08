@@ -5,7 +5,7 @@ import '../../../app/assets/coastin_asset_registry.dart';
 import '../../application/harbor_credential_checks.dart';
 import '../../data/local/harbor_passage_store.dart';
 import '../../domain/value_objects/harbor_entry_channel.dart';
-import '../../domain/value_objects/harbor_policy_kind.dart';
+import '../../domain/value_objects/harbor_policy_channel.dart';
 import '../access/widgets/access_agreement_line.dart';
 import '../access/widgets/brine_primary_button.dart';
 import '../access/widgets/harbor_back_button.dart';
@@ -181,10 +181,10 @@ class _SurfsideEnrollmentPageState extends State<SurfsideEnrollmentPage> {
     Navigator.of(context).pop();
   }
 
-  void _openPolicyPage(HarborPolicyKind policyKind) {
+  void _openPolicyPage(HarborPolicyChannel policyChannel) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => HarborPolicyWebviewPage(policyKind: policyKind),
+        builder: (_) => HarborPolicyWebviewPage(policyChannel: policyChannel),
       ),
     );
   }
@@ -209,7 +209,7 @@ class _EnrollmentPanel extends StatelessWidget {
   final bool agreementAnchored;
   final bool dockKeyVisible;
   final ValueChanged<bool> onAgreementChanged;
-  final ValueChanged<HarborPolicyKind> onPolicyOpened;
+  final ValueChanged<HarborPolicyChannel> onPolicyOpened;
   final VoidCallback onDockKeyVisibilityChanged;
   final VoidCallback onMailCleared;
   final VoidCallback onSignupRequested;
