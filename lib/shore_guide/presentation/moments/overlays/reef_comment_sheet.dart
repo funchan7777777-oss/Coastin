@@ -67,17 +67,24 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final viewportHeight = MediaQuery.sizeOf(context).height;
-    final sheetHeight = viewportHeight * 0.52;
+    final viewportSize = MediaQuery.sizeOf(context);
+    const sheetSize = Size(420, 522);
+    final sheetWidth = viewportSize.width < sheetSize.width
+        ? viewportSize.width
+        : sheetSize.width;
+    final sheetHeight = viewportSize.height < sheetSize.height
+        ? viewportSize.height
+        : sheetSize.height;
+    const contentDrop = 28.0;
     final inputBottom = widget.bottomDockClearance + 10;
     const inputHeight = 46.0;
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 260),
       curve: Curves.easeOutCubic,
-      left: 0,
-      right: 0,
+      left: (viewportSize.width - sheetWidth) / 2,
       bottom: widget.isOpen ? 0 : -sheetHeight,
+      width: sheetWidth,
       height: sheetHeight,
       child: IgnorePointer(
         ignoring: !widget.isOpen,
@@ -92,7 +99,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
               ),
             ),
             Positioned(
-              top: 38,
+              top: 38 + contentDrop,
               right: 38,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -120,7 +127,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(34, 54, 78, 0),
+              padding: const EdgeInsets.fromLTRB(34, 54 + contentDrop, 78, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -137,7 +144,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
             Positioned(
               left: 36,
               right: 36,
-              top: 112,
+              top: 112 + contentDrop,
               bottom: inputBottom + inputHeight + 16,
               child: ListView.separated(
                 padding: EdgeInsets.zero,

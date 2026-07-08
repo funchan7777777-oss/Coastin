@@ -125,7 +125,15 @@ class _SafetyWavePanelState extends State<_SafetyWavePanel> {
 
   @override
   Widget build(BuildContext context) {
-    final panelHeight = MediaQuery.sizeOf(context).height * 0.32;
+    final viewportSize = MediaQuery.sizeOf(context);
+    const panelSize = Size(420, 300);
+    final panelWidth = viewportSize.width < panelSize.width
+        ? viewportSize.width
+        : panelSize.width;
+    final panelHeight = viewportSize.height < panelSize.height
+        ? viewportSize.height
+        : panelSize.height;
+    const contentDrop = 28.0;
 
     return Padding(
       padding: const EdgeInsets.only(left: 0, right: 0, bottom: 0),
@@ -141,8 +149,9 @@ class _SafetyWavePanelState extends State<_SafetyWavePanel> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
+              width: panelWidth,
               height: panelHeight,
-              padding: const EdgeInsets.fromLTRB(34, 42, 34, 24),
+              padding: const EdgeInsets.fromLTRB(34, 42 + contentDrop, 34, 24),
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(CoastinAssetRegistry.profileWavePanel),

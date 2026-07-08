@@ -50,7 +50,7 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
   void initState() {
     super.initState();
     _likedMoments = {
-      for (final moment in _moments) moment.momentKey: moment.isInitiallyLiked,
+      for (final moment in _moments) moment.momentKey: false,
     };
     _pausedMoments = {for (final moment in _moments) moment.momentKey: false};
     _restoreSafety();
@@ -101,6 +101,7 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
                 itemBuilder: (context, index) {
                   final moment = visibleMoments[index];
                   return _ShareMomentPane(
+                    key: ValueKey(moment.momentKey),
                     shoreMoment: moment,
                     isActive: index == _currentMomentIndex,
                     isLiked: _likedMoments[moment.momentKey] ?? false,
@@ -189,6 +190,42 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     setState(() => _safetySnapshot = snapshot);
   }
 
+  Future<void> _restoreSafetyAndSyncMomentPage() async {
+    final snapshot = await _safetyStore.restoreSnapshot();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _safetySnapshot = snapshot;
+      _currentMomentIndex = _boundedMomentIndex(snapshot);
+      _commentsOpen = false;
+      _guardOpen = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_momentController.hasClients || _visibleMoments.isEmpty) {
+        return;
+      }
+      _momentController.jumpToPage(_currentMomentIndex);
+    });
+  }
+
+  int _boundedMomentIndex(ShoreSafetySnapshot snapshot) {
+    final visibleCount = _moments
+        .where(
+          (moment) => snapshot.isVisibleContent(
+            'moment:${moment.momentKey}',
+            moment.creatorPersona.tideHandle,
+          ),
+        )
+        .length;
+    if (visibleCount == 0) {
+      return 0;
+    }
+    return _currentMomentIndex >= visibleCount
+        ? visibleCount - 1
+        : _currentMomentIndex;
+  }
+
   void _toggleLike(ShoreVideoMoment moment) {
     setState(() {
       _likedMoments[moment.momentKey] =
@@ -231,20 +268,31 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
   }
 
   Future<void> _openMomentSafety(ShoreVideoMoment moment) async {
-    setState(() => _commentsOpen = false);
-    await ShoreSafetyReef.showGuard(
+    setState(() {
+      _commentsOpen = false;
+      _guardOpen = true;
+    });
+    final outcome = await ShoreSafetyReef.showGuard(
       context: context,
       contentId: 'moment:${moment.momentKey}',
       contentKind: ShoreSafetyContentKind.moment,
       ownerName: moment.creatorPersona.displayHarborName,
       ownerHandle: moment.creatorPersona.tideHandle,
     );
-    await _restoreSafety();
+    if (!mounted) {
+      return;
+    }
+    if (outcome == null) {
+      setState(() => _guardOpen = false);
+      return;
+    }
+    await _restoreSafetyAndSyncMomentPage();
   }
 }
 
 class _ShareMomentPane extends StatelessWidget {
   const _ShareMomentPane({
+    super.key,
     required this.shoreMoment,
     required this.isActive,
     required this.isLiked,
@@ -278,12 +326,7 @@ class _ShareMomentPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final likeDelta = isLiked == shoreMoment.isInitiallyLiked
-        ? 0
-        : isLiked
-        ? 1
-        : -1;
-    final adjustedLikeCount = shoreMoment.likeTally + likeDelta;
+    final adjustedLikeCount = shoreMoment.likeTally + (isLiked ? 1 : 0);
 
     return Stack(
       fit: StackFit.expand,

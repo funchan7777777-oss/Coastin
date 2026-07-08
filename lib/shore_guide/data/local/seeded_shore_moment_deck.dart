@@ -317,7 +317,7 @@ class SeededShoreMomentDeck {
         replyTally: replyDrifts.length,
         infoTally: 0,
         isInitiallyFollowed: index % 3 == 0,
-        isInitiallyLiked: index == 1 || index == 6 || index == 11,
+        isInitiallyLiked: false,
         replyDrifts: replyDrifts,
       );
     }),

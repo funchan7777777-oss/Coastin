@@ -18,28 +18,24 @@ class ShoreVideoStage extends StatefulWidget {
 }
 
 class _ShoreVideoStageState extends State<ShoreVideoStage> {
-  late final VideoPlayerController _videoController;
+  late VideoPlayerController _videoController;
   bool _isReady = false;
 
   @override
   void initState() {
     super.initState();
-    _videoController = VideoPlayerController.asset(widget.videoAsset);
-    _videoController
-      ..setLooping(true)
-      ..setVolume(0);
-    _videoController.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() => _isReady = true);
-      _syncPlayback();
-    });
+    _prepareVideoController();
   }
 
   @override
   void didUpdateWidget(covariant ShoreVideoStage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.videoAsset != widget.videoAsset) {
+      _videoController.dispose();
+      _isReady = false;
+      _prepareVideoController();
+      return;
+    }
     if (oldWidget.shouldDrift != widget.shouldDrift ||
         oldWidget.isPausedByViewer != widget.isPausedByViewer) {
       _syncPlayback();
@@ -50,6 +46,24 @@ class _ShoreVideoStageState extends State<ShoreVideoStage> {
   void dispose() {
     _videoController.dispose();
     super.dispose();
+  }
+
+  void _prepareVideoController() {
+    final controller = VideoPlayerController.asset(widget.videoAsset);
+    _videoController = controller;
+    controller
+      ..setLooping(true)
+      ..setVolume(0);
+    controller
+        .initialize()
+        .then((_) {
+          if (!mounted || !identical(controller, _videoController)) {
+            return;
+          }
+          setState(() => _isReady = true);
+          _syncPlayback();
+        })
+        .catchError((Object _) {});
   }
 
   void _syncPlayback() {
