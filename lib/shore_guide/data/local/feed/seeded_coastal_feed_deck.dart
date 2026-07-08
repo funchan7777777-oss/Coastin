@@ -41,7 +41,7 @@ class SeededCoastalFeedDeck {
       placeRibbon: '23 - Australia',
       clockRibbon: '18m ago',
       captionCurrent:
-          'Breeze by shore, collect seaside romance today. Long coastline, slow down for coastal tiny joys.',
+          'Breeze by shore, collect soft light today. Long coastline, slow down for coastal tiny joys.',
       frameAssets: const [
         CoastinAssetRegistry.sunwearMood1,
         CoastinAssetRegistry.sunwearMood2,

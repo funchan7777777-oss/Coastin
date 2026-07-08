@@ -14,7 +14,7 @@ class CoastinEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      CoastinAssetRegistry.kayakDateEmptyState,
+      CoastinAssetRegistry.kayakEmptyState,
       width: width,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,

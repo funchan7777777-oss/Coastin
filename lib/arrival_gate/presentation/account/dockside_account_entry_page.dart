@@ -269,8 +269,8 @@ class _AccountEntryPanel extends StatelessWidget {
           keyboardTrail: TextInputType.visiblePassword,
           textInputAction: TextInputAction.done,
           trailingAsset: dockKeyVisible
-              ? CoastinAssetRegistry.visibleSecretBadge
-              : CoastinAssetRegistry.shadedSecretBadge,
+              ? CoastinAssetRegistry.passwordVisibleBadge
+              : CoastinAssetRegistry.passwordHiddenBadge,
           onTrailingTap: onDockKeyVisibilityChanged,
         ),
         const SizedBox(height: 24),
