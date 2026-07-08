@@ -9,6 +9,7 @@ import '../../../shared/ui/coastin_profile_pickers.dart';
 import '../../data/local/harbor_passage_store.dart';
 import '../../domain/entities/harbor_passage_record.dart';
 import '../../domain/value_objects/profile_wake_choice.dart';
+import '../../../shore_guide/domain/value_objects/shore_content_safety_gate.dart';
 import '../access/widgets/brine_primary_button.dart';
 import '../access/widgets/harbor_back_button.dart';
 import '../access/widgets/harbor_credential_field.dart';
@@ -225,6 +226,31 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
       );
       return;
     }
+    final nameSafetyDecision = ShoreContentSafetyGate.inspect(
+      docksideName,
+      surface: ShoreContentSurface.profileName,
+    );
+    if (!nameSafetyDecision.isAllowed) {
+      await showHarborNotice(
+        context: context,
+        title: nameSafetyDecision.title,
+        message: nameSafetyDecision.message,
+      );
+      return;
+    }
+    final signatureLine = _signatureController.text.trim();
+    final signatureSafetyDecision = ShoreContentSafetyGate.inspect(
+      signatureLine,
+      surface: ShoreContentSurface.profileNote,
+    );
+    if (!signatureSafetyDecision.isAllowed) {
+      await showHarborNotice(
+        context: context,
+        title: signatureSafetyDecision.title,
+        message: signatureSafetyDecision.message,
+      );
+      return;
+    }
     final chosenWake = _chosenWake;
     if (chosenWake == null) {
       await showHarborNotice(
@@ -251,7 +277,7 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
         settledAtIso: DateTime.now().toIso8601String(),
         avatarImagePath: _avatarImagePath,
         profileWake: chosenWake.storageValue,
-        signatureLine: _signatureController.text.trim(),
+        signatureLine: signatureLine,
         countryLine: _countryLine.trim(),
         birthLine: _birthLine.trim(),
       ),

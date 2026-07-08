@@ -8,6 +8,7 @@ import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../data/local/seeded_shore_moment_deck.dart';
 import '../../../domain/entities/feed/coastal_post_dispatch.dart';
 import '../../../domain/entities/shore_reply_drift.dart';
+import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
 import '../../people/shore_persona_detail_page.dart';
 import '../../safety/shore_safety_action.dart';
@@ -177,9 +178,21 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     widget.onFollowChanged(_isFollowed);
   }
 
-  void _sendReply() {
+  Future<void> _sendReply() async {
     final text = _replyController.text.trim();
     if (text.isEmpty) {
+      return;
+    }
+    final safetyDecision = ShoreContentSafetyGate.inspect(
+      text,
+      surface: ShoreContentSurface.publicComment,
+    );
+    if (!safetyDecision.isAllowed) {
+      await ShoreSafetyReef.showAccountDone(
+        context: context,
+        title: safetyDecision.title,
+        message: safetyDecision.message,
+      );
       return;
     }
     setState(() {

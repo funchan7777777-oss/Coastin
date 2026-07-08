@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../data/local/wallet/shore_shell_wallet_store.dart';
+import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../my_coast/wallet/shore_shell_reef.dart';
 import '../../safety/shore_safety_reef.dart';
 
@@ -246,11 +247,22 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
   }
 
   Future<void> _releaseMoment() async {
-    final hasCopy = _copyController.text.trim().isNotEmpty;
-    if (_pickedHarborFile == null || !hasCopy) {
+    final caption = _copyController.text.trim();
+    if (_pickedHarborFile == null || caption.isEmpty) {
       _showReleaseNote(
         title: 'Shore draft needs more',
         message: 'Please add a video or picture and a short caption first.',
+      );
+      return;
+    }
+    final safetyDecision = ShoreContentSafetyGate.inspect(
+      caption,
+      surface: ShoreContentSurface.publicCaption,
+    );
+    if (!safetyDecision.isAllowed) {
+      _showReleaseNote(
+        title: safetyDecision.title,
+        message: safetyDecision.message,
       );
       return;
     }

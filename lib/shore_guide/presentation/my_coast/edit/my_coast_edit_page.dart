@@ -9,6 +9,7 @@ import '../../../../arrival_gate/data/local/harbor_passage_store.dart';
 import '../../../../arrival_gate/domain/entities/harbor_passage_record.dart';
 import '../../../../arrival_gate/domain/value_objects/profile_wake_choice.dart';
 import '../../../../shared/ui/coastin_profile_pickers.dart';
+import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../widgets/my_coast_top_bar.dart';
 import '../widgets/my_coast_wash.dart';
 
@@ -269,23 +270,32 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
   Future<void> _saveProfile() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      await showCupertinoDialog<void>(
-        context: context,
-        builder: (context) {
-          return CupertinoAlertDialog(
-            title: const Text('Nickname needed'),
-            content: const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: Text('Please enter a Coastin nickname before saving.'),
-            ),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
+      await _showEditNotice(
+        title: 'Nickname needed',
+        message: 'Please enter a Coastin nickname before saving.',
+      );
+      return;
+    }
+    final nameSafetyDecision = ShoreContentSafetyGate.inspect(
+      name,
+      surface: ShoreContentSurface.profileName,
+    );
+    if (!nameSafetyDecision.isAllowed) {
+      await _showEditNotice(
+        title: nameSafetyDecision.title,
+        message: nameSafetyDecision.message,
+      );
+      return;
+    }
+    final signatureLine = _signatureController.text.trim();
+    final signatureSafetyDecision = ShoreContentSafetyGate.inspect(
+      signatureLine,
+      surface: ShoreContentSurface.profileNote,
+    );
+    if (!signatureSafetyDecision.isAllowed) {
+      await _showEditNotice(
+        title: signatureSafetyDecision.title,
+        message: signatureSafetyDecision.message,
       );
       return;
     }
@@ -302,7 +312,7 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
             existing?.settledAtIso ?? DateTime.now().toIso8601String(),
         avatarImagePath: _avatarPath,
         profileWake: _wakeChoice.storageValue,
-        signatureLine: _signatureController.text.trim(),
+        signatureLine: signatureLine,
         countryLine: _countryLine.trim(),
         birthLine: _birthLine.trim(),
       ),
@@ -311,6 +321,30 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
       return;
     }
     Navigator.of(context).pop();
+  }
+
+  Future<void> _showEditNotice({
+    required String title,
+    required String message,
+  }) async {
+    await showCupertinoDialog<void>(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: Text(title),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(message),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

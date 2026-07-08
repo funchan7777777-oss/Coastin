@@ -7,6 +7,7 @@ import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/shore_reply_drift.dart';
 import '../../../domain/entities/shoreline_persona.dart';
+import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
 import '../../people/shore_persona_detail_page.dart';
 import '../../safety/shore_safety_action.dart';
@@ -175,9 +176,21 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     );
   }
 
-  void _releaseComment() {
+  Future<void> _releaseComment() async {
     final text = _commentController.text.trim();
     if (text.isEmpty) {
+      return;
+    }
+    final safetyDecision = ShoreContentSafetyGate.inspect(
+      text,
+      surface: ShoreContentSurface.publicComment,
+    );
+    if (!safetyDecision.isAllowed) {
+      await ShoreSafetyReef.showAccountDone(
+        context: context,
+        title: safetyDecision.title,
+        message: safetyDecision.message,
+      );
       return;
     }
     setState(() {

@@ -7,6 +7,7 @@ import '../../../data/local/buddies/sea_buddy_message_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/buddies/sea_buddy_note.dart';
 import '../../../domain/entities/buddies/sea_buddy_thread.dart';
+import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../people/shore_persona_detail_page.dart';
 import '../../safety/shore_safety_action.dart';
 import '../../safety/shore_safety_reef.dart';
@@ -132,6 +133,18 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   Future<void> _sendNote() async {
     final text = _replyController.text.trim();
     if (text.isEmpty) {
+      return;
+    }
+    final safetyDecision = ShoreContentSafetyGate.inspect(
+      text,
+      surface: ShoreContentSurface.privateMessage,
+    );
+    if (!safetyDecision.isAllowed) {
+      await ShoreSafetyReef.showAccountDone(
+        context: context,
+        title: safetyDecision.title,
+        message: safetyDecision.message,
+      );
       return;
     }
     if (!await _ensureMutual()) {
