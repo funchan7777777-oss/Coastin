@@ -59,6 +59,17 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
   @override
   void initState() {
     super.initState();
+    ShoreSafetyStore.safetyRevision.addListener(_handleSafetyRevision);
+    _restoreSafety();
+  }
+
+  @override
+  void dispose() {
+    ShoreSafetyStore.safetyRevision.removeListener(_handleSafetyRevision);
+    super.dispose();
+  }
+
+  void _handleSafetyRevision() {
     _restoreSafety();
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../app/theme/tidewash_palette.dart';
@@ -12,6 +13,7 @@ import '../../domain/entities/feed/coastal_post_dispatch.dart';
 import '../../domain/entities/shore_video_moment.dart';
 import '../../domain/entities/shoreline_persona.dart';
 import '../../domain/value_objects/shore_profile_current.dart';
+import '../moments/share_moments_page.dart';
 import '../sea_buddies/call/sea_buddy_call_page.dart';
 import '../sea_buddies/chat/sea_buddy_chat_page.dart';
 import '../safety/shore_safety_action.dart';
@@ -45,6 +47,17 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
   @override
   void initState() {
     super.initState();
+    ShoreSafetyStore.safetyRevision.addListener(_handleSafetyRevision);
+    _restoreSafety();
+  }
+
+  @override
+  void dispose() {
+    ShoreSafetyStore.safetyRevision.removeListener(_handleSafetyRevision);
+    super.dispose();
+  }
+
+  void _handleSafetyRevision() {
     _restoreSafety();
   }
 
@@ -60,11 +73,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
   Widget build(BuildContext context) {
     final persona = widget.persona;
     final isFollowing = _snapshot.isFollowing(persona.tideHandle);
-    final placeRibbon =
-        widget.placeRibbon ??
-        (persona.profileCurrent == ShoreProfileCurrent.feminine
-            ? '23 - Australia'
-            : 'Reef Rail');
+    final profileOriginLine = _profileOriginLine(persona, widget.placeRibbon);
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFBDF8F3),
@@ -96,7 +105,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
                         const SizedBox(height: 48),
                         _ProfileBand(
                           persona: persona,
-                          placeRibbon: placeRibbon,
+                          placeRibbon: profileOriginLine,
                           isFollowing: isFollowing,
                           onFollowTap: _toggleFollow,
                         ),
@@ -175,10 +184,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     return false;
   }
 
-  Future<void> _openChat() async {
-    if (!await _canStartPrivateAction() || !mounted) {
-      return;
-    }
+  void _openChat() {
     final thread = ShorePersonaCatalog.threadForPersona(widget.persona);
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
@@ -211,13 +217,16 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
       return;
     }
     await _restoreSafety();
+    if (outcome == null) {
+      return;
+    }
     if (outcome == ShoreSafetyOutcome.blocked) {
       await _messageStore.clearThread(
         ShorePersonaCatalog.threadForPersona(widget.persona).threadKey,
       );
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
+    }
+    if (mounted) {
+      Navigator.of(context).pop();
     }
   }
 }
@@ -557,11 +566,10 @@ class _PersonaWorkGrid extends StatelessWidget {
         )
         .toList();
 
-    final tiles = showVideos
-        ? _tilesForMoments(videoMoments)
-        : _tilesForPosts(posts);
+    final postTiles = _tilesForPosts(posts);
+    final tileCount = showVideos ? videoMoments.length : postTiles.length;
 
-    if (tiles.isEmpty) {
+    if (tileCount == 0) {
       return const Padding(
         padding: EdgeInsets.only(top: 34),
         child: Center(child: CoastinEmptyState(width: 104)),
@@ -577,46 +585,37 @@ class _PersonaWorkGrid extends StatelessWidget {
         mainAxisSpacing: 6,
         crossAxisSpacing: 6,
       ),
-      itemCount: tiles.length,
+      itemCount: tileCount,
       itemBuilder: (context, index) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(9),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.asset(
-                tiles[index],
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
-              ),
-              if (showVideos)
-                Center(
-                  child: Image.asset(
-                    CoastinAssetRegistry.playRoundBadge,
-                    width: 34,
-                    height: 34,
-                    fit: BoxFit.contain,
-                  ),
+        if (!showVideos) {
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(9),
+            child: Image.asset(
+              postTiles[index],
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+            ),
+          );
+        }
+        final moment = videoMoments[index];
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            Navigator.of(context).push(
+              CupertinoPageRoute<void>(
+                builder: (_) => ShareMomentsPage(
+                  bottomDockClearance: 0,
+                  initialMomentKey: moment.momentKey,
+                  showBackButton: true,
+                  showReleaseButton: false,
                 ),
-            ],
-          ),
+              ),
+            );
+          },
+          child: _MomentFirstFrameTile(moment: moment),
         );
       },
     );
-  }
-
-  List<String> _tilesForMoments(List<ShoreVideoMoment> moments) {
-    if (moments.isNotEmpty) {
-      return const [
-        CoastinAssetRegistry.sunwearMood1,
-        CoastinAssetRegistry.sunwearMood2,
-        CoastinAssetRegistry.sunwearMood3,
-        CoastinAssetRegistry.tideplayArc4,
-        CoastinAssetRegistry.harborBite2,
-        CoastinAssetRegistry.sunwearMood8,
-      ].take(moments.length.clamp(1, 6)).toList();
-    }
-    return const [];
   }
 
   List<String> _tilesForPosts(List<CoastalPostDispatch> posts) {
@@ -625,6 +624,187 @@ class _PersonaWorkGrid extends StatelessWidget {
         if (post.frameAssets.isNotEmpty) post.frameAssets.first,
     ].take(6).toList();
   }
+}
+
+class _MomentFirstFrameTile extends StatefulWidget {
+  const _MomentFirstFrameTile({required this.moment});
+
+  final ShoreVideoMoment moment;
+
+  @override
+  State<_MomentFirstFrameTile> createState() => _MomentFirstFrameTileState();
+}
+
+class _MomentFirstFrameTileState extends State<_MomentFirstFrameTile> {
+  late VideoPlayerController _videoController;
+  bool _isReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _prepareVideoController();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MomentFirstFrameTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.moment.videoAsset == widget.moment.videoAsset) {
+      return;
+    }
+    _videoController.dispose();
+    _isReady = false;
+    _prepareVideoController();
+  }
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
+
+  void _prepareVideoController() {
+    final controller = VideoPlayerController.asset(widget.moment.videoAsset);
+    _videoController = controller;
+    controller
+      ..setLooping(false)
+      ..setVolume(0);
+    controller
+        .initialize()
+        .then((_) => controller.seekTo(Duration.zero))
+        .then((_) {
+          if (!mounted || !identical(controller, _videoController)) {
+            return;
+          }
+          controller.pause();
+          setState(() => _isReady = true);
+        })
+        .catchError((Object _) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(9),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (_isReady)
+            FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: _videoController.value.size.width,
+                height: _videoController.value.size.height,
+                child: VideoPlayer(_videoController),
+              ),
+            )
+          else
+            const ColoredBox(color: Color(0xFF0B1F29)),
+          Center(
+            child: Image.asset(
+              CoastinAssetRegistry.playRoundBadge,
+              width: 34,
+              height: 34,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _profileOriginLine(ShorelinePersona persona, String? placeRibbon) {
+  final age = _profileAge(persona, placeRibbon);
+  final country =
+      _countryFromPlaceRibbon(placeRibbon) ?? _fallbackCountryFor(persona);
+  return '$country, $age';
+}
+
+int _profileAge(ShorelinePersona persona, String? placeRibbon) {
+  final firstPart = placeRibbon?.split('-').first.trim();
+  final parsedAge = int.tryParse(firstPart ?? '');
+  if (parsedAge != null) {
+    return parsedAge;
+  }
+  final index = SeededShoreMomentDeck.shorelinePeople.indexWhere(
+    (person) => person.tideHandle == persona.tideHandle,
+  );
+  return 22 + ((index < 0 ? 0 : index) * 3) % 10;
+}
+
+String? _countryFromPlaceRibbon(String? placeRibbon) {
+  if (placeRibbon == null || placeRibbon.trim().isEmpty) {
+    return null;
+  }
+  final parts = placeRibbon.split('-');
+  final placeMarker = (parts.length > 1 ? parts.last : parts.first).trim();
+  const placeCountries = {
+    'Aruba': 'Aruba',
+    'Australia': 'Australia',
+    'Bali': 'Indonesia',
+    'Beacon Steps': 'China',
+    'Breeze Point': 'Australia',
+    'Cebu': 'Philippines',
+    'Crete': 'Greece',
+    'Durban': 'South Africa',
+    'Foamline': 'Indonesia',
+    'Kona': 'United States',
+    'Lagoon Market': 'Aruba',
+    'Lagos': 'Nigeria',
+    'Lisbon': 'Portugal',
+    'Maui': 'United States',
+    'Miami': 'United States',
+    'Nice': 'France',
+    'Palm Walk': 'United States',
+    'Phuket': 'Thailand',
+    'Quiet Pier': 'Nigeria',
+    'Reef Rail': 'Indonesia',
+    'Sandbar Gate': 'United States',
+    'Sanya': 'China',
+    'Seaglass Cafe': 'Greece',
+    'Venice': 'United States',
+  };
+  return placeCountries[placeMarker] ??
+      _countryNameIfAlreadyCountry(placeMarker);
+}
+
+String? _countryNameIfAlreadyCountry(String value) {
+  const countryNames = {
+    'Australia',
+    'Aruba',
+    'China',
+    'France',
+    'Greece',
+    'Indonesia',
+    'Nigeria',
+    'Philippines',
+    'Portugal',
+    'South Africa',
+    'Thailand',
+    'United States',
+  };
+  return countryNames.contains(value) ? value : null;
+}
+
+String _fallbackCountryFor(ShorelinePersona persona) {
+  const countries = [
+    'Australia',
+    'United States',
+    'Philippines',
+    'Nigeria',
+    'Indonesia',
+    'Portugal',
+    'Aruba',
+    'China',
+    'Thailand',
+    'United States',
+    'Greece',
+    'France',
+  ];
+  final index = SeededShoreMomentDeck.shorelinePeople.indexWhere(
+    (person) => person.tideHandle == persona.tideHandle,
+  );
+  return countries[(index < 0 ? 0 : index) % countries.length];
 }
 
 const Shadow _profileShadow = Shadow(

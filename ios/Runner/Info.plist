@@ -27,11 +27,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Coastin uses the camera when you take a profile photo or preview yourself during a video call.</string>
+	<string>Coastin uses the camera when you take profile photos, record shoreline videos, or preview yourself during a video call.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Coastin uses the microphone for video calls between mutual Coastin friends.</string>
+	<string>Coastin uses the microphone for video calls between mutual Coastin friends and for shoreline videos you record.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Coastin uses your photo library when you choose a profile image.</string>
+	<string>Coastin uses your photo library when you choose profile images, shoreline photos, or shoreline videos.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

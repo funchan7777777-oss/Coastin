@@ -47,6 +47,7 @@ class ShoreSafetyReef {
           message:
               'Please confirm you and $displayName follow each other before starting chat or video call.',
           actionAsset: CoastinAssetRegistry.goFollowPlate,
+          showHeaderVisuals: false,
           onAction: () {
             Navigator.of(dialogContext).pop();
             onGoFollow();
@@ -382,6 +383,7 @@ class _WaveNoticeDialog extends StatelessWidget {
     required this.onAction,
     this.actionAsset,
     this.actionLabel,
+    this.showHeaderVisuals = true,
   });
 
   final String wordmark;
@@ -391,6 +393,7 @@ class _WaveNoticeDialog extends StatelessWidget {
   final VoidCallback onAction;
   final String? actionAsset;
   final String? actionLabel;
+  final bool showHeaderVisuals;
 
   @override
   Widget build(BuildContext context) {
@@ -417,16 +420,18 @@ class _WaveNoticeDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                wordmark,
-                width: 205,
-                height: 34,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-              ),
-              const SizedBox(height: 16),
-              Image.asset(iconAsset, width: 48, height: 48),
-              const SizedBox(height: 14),
+              if (showHeaderVisuals) ...[
+                Image.asset(
+                  wordmark,
+                  width: 205,
+                  height: 34,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                ),
+                const SizedBox(height: 16),
+                Image.asset(iconAsset, width: 48, height: 48),
+                const SizedBox(height: 14),
+              ],
               Text(
                 title,
                 textAlign: TextAlign.center,

@@ -129,11 +129,11 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   }
 
   Future<void> _sendNote() async {
-    if (!await _ensureMutual()) {
-      return;
-    }
     final text = _replyController.text.trim();
     if (text.isEmpty) {
+      return;
+    }
+    if (!await _ensureMutual()) {
       return;
     }
     final note = SeaBuddyNote(

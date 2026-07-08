@@ -45,13 +45,19 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
   @override
   void initState() {
     super.initState();
-    _restoreReplies();
+    ShoreSafetyStore.safetyRevision.addListener(_handleSafetyRevision);
+    _restoreSafety();
   }
 
   @override
   void dispose() {
+    ShoreSafetyStore.safetyRevision.removeListener(_handleSafetyRevision);
     _replyController.dispose();
     super.dispose();
+  }
+
+  void _handleSafetyRevision() {
+    _restoreSafety();
   }
 
   @override
@@ -217,15 +223,18 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     if (!mounted || outcome == null) {
       return;
     }
-    await _restoreReplies();
+    await _restoreSafety();
   }
 
-  Future<void> _restoreReplies() async {
+  Future<void> _restoreSafety() async {
     final snapshot = await _safetyStore.restoreSnapshot();
     if (!mounted) {
       return;
     }
     setState(() {
+      _isFollowed = snapshot.isFollowing(
+        widget.postDispatch.authorHarbor.tideHandle,
+      );
       _visibleReplies
         ..clear()
         ..addAll(

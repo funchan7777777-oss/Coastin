@@ -18,16 +18,25 @@ import 'widgets/share_moment_header.dart';
 import 'widgets/shore_video_stage.dart';
 
 class ShareMomentsPage extends StatefulWidget {
-  const ShareMomentsPage({super.key, required this.bottomDockClearance});
+  const ShareMomentsPage({
+    super.key,
+    required this.bottomDockClearance,
+    this.initialMomentKey,
+    this.showBackButton = false,
+    this.showReleaseButton = true,
+  });
 
   final double bottomDockClearance;
+  final String? initialMomentKey;
+  final bool showBackButton;
+  final bool showReleaseButton;
 
   @override
   State<ShareMomentsPage> createState() => _ShareMomentsPageState();
 }
 
 class _ShareMomentsPageState extends State<ShareMomentsPage> {
-  final PageController _momentController = PageController();
+  late final PageController _momentController;
   final List<ShoreVideoMoment> _moments =
       SeededShoreMomentDeck.shoreVideoMoments;
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
@@ -45,21 +54,39 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
   int _currentMomentIndex = 0;
   bool _commentsOpen = false;
   bool _guardOpen = false;
+  bool _didSyncInitialMoment = false;
 
   @override
   void initState() {
     super.initState();
-    _likedMoments = {
-      for (final moment in _moments) moment.momentKey: false,
-    };
+    ShoreSafetyStore.safetyRevision.addListener(_handleSafetyRevision);
+    _currentMomentIndex = _initialMomentIndex();
+    _momentController = PageController(initialPage: _currentMomentIndex);
+    _likedMoments = {for (final moment in _moments) moment.momentKey: false};
     _pausedMoments = {for (final moment in _moments) moment.momentKey: false};
     _restoreSafety();
   }
 
+  int _initialMomentIndex() {
+    final momentKey = widget.initialMomentKey;
+    if (momentKey == null) {
+      return 0;
+    }
+    final index = _moments.indexWhere(
+      (moment) => moment.momentKey == momentKey,
+    );
+    return index < 0 ? 0 : index;
+  }
+
   @override
   void dispose() {
+    ShoreSafetyStore.safetyRevision.removeListener(_handleSafetyRevision);
     _momentController.dispose();
     super.dispose();
+  }
+
+  void _handleSafetyRevision() {
+    _restoreSafety();
   }
 
   @override
@@ -124,6 +151,10 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
                     },
                     onInfoTap: () => _openMomentSafety(moment),
                     onReleaseTap: _openReleasePage,
+                    onBackTap: widget.showBackButton
+                        ? () => Navigator.of(context).pop()
+                        : null,
+                    showReleaseButton: widget.showReleaseButton,
                     onPersonaTap: () => _openPersona(moment),
                   );
                 },
@@ -187,7 +218,45 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     if (!mounted) {
       return;
     }
-    setState(() => _safetySnapshot = snapshot);
+    var shouldJumpToInitialMoment = false;
+    setState(() {
+      _safetySnapshot = snapshot;
+      if (!_didSyncInitialMoment && widget.initialMomentKey != null) {
+        _currentMomentIndex = _initialVisibleMomentIndex(snapshot);
+        _didSyncInitialMoment = true;
+        shouldJumpToInitialMoment = true;
+      }
+    });
+    if (!shouldJumpToInitialMoment) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          !_momentController.hasClients ||
+          _visibleMoments.isEmpty) {
+        return;
+      }
+      _momentController.jumpToPage(_currentMomentIndex);
+    });
+  }
+
+  int _initialVisibleMomentIndex(ShoreSafetySnapshot snapshot) {
+    final momentKey = widget.initialMomentKey;
+    if (momentKey == null) {
+      return 0;
+    }
+    final visibleMoments = _moments
+        .where(
+          (moment) => snapshot.isVisibleContent(
+            'moment:${moment.momentKey}',
+            moment.creatorPersona.tideHandle,
+          ),
+        )
+        .toList();
+    final index = visibleMoments.indexWhere(
+      (moment) => moment.momentKey == momentKey,
+    );
+    return index < 0 ? _boundedMomentIndex(snapshot) : index;
   }
 
   Future<void> _restoreSafetyAndSyncMomentPage() async {
@@ -202,7 +271,9 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
       _guardOpen = false;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_momentController.hasClients || _visibleMoments.isEmpty) {
+      if (!mounted ||
+          !_momentController.hasClients ||
+          _visibleMoments.isEmpty) {
         return;
       }
       _momentController.jumpToPage(_currentMomentIndex);
@@ -306,6 +377,8 @@ class _ShareMomentPane extends StatelessWidget {
     required this.onCommentTap,
     required this.onInfoTap,
     required this.onReleaseTap,
+    required this.onBackTap,
+    required this.showReleaseButton,
     required this.onPersonaTap,
   });
 
@@ -322,6 +395,8 @@ class _ShareMomentPane extends StatelessWidget {
   final VoidCallback onCommentTap;
   final VoidCallback onInfoTap;
   final VoidCallback onReleaseTap;
+  final VoidCallback? onBackTap;
+  final bool showReleaseButton;
   final VoidCallback onPersonaTap;
 
   @override
@@ -338,7 +413,11 @@ class _ShareMomentPane extends StatelessWidget {
         ),
         const _VideoReadabilityScrim(),
         _CenterPlaybackToggle(isPaused: isPaused, onTap: onPlayTap),
-        ShareMomentHeader(onReleaseTap: onReleaseTap),
+        ShareMomentHeader(
+          onReleaseTap: onReleaseTap,
+          onBackTap: onBackTap,
+          showReleaseAction: showReleaseButton,
+        ),
         MomentActionRail(
           creatorPersona: shoreMoment.creatorPersona,
           isLiked: isLiked,

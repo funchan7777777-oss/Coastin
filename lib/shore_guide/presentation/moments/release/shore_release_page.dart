@@ -156,16 +156,93 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
   }
 
   Future<void> _pickHarborFile() async {
-    final nextFile = _releaseKind == ShoreReleaseKind.video
-        ? await _picker.pickVideo(source: ImageSource.gallery)
-        : await _picker.pickImage(
-            source: ImageSource.gallery,
-            imageQuality: 86,
-          );
+    XFile? nextFile;
+    try {
+      nextFile = _releaseKind == ShoreReleaseKind.video
+          ? await _pickVideoFile()
+          : await _pickPostImageFile();
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      _showReleaseNote(
+        title: 'Media was not added',
+        message:
+            'Please allow camera or photo library access, then choose a shoreline file again.',
+      );
+      return;
+    }
     if (!mounted || nextFile == null) {
       return;
     }
     setState(() => _pickedHarborFile = nextFile);
+  }
+
+  Future<XFile?> _pickVideoFile() async {
+    final source = await showCupertinoModalPopup<ImageSource>(
+      context: context,
+      builder: (sheetContext) {
+        return CupertinoActionSheet(
+          title: const Text('Shoreline video'),
+          message: const Text('Choose a local video or record one now.'),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () =>
+                  Navigator.of(sheetContext).pop(ImageSource.gallery),
+              child: const Text('Choose from Album'),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () =>
+                  Navigator.of(sheetContext).pop(ImageSource.camera),
+              child: const Text('Record Video'),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(sheetContext).pop(),
+            child: const Text('Cancel'),
+          ),
+        );
+      },
+    );
+    if (!mounted || source == null) {
+      return null;
+    }
+    return _picker.pickVideo(
+      source: source,
+      maxDuration: const Duration(seconds: 60),
+    );
+  }
+
+  Future<XFile?> _pickPostImageFile() async {
+    final source = await showCupertinoModalPopup<ImageSource>(
+      context: context,
+      builder: (sheetContext) {
+        return CupertinoActionSheet(
+          title: const Text('Shoreline picture'),
+          message: const Text('Choose a local picture or take one now.'),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () =>
+                  Navigator.of(sheetContext).pop(ImageSource.gallery),
+              child: const Text('Choose from Album'),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () =>
+                  Navigator.of(sheetContext).pop(ImageSource.camera),
+              child: const Text('Take Photo'),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(sheetContext).pop(),
+            child: const Text('Cancel'),
+          ),
+        );
+      },
+    );
+    if (!mounted || source == null) {
+      return null;
+    }
+    return _picker.pickImage(source: source, imageQuality: 86);
   }
 
   Future<void> _releaseMoment() async {
@@ -201,23 +278,133 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
     showCupertinoDialog<void>(
       context: context,
       builder: (context) {
-        return CupertinoAlertDialog(
-          title: Text(title),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(message),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-                onDone?.call();
-              },
-              child: const Text('OK'),
-            ),
-          ],
+        return _ReleaseNoticeDialog(
+          title: title,
+          message: message,
+          onDone: () {
+            Navigator.of(context).pop();
+            onDone?.call();
+          },
         );
       },
+    );
+  }
+}
+
+class _ReleaseNoticeDialog extends StatelessWidget {
+  const _ReleaseNoticeDialog({
+    required this.title,
+    required this.message,
+    required this.onDone,
+  });
+
+  final String title;
+  final String message;
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: CupertinoPopupSurface(
+        isSurfacePainted: false,
+        child: Container(
+          width: 318,
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFFFFFFF), Color(0xFFEFFFF9)],
+            ),
+            border: Border.all(
+              color: const Color(0xFF9CECE6).withValues(alpha: 0.78),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0B6E92).withValues(alpha: 0.22),
+                blurRadius: 28,
+                offset: const Offset(0, 16),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFE9F9FF),
+                  border: Border.all(
+                    color: const Color(0xFF68D8E1).withValues(alpha: 0.54),
+                  ),
+                ),
+                child: Center(
+                  child: Image.asset(
+                    CoastinAssetRegistry.warningBlueBadge,
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: TidewashPalette.inkBlue,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: TidewashPalette.harborSlate.withValues(alpha: 0.82),
+                  fontSize: 15,
+                  height: 1.38,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 22),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onDone,
+                child: Container(
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2F68D3),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2F68D3).withValues(alpha: 0.22),
+                        blurRadius: 14,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -559,31 +746,14 @@ class _ReleaseButton extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: 280,
-            height: 60,
-            child: Image.asset(
-              CoastinAssetRegistry.releaseButtonPlate,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-            ),
-          ),
-          Positioned(
-            right: -6,
-            top: -18,
-            child: Image.asset(
-              CoastinAssetRegistry.redReleaseCorner,
-              width: 64,
-              height: 38,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-            ),
-          ),
-        ],
+      child: SizedBox(
+        width: 280,
+        height: 60,
+        child: Image.asset(
+          CoastinAssetRegistry.releaseButtonPlate,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+        ),
       ),
     );
   }

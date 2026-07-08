@@ -37,6 +37,17 @@ class _MyCoastPageState extends State<MyCoastPage> {
   @override
   void initState() {
     super.initState();
+    ShoreSafetyStore.safetyRevision.addListener(_handleSafetyRevision);
+    _restoreProfile();
+  }
+
+  @override
+  void dispose() {
+    ShoreSafetyStore.safetyRevision.removeListener(_handleSafetyRevision);
+    super.dispose();
+  }
+
+  void _handleSafetyRevision() {
     _restoreProfile();
   }
 

@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ShoreSafetyStore {
   const ShoreSafetyStore();
+
+  static final ValueNotifier<int> safetyRevision = ValueNotifier<int>(0);
 
   static const String _blockedHandlesKey = 'coastin.safety.blockedHandles';
   static const String _reportedContentKey = 'coastin.safety.reportedContent';
@@ -39,6 +42,7 @@ class ShoreSafetyStore {
     final handles = prefs.getStringList(_followingKey)?.toSet() ?? {};
     handles.add(handle);
     await prefs.setStringList(_followingKey, handles.toList()..sort());
+    _publishChange();
   }
 
   Future<void> unfollow(String handle) async {
@@ -46,6 +50,7 @@ class ShoreSafetyStore {
     final handles = prefs.getStringList(_followingKey)?.toSet() ?? {};
     handles.remove(handle);
     await prefs.setStringList(_followingKey, handles.toList()..sort());
+    _publishChange();
   }
 
   Future<void> approveFollower(String handle) async {
@@ -53,6 +58,7 @@ class ShoreSafetyStore {
     final handles = prefs.getStringList(_approvedFollowersKey)?.toSet() ?? {};
     handles.add(handle);
     await prefs.setStringList(_approvedFollowersKey, handles.toList()..sort());
+    _publishChange();
   }
 
   Future<void> removeApprovedFollower(String handle) async {
@@ -60,6 +66,7 @@ class ShoreSafetyStore {
     final handles = prefs.getStringList(_approvedFollowersKey)?.toSet() ?? {};
     handles.remove(handle);
     await prefs.setStringList(_approvedFollowersKey, handles.toList()..sort());
+    _publishChange();
   }
 
   Future<void> blockHandle(String handle) async {
@@ -67,6 +74,7 @@ class ShoreSafetyStore {
     final blocked = prefs.getStringList(_blockedHandlesKey)?.toSet() ?? {};
     blocked.add(handle);
     await prefs.setStringList(_blockedHandlesKey, blocked.toList()..sort());
+    _publishChange();
   }
 
   Future<void> unblockHandle(String handle) async {
@@ -74,6 +82,7 @@ class ShoreSafetyStore {
     final blocked = prefs.getStringList(_blockedHandlesKey)?.toSet() ?? {};
     blocked.remove(handle);
     await prefs.setStringList(_blockedHandlesKey, blocked.toList()..sort());
+    _publishChange();
   }
 
   Future<void> reportContent({
@@ -102,6 +111,7 @@ class ShoreSafetyStore {
       }),
     );
     await prefs.setStringList(_reportLedgerKey, ledger);
+    _publishChange();
   }
 
   Future<void> clearLocalLedger() async {
@@ -111,6 +121,11 @@ class ShoreSafetyStore {
     await prefs.remove(_reportLedgerKey);
     await prefs.remove(_followingKey);
     await prefs.remove(_approvedFollowersKey);
+    _publishChange();
+  }
+
+  static void _publishChange() {
+    safetyRevision.value += 1;
   }
 }
 
@@ -129,6 +144,7 @@ class ShoreSafetySnapshot {
 
   bool isVisibleContent(String contentId, String ownerHandle) {
     return !reportedContentIds.contains(contentId) &&
+        !reportedContentIds.contains('profile:$ownerHandle') &&
         !blockedHandles.contains(ownerHandle);
   }
 

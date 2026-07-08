@@ -43,13 +43,19 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
   @override
   void initState() {
     super.initState();
+    ShoreSafetyStore.safetyRevision.addListener(_handleSafetyRevision);
     _restoreSafety();
   }
 
   @override
   void dispose() {
+    ShoreSafetyStore.safetyRevision.removeListener(_handleSafetyRevision);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _handleSafetyRevision() {
+    _restoreSafety();
   }
 
   List<SeaBuddyThread> get _filteredThreads {
