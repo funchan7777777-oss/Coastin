@@ -106,6 +106,7 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
                       const SizedBox(height: 22),
                       _TopicShelf(
                         selectedTopicKey: _selectedTopicKey,
+                        participationLines: _topicParticipationLines,
                         onTopicTap: _toggleTopic,
                       ),
                       const SizedBox(height: 20),
@@ -149,6 +150,47 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
       _lovedDispatches[post.dispatchKey] =
           !(_lovedDispatches[post.dispatchKey] ?? false);
     });
+  }
+
+  Map<String, String> get _topicParticipationLines {
+    return {
+      for (final topicLane in SeededCoastalFeedDeck.topicLanes)
+        topicLane.laneKey: _topicParticipationLine(topicLane.laneKey),
+    };
+  }
+
+  String _topicParticipationLine(String topicKey) {
+    final count = _topicParticipationCount(topicKey);
+    return count == 1 ? '1 person' : '$count people';
+  }
+
+  int _topicParticipationCount(String topicKey) {
+    final authorHandles = <String>{};
+    var replySignals = 0;
+    var localLoveSignals = 0;
+    var relaySignals = 0;
+
+    for (final post in SeededCoastalFeedDeck.coastalDispatches) {
+      if (post.topicKey != topicKey ||
+          !_safetySnapshot.isVisibleContent(
+            'post:${post.dispatchKey}',
+            post.authorHarbor.tideHandle,
+          )) {
+        continue;
+      }
+      authorHandles.add(post.authorHarbor.tideHandle);
+      replySignals +=
+          _replyCounts[post.dispatchKey] ?? coastalPostReplyCount(post);
+      if (_lovedDispatches[post.dispatchKey] == true) {
+        localLoveSignals += 1;
+      }
+      relaySignals += post.relayTally > 0 ? 1 : 0;
+    }
+
+    return authorHandles.length +
+        replySignals +
+        localLoveSignals +
+        relaySignals;
   }
 
   Future<void> _toggleFollow(CoastalPostDispatch post) async {
@@ -329,9 +371,14 @@ class _SunGuideBanner extends StatelessWidget {
 }
 
 class _TopicShelf extends StatelessWidget {
-  const _TopicShelf({required this.selectedTopicKey, required this.onTopicTap});
+  const _TopicShelf({
+    required this.selectedTopicKey,
+    required this.participationLines,
+    required this.onTopicTap,
+  });
 
   final String? selectedTopicKey;
+  final Map<String, String> participationLines;
   final ValueChanged<CoastalTopicLane> onTopicTap;
 
   @override
@@ -355,6 +402,9 @@ class _TopicShelf extends StatelessWidget {
             Expanded(
               child: _TopicCard(
                 topicLane: topics[0],
+                participationLine:
+                    participationLines[topics[0].laneKey] ??
+                    topics[0].participationLine,
                 isSelected: selectedTopicKey == topics[0].laneKey,
                 isLarge: true,
                 onTap: () => onTopicTap(topics[0]),
@@ -366,12 +416,18 @@ class _TopicShelf extends StatelessWidget {
                 children: [
                   _TopicCard(
                     topicLane: topics[1],
+                    participationLine:
+                        participationLines[topics[1].laneKey] ??
+                        topics[1].participationLine,
                     isSelected: selectedTopicKey == topics[1].laneKey,
                     onTap: () => onTopicTap(topics[1]),
                   ),
                   const SizedBox(height: 10),
                   _TopicCard(
                     topicLane: topics[2],
+                    participationLine:
+                        participationLines[topics[2].laneKey] ??
+                        topics[2].participationLine,
                     isSelected: selectedTopicKey == topics[2].laneKey,
                     onTap: () => onTopicTap(topics[2]),
                   ),
@@ -388,12 +444,14 @@ class _TopicShelf extends StatelessWidget {
 class _TopicCard extends StatelessWidget {
   const _TopicCard({
     required this.topicLane,
+    required this.participationLine,
     required this.isSelected,
     required this.onTap,
     this.isLarge = false,
   });
 
   final CoastalTopicLane topicLane;
+  final String participationLine;
   final bool isSelected;
   final bool isLarge;
   final VoidCallback onTap;
@@ -445,35 +503,18 @@ class _TopicCard extends StatelessWidget {
               ),
               Positioned(
                 left: 14,
-                top: 62,
-                right: 12,
-                child: Text(
-                  topicLane.participationLine,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: TidewashPalette.harborSlate.withValues(alpha: 0.42),
-                    fontSize: 10,
-                    height: 1,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                top: 60,
+                child: _TopicPeopleBadge(participationLine: participationLine),
               ),
             ] else
               Positioned(
                 left: 12,
                 top: 44,
-                right: 10,
-                child: Text(
-                  topicLane.participationLine,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: TidewashPalette.harborSlate.withValues(alpha: 0.4),
-                    fontSize: 10,
-                    height: 1,
-                    fontWeight: FontWeight.w700,
-                  ),
+                right: 68,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: _TopicPeopleText(participationLine: participationLine),
                 ),
               ),
             if (isLarge)
@@ -490,6 +531,46 @@ class _TopicCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TopicPeopleBadge extends StatelessWidget {
+  const _TopicPeopleBadge({required this.participationLine});
+
+  final String participationLine;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 92),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF).withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: _TopicPeopleText(participationLine: participationLine),
+    );
+  }
+}
+
+class _TopicPeopleText extends StatelessWidget {
+  const _TopicPeopleText({required this.participationLine});
+
+  final String participationLine;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      participationLine,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: TidewashPalette.harborSlate.withValues(alpha: 0.58),
+        fontSize: 10,
+        height: 1,
+        fontWeight: FontWeight.w800,
       ),
     );
   }

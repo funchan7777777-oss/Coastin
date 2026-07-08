@@ -657,6 +657,7 @@ class _MedalShelf extends StatelessWidget {
                     asset: medals[index].asset,
                     title: medals[index].title,
                     progress: medals[index].progressLine,
+                    onRuleTap: () => _showMedalRule(context, medals[index]),
                   ),
                 ),
                 if (index != medals.length - 1) const SizedBox(width: 8),
@@ -688,6 +689,15 @@ class _MedalGoal {
 
   String get asset => currentCount >= goalCount ? unlockedAsset : lockedAsset;
 
+  String get ruleLine {
+    return switch (unitLabel) {
+      'posts' => 'Publish $goalCount shoreline posts to light this badge.',
+      'videos' => 'Publish $goalCount shoreline videos to light this badge.',
+      'photos' => 'Publish $goalCount shoreline photos to light this badge.',
+      _ => 'Complete $goalCount Coastin actions to light this badge.',
+    };
+  }
+
   String? get progressLine {
     if (currentCount <= 0) {
       return null;
@@ -702,11 +712,13 @@ class _MedalTile extends StatelessWidget {
     required this.asset,
     required this.title,
     required this.progress,
+    required this.onRuleTap,
   });
 
   final String asset;
   final String title;
   final String? progress;
+  final VoidCallback onRuleTap;
 
   @override
   Widget build(BuildContext context) {
@@ -739,13 +751,138 @@ class _MedalTile extends StatelessWidget {
         ] else
           const SizedBox(height: 13),
         const SizedBox(height: 4),
-        Image.asset(
-          CoastinAssetRegistry.coinTrailArrow,
-          width: 34,
-          height: 18,
-          fit: BoxFit.contain,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onRuleTap,
+          child: SizedBox(
+            width: 46,
+            height: 26,
+            child: Center(
+              child: Image.asset(
+                CoastinAssetRegistry.coinTrailArrow,
+                width: 34,
+                height: 18,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+              ),
+            ),
+          ),
         ),
       ],
+    );
+  }
+}
+
+Future<void> _showMedalRule(BuildContext context, _MedalGoal medalGoal) {
+  return showCupertinoDialog<void>(
+    context: context,
+    builder: (dialogContext) {
+      return _MedalRuleDialog(medalGoal: medalGoal);
+    },
+  );
+}
+
+class _MedalRuleDialog extends StatelessWidget {
+  const _MedalRuleDialog({required this.medalGoal});
+
+  final _MedalGoal medalGoal;
+
+  @override
+  Widget build(BuildContext context) {
+    final remainingCount = medalGoal.goalCount - medalGoal.currentCount;
+    final progressLine = medalGoal.currentCount >= medalGoal.goalCount
+        ? 'This badge is already lit.'
+        : remainingCount <= 0
+        ? 'This badge is ready to light.'
+        : '$remainingCount more ${medalGoal.unitLabel} needed.';
+
+    return CupertinoPopupSurface(
+      isSurfacePainted: false,
+      child: Center(
+        child: Container(
+          width: 300,
+          padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF7FFFD),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFF91F2EA), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0E8C9E).withValues(alpha: 0.18),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                medalGoal.asset,
+                width: 70,
+                height: 78,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                medalGoal.title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: TidewashPalette.inkBlue,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                medalGoal.ruleLine,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: TidewashPalette.harborSlate,
+                  fontSize: 15,
+                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                progressLine,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF109B96),
+                  fontSize: 13,
+                  height: 1.3,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF35D5DC), Color(0xFF2D67CE)],
+                    ),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: const Text(
+                    'Got it',
+                    style: TextStyle(
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
