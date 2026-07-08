@@ -130,15 +130,15 @@ extension _ShoreContentSurfaceCopy on ShoreContentSurface {
   String get blockMessage {
     return switch (this) {
       ShoreContentSurface.profileName =>
-        'Please use a respectful Coastin nickname without unsafe or objectionable wording.',
+        'Please use a respectful Coastin nickname that feels appropriate for shoreline conversations.',
       ShoreContentSurface.profileNote =>
         'Please keep your profile note respectful, lawful, and focused on coastal interests.',
       ShoreContentSurface.publicCaption =>
-        'Please keep Coastin posts lawful, respectful, and focused on shoreline moments. Remove sexual, threatening, hateful, illegal, or harassing content before sharing.',
+        'Please keep Coastin posts lawful, respectful, and focused on shoreline moments. Remove unsafe, abusive, or off-topic wording before sharing.',
       ShoreContentSurface.publicComment =>
-        'Please keep comments respectful and useful for the shoreline discussion. Remove unsafe, harassing, illegal, or objectionable wording before sending.',
+        'Please keep comments respectful and useful for the shoreline discussion. Remove unsafe, abusive, or off-topic wording before sending.',
       ShoreContentSurface.privateMessage =>
-        'Please keep Coastin messages respectful and safe. Remove unsafe, harassing, illegal, or objectionable wording before sending.',
+        'Please keep Coastin messages respectful and safe. Remove unsafe, abusive, or off-topic wording before sending.',
     };
   }
 }

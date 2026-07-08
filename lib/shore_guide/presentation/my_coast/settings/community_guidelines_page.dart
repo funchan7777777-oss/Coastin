@@ -21,7 +21,7 @@ class CommunityGuidelinesPage extends StatelessWidget {
     _GuidelineCurrent(
       title: 'Share lawful shoreline content',
       body:
-          'Upload only content you own or have permission to use. Do not share illegal activity, dangerous instructions, sexual content, threats, hate, or harassment.',
+          'Upload only content you own or have permission to use. Do not share harmful, exploitative, threatening, or abusive material.',
     ),
     _GuidelineCurrent(
       title: 'Filtering before posting',
