@@ -41,7 +41,7 @@ class MyCoastSettingsPage extends StatelessWidget {
               child: Column(
                 children: [
                   MyCoastTopBar(
-                    title: '',
+                    title: 'Settings',
                     onBack: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(height: 24),
@@ -53,13 +53,13 @@ class MyCoastSettingsPage extends StatelessWidget {
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.documentGlyph,
-                    title: 'Privacy agreement',
+                    title: 'Privacy Policy',
                     onTap: () =>
                         _openPolicy(context, HarborPolicyKind.privacyPolicy),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.documentGlyph,
-                    title: 'User agreement',
+                    title: 'Terms of Service',
                     onTap: () =>
                         _openPolicy(context, HarborPolicyKind.userAgreement),
                   ),

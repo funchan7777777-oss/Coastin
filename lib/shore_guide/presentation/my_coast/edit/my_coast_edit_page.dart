@@ -8,6 +8,7 @@ import '../../../../app/theme/tidewash_palette.dart';
 import '../../../../arrival_gate/data/local/harbor_passage_store.dart';
 import '../../../../arrival_gate/domain/entities/harbor_passage_record.dart';
 import '../../../../arrival_gate/domain/value_objects/profile_wake_choice.dart';
+import '../../../../shared/ui/coastin_profile_pickers.dart';
 import '../widgets/my_coast_top_bar.dart';
 import '../widgets/my_coast_wash.dart';
 
@@ -26,8 +27,8 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
   late final TextEditingController _nameController;
   late final TextEditingController _signatureController;
   String _avatarPath = '';
-  String _birthLine = '2000  00  00';
-  String _countryLine = 'United States';
+  String _birthLine = '';
+  String _countryLine = '';
   ProfileWakeChoice _wakeChoice = ProfileWakeChoice.male;
 
   @override
@@ -41,6 +42,8 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
       text: record?.signatureLine ?? '',
     );
     _avatarPath = record?.avatarImagePath ?? '';
+    _birthLine = record?.birthLine ?? '';
+    _countryLine = record?.countryLine ?? '';
     if (record?.profileWake == ProfileWakeChoice.female.storageValue) {
       _wakeChoice = ProfileWakeChoice.female;
     }
@@ -94,13 +97,17 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
                         const SizedBox(height: 22),
                         _SelectorField(
                           label: 'Date of Birth',
-                          value: _birthLine,
+                          value: _birthLine.isEmpty
+                              ? 'Not selected'
+                              : _birthLine,
                           onTap: _chooseBirthday,
                         ),
                         const SizedBox(height: 22),
                         _SelectorField(
                           label: 'Select country',
-                          value: _countryLine,
+                          value: _countryLine.isEmpty
+                              ? 'Not selected'
+                              : _countryLine,
                           onTap: _chooseCountry,
                         ),
                         const SizedBox(height: 22),
@@ -200,69 +207,63 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
     if (source == null) {
       return;
     }
-    final picked = await _imagePicker.pickImage(
-      source: source,
-      imageQuality: 84,
-      maxWidth: 1400,
+    try {
+      final picked = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 84,
+        maxWidth: 1400,
+      );
+      if (!mounted || picked == null) {
+        return;
+      }
+      setState(() => _avatarPath = picked.path);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      await showCupertinoDialog<void>(
+        context: context,
+        builder: (context) {
+          return CupertinoAlertDialog(
+            title: const Text('Photo was not added'),
+            content: const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text(
+                'Please allow camera or photo library access, then choose a profile image again.',
+              ),
+            ),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> _chooseBirthday() async {
+    final selectedBirthLine = await showCoastinBirthDatePicker(
+      context: context,
+      selectedBirthLine: _birthLine,
     );
-    if (!mounted || picked == null) {
+    if (!mounted || selectedBirthLine == null) {
       return;
     }
-    setState(() => _avatarPath = picked.path);
+    setState(() => _birthLine = selectedBirthLine);
   }
 
-  void _chooseBirthday() {
-    showCupertinoModalPopup<void>(
+  Future<void> _chooseCountry() async {
+    final selectedCountry = await showCoastinCountryPicker(
       context: context,
-      builder: (context) {
-        return CupertinoActionSheet(
-          title: const Text('Date of Birth'),
-          actions: [
-            for (final value in [
-              '1998  05  12',
-              '2000  00  00',
-              '2002  08  21',
-            ])
-              CupertinoActionSheetAction(
-                onPressed: () {
-                  setState(() => _birthLine = value);
-                  Navigator.of(context).pop();
-                },
-                child: Text(value),
-              ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-        );
-      },
+      selectedCountry: _countryLine,
     );
-  }
-
-  void _chooseCountry() {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (context) {
-        return CupertinoActionSheet(
-          title: const Text('Select country'),
-          actions: [
-            for (final value in ['United States', 'Australia', 'Canada'])
-              CupertinoActionSheetAction(
-                onPressed: () {
-                  setState(() => _countryLine = value);
-                  Navigator.of(context).pop();
-                },
-                child: Text(value),
-              ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-        );
-      },
-    );
+    if (!mounted || selectedCountry == null) {
+      return;
+    }
+    setState(() => _countryLine = selectedCountry);
   }
 
   Future<void> _saveProfile() async {
@@ -302,6 +303,8 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
         avatarImagePath: _avatarPath,
         profileWake: _wakeChoice.storageValue,
         signatureLine: _signatureController.text.trim(),
+        countryLine: _countryLine.trim(),
+        birthLine: _birthLine.trim(),
       ),
     );
     if (!mounted) {

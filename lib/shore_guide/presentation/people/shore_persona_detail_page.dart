@@ -12,7 +12,9 @@ import '../../data/local/shore_persona_catalog.dart';
 import '../../domain/entities/feed/coastal_post_dispatch.dart';
 import '../../domain/entities/shore_video_moment.dart';
 import '../../domain/entities/shoreline_persona.dart';
+import '../../domain/value_objects/coastin_country_label.dart';
 import '../../domain/value_objects/shore_profile_current.dart';
+import '../coastal_feed/details/coastal_post_details_page.dart';
 import '../moments/share_moments_page.dart';
 import '../sea_buddies/call/sea_buddy_call_page.dart';
 import '../sea_buddies/chat/sea_buddy_chat_page.dart';
@@ -36,6 +38,10 @@ class ShorePersonaDetailPage extends StatefulWidget {
 class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   final SeaBuddyMessageStore _messageStore = const SeaBuddyMessageStore();
+  final Map<String, bool> _lovedDispatches = {
+    for (final post in SeededCoastalFeedDeck.coastalDispatches)
+      post.dispatchKey: post.isInitiallyLoved,
+  };
   ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
     reportedContentIds: {},
@@ -142,6 +148,14 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
                           persona: persona,
                           showVideos: _showVideos,
                           snapshot: _snapshot,
+                          lovedDispatches: _lovedDispatches,
+                          onPostLoveChanged: (post, isLoved) {
+                            setState(
+                              () =>
+                                  _lovedDispatches[post.dispatchKey] = isLoved,
+                            );
+                          },
+                          onPostFollowChanged: (_) => _restoreSafety(),
                         ),
                       ],
                     ),
@@ -537,11 +551,17 @@ class _PersonaWorkGrid extends StatelessWidget {
     required this.persona,
     required this.showVideos,
     required this.snapshot,
+    required this.lovedDispatches,
+    required this.onPostLoveChanged,
+    required this.onPostFollowChanged,
   });
 
   final ShorelinePersona persona;
   final bool showVideos;
   final ShoreSafetySnapshot snapshot;
+  final Map<String, bool> lovedDispatches;
+  final void Function(CoastalPostDispatch post, bool isLoved) onPostLoveChanged;
+  final ValueChanged<bool> onPostFollowChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -566,7 +586,10 @@ class _PersonaWorkGrid extends StatelessWidget {
         )
         .toList();
 
-    final postTiles = _tilesForPosts(posts);
+    final postTiles = posts
+        .where((post) => post.frameAssets.isNotEmpty)
+        .take(6)
+        .toList();
     final tileCount = showVideos ? videoMoments.length : postTiles.length;
 
     if (tileCount == 0) {
@@ -588,12 +611,35 @@ class _PersonaWorkGrid extends StatelessWidget {
       itemCount: tileCount,
       itemBuilder: (context, index) {
         if (!showVideos) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(9),
-            child: Image.asset(
-              postTiles[index],
-              fit: BoxFit.cover,
-              filterQuality: FilterQuality.high,
+          final post = postTiles[index];
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              Navigator.of(context).push(
+                CupertinoPageRoute<void>(
+                  builder: (_) => CoastalPostDetailsPage(
+                    postDispatch: post,
+                    isLoved:
+                        lovedDispatches[post.dispatchKey] ??
+                        post.isInitiallyLoved,
+                    isFollowed: snapshot.isFollowing(
+                      post.authorHarbor.tideHandle,
+                    ),
+                    onLoveChanged: (isLoved) =>
+                        onPostLoveChanged(post, isLoved),
+                    onFollowChanged: onPostFollowChanged,
+                    onReplyCountChanged: (_) {},
+                  ),
+                ),
+              );
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(9),
+              child: Image.asset(
+                post.frameAssets.first,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              ),
             ),
           );
         }
@@ -616,13 +662,6 @@ class _PersonaWorkGrid extends StatelessWidget {
         );
       },
     );
-  }
-
-  List<String> _tilesForPosts(List<CoastalPostDispatch> posts) {
-    return [
-      for (final post in posts)
-        if (post.frameAssets.isNotEmpty) post.frameAssets.first,
-    ].take(6).toList();
   }
 }
 
@@ -714,97 +753,7 @@ class _MomentFirstFrameTileState extends State<_MomentFirstFrameTile> {
 }
 
 String _profileOriginLine(ShorelinePersona persona, String? placeRibbon) {
-  final age = _profileAge(persona, placeRibbon);
-  final country =
-      _countryFromPlaceRibbon(placeRibbon) ?? _fallbackCountryFor(persona);
-  return '$country, $age';
-}
-
-int _profileAge(ShorelinePersona persona, String? placeRibbon) {
-  final firstPart = placeRibbon?.split('-').first.trim();
-  final parsedAge = int.tryParse(firstPart ?? '');
-  if (parsedAge != null) {
-    return parsedAge;
-  }
-  final index = SeededShoreMomentDeck.shorelinePeople.indexWhere(
-    (person) => person.tideHandle == persona.tideHandle,
-  );
-  return 22 + ((index < 0 ? 0 : index) * 3) % 10;
-}
-
-String? _countryFromPlaceRibbon(String? placeRibbon) {
-  if (placeRibbon == null || placeRibbon.trim().isEmpty) {
-    return null;
-  }
-  final parts = placeRibbon.split('-');
-  final placeMarker = (parts.length > 1 ? parts.last : parts.first).trim();
-  const placeCountries = {
-    'Aruba': 'Aruba',
-    'Australia': 'Australia',
-    'Bali': 'Indonesia',
-    'Beacon Steps': 'China',
-    'Breeze Point': 'Australia',
-    'Cebu': 'Philippines',
-    'Crete': 'Greece',
-    'Durban': 'South Africa',
-    'Foamline': 'Indonesia',
-    'Kona': 'United States',
-    'Lagoon Market': 'Aruba',
-    'Lagos': 'Nigeria',
-    'Lisbon': 'Portugal',
-    'Maui': 'United States',
-    'Miami': 'United States',
-    'Nice': 'France',
-    'Palm Walk': 'United States',
-    'Phuket': 'Thailand',
-    'Quiet Pier': 'Nigeria',
-    'Reef Rail': 'Indonesia',
-    'Sandbar Gate': 'United States',
-    'Sanya': 'China',
-    'Seaglass Cafe': 'Greece',
-    'Venice': 'United States',
-  };
-  return placeCountries[placeMarker] ??
-      _countryNameIfAlreadyCountry(placeMarker);
-}
-
-String? _countryNameIfAlreadyCountry(String value) {
-  const countryNames = {
-    'Australia',
-    'Aruba',
-    'China',
-    'France',
-    'Greece',
-    'Indonesia',
-    'Nigeria',
-    'Philippines',
-    'Portugal',
-    'South Africa',
-    'Thailand',
-    'United States',
-  };
-  return countryNames.contains(value) ? value : null;
-}
-
-String _fallbackCountryFor(ShorelinePersona persona) {
-  const countries = [
-    'Australia',
-    'United States',
-    'Philippines',
-    'Nigeria',
-    'Indonesia',
-    'Portugal',
-    'Aruba',
-    'China',
-    'Thailand',
-    'United States',
-    'Greece',
-    'France',
-  ];
-  final index = SeededShoreMomentDeck.shorelinePeople.indexWhere(
-    (person) => person.tideHandle == persona.tideHandle,
-  );
-  return countries[(index < 0 ? 0 : index) % countries.length];
+  return coastinCountryForPersona(persona, placeRibbon: placeRibbon);
 }
 
 const Shadow _profileShadow = Shadow(

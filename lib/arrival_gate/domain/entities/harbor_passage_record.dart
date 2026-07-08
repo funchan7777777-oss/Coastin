@@ -8,6 +8,8 @@ class HarborPassageRecord {
     this.avatarImagePath = '',
     this.profileWake = '',
     this.signatureLine = '',
+    this.countryLine = '',
+    this.birthLine = '',
   });
 
   final String passageMarker;
@@ -18,6 +20,8 @@ class HarborPassageRecord {
   final String avatarImagePath;
   final String profileWake;
   final String signatureLine;
+  final String countryLine;
+  final String birthLine;
 
   bool get canRestoreHarbor =>
       passageMarker.isNotEmpty && displayName.isNotEmpty;

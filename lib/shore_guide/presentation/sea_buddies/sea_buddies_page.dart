@@ -4,12 +4,12 @@ import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../app/theme/tidewash_palette.dart';
 import '../../../shared/ui/coastin_empty_state.dart';
 import '../../data/local/buddies/sea_buddy_message_store.dart';
-import '../../data/local/buddies/seeded_sea_buddy_deck.dart';
 import '../../data/local/buddies/shore_system_notice_store.dart';
 import '../../data/local/shore_persona_catalog.dart';
 import '../../data/local/safety/shore_safety_store.dart';
 import '../../domain/entities/buddies/sea_buddy_note.dart';
 import '../../domain/entities/buddies/sea_buddy_thread.dart';
+import '../../domain/value_objects/coastin_country_label.dart';
 import '../../domain/value_objects/shore_profile_current.dart';
 import '../people/shore_persona_detail_page.dart';
 import 'chat/sea_buddy_chat_page.dart';
@@ -58,15 +58,18 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
     _restoreSafety();
   }
 
-  List<SeaBuddyThread> get _filteredThreads {
+  List<SeaBuddyThread> get _visibleMutualThreads {
     final query = _searchTide.trim().toLowerCase();
-    final threads = SeededSeaBuddyDeck.buddyThreads.where((thread) {
-      final handle = thread.buddyPersona.tideHandle;
-      return _snapshot.isMutualWith(handle) &&
-          !_snapshot.blockedHandles.contains(handle);
-    });
+    final threads = ShorePersonaCatalog.people
+        .where((persona) {
+          final handle = persona.tideHandle;
+          return _snapshot.isMutualWith(handle) &&
+              !_snapshot.blockedHandles.contains(handle);
+        })
+        .map(ShorePersonaCatalog.threadForPersona)
+        .toList();
     if (query.isEmpty) {
-      return threads.toList();
+      return threads;
     }
     return threads.where((thread) {
       final savedPreview = _latestThreadNotes[thread.threadKey]?.noteText ?? '';
@@ -74,6 +77,7 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
             query,
           ) ||
           thread.placeRibbon.toLowerCase().contains(query) ||
+          thread.buddyPersona.coastalStamp.toLowerCase().contains(query) ||
           savedPreview.toLowerCase().contains(query);
     }).toList();
   }
@@ -96,7 +100,8 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final visibleThreads = _filteredThreads;
+    final visibleMutualThreads = _visibleMutualThreads;
+    final visibleThreads = visibleMutualThreads;
     final visibleNotices = _visibleSystemNotices;
 
     return CupertinoPageScaffold(
@@ -128,6 +133,13 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
                         },
                       ),
                       const SizedBox(height: 24),
+                      if (visibleMutualThreads.isNotEmpty) ...[
+                        _MutualBuddySection(
+                          threads: visibleMutualThreads,
+                          onBuddyTap: _showMutualBuddyActions,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                       if (visibleNotices.isNotEmpty) ...[
                         _SeaSystemNoticeSection(
                           notices: visibleNotices,
@@ -211,6 +223,42 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
         .then((_) => _restoreSafety());
   }
 
+  void _showMutualBuddyActions(SeaBuddyThread thread) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (context) {
+        return CupertinoActionSheet(
+          title: Text(thread.buddyPersona.displayHarborName),
+          message: Text(
+            'Mutual follow - ${coastinCountryForPersona(thread.buddyPersona, placeRibbon: thread.placeRibbon)}',
+          ),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _openChat(thread);
+              },
+              child: const Text('Chat'),
+            ),
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _safetyStore.unfollow(thread.buddyPersona.tideHandle);
+                await _restoreSafety();
+              },
+              child: const Text('Unfollow'),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _restoreSafety() async {
     final snapshot = await _safetyStore.restoreSnapshot();
     final notices = await _noticeStore.restoreNotices();
@@ -287,6 +335,157 @@ class _SeaSearchField extends StatelessWidget {
         color: TidewashPalette.inkBlue,
         fontSize: 14,
         fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+}
+
+class _MutualBuddySection extends StatelessWidget {
+  const _MutualBuddySection({required this.threads, required this.onBuddyTap});
+
+  final List<SeaBuddyThread> threads;
+  final ValueChanged<SeaBuddyThread> onBuddyTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 15, 16, 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF).withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFD9F4EF)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF1BAFC4).withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF35D5DC), Color(0xFF2D67CE)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: const Icon(
+                  CupertinoIcons.person_2_fill,
+                  color: Color(0xFFFFFFFF),
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                'Mutual buddies',
+                style: TextStyle(
+                  color: TidewashPalette.inkBlue,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 92,
+            child: ListView.separated(
+              padding: EdgeInsets.zero,
+              scrollDirection: Axis.horizontal,
+              itemCount: threads.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final thread = threads[index];
+                return _MutualBuddyChip(
+                  thread: thread,
+                  onTap: () => onBuddyTap(thread),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MutualBuddyChip extends StatelessWidget {
+  const _MutualBuddyChip({required this.thread, required this.onTap});
+
+  final SeaBuddyThread thread;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final persona = thread.buddyPersona;
+    final genderGlyph = persona.profileCurrent == ShoreProfileCurrent.feminine
+        ? CoastinAssetRegistry.feminineTideGlyph
+        : CoastinAssetRegistry.masculineTideGlyph;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: SizedBox(
+        width: 76,
+        child: Column(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipOval(
+                  child: Image.asset(
+                    persona.avatarAsset,
+                    width: 54,
+                    height: 54,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+                Positioned(
+                  right: -3,
+                  bottom: -2,
+                  child: Image.asset(genderGlyph, width: 17, height: 17),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              persona.displayHarborName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: TidewashPalette.inkBlue,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              coastinCountryForPersona(
+                thread.buddyPersona,
+                placeRibbon: thread.placeRibbon,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF8FA7A4),
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -592,7 +791,10 @@ class _SeaBuddyThreadRow extends StatelessWidget {
                     const SizedBox(width: 3),
                     Flexible(
                       child: Text(
-                        thread.placeRibbon,
+                        coastinCountryForPersona(
+                          thread.buddyPersona,
+                          placeRibbon: thread.placeRibbon,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -636,6 +838,6 @@ class _NoBuddyContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CoastinEmptyState(width: 104);
+    return const CoastinEmptyState(width: 72);
   }
 }

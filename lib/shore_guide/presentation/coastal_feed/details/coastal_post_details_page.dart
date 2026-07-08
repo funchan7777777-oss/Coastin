@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
@@ -36,6 +37,8 @@ class CoastalPostDetailsPage extends StatefulWidget {
 }
 
 class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
+  static const MethodChannel _shareChannel = MethodChannel('coastin/share');
+
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
   late bool _isLoved = widget.isLoved;
@@ -105,7 +108,10 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        _DetailFrameStrip(frameAssets: post.frameAssets),
+                        _DetailFrameStrip(
+                          frameAssets: post.frameAssets,
+                          onFrameTap: _openFramePreview,
+                        ),
                         const SizedBox(height: 12),
                         _DetailActionRow(
                           isLoved: _isLoved,
@@ -114,6 +120,8 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                           relayTally: post.relayTally,
                           topicLabel: post.topicLabel,
                           onLoveTap: _toggleLove,
+                          onShareTap: _sharePost,
+                          onMoreTap: _showPostInfo,
                         ),
                         const SizedBox(height: 26),
                         Image.asset(
@@ -253,43 +261,55 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     widget.onReplyCountChanged(_visibleReplies.length);
   }
 
-  void _showPostInfo() {
+  void _openFramePreview(int initialIndex) {
     showCupertinoModalPopup<void>(
       context: context,
+      barrierColor: const Color(0xE6000000),
       builder: (context) {
-        return CupertinoActionSheet(
-          title: Text(widget.postDispatch.topicLabel),
-          message: Text(widget.postDispatch.authorHarbor.coastalStamp),
-          actions: [
-            CupertinoActionSheetAction(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Save post'),
-            ),
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await ShoreSafetyReef.showGuard(
-                  context: this.context,
-                  contentId: 'post:${widget.postDispatch.dispatchKey}',
-                  contentKind: ShoreSafetyContentKind.post,
-                  ownerName: widget.postDispatch.authorHarbor.displayHarborName,
-                  ownerHandle: widget.postDispatch.authorHarbor.tideHandle,
-                );
-                if (mounted) {
-                  Navigator.of(this.context).pop();
-                }
-              },
-              child: const Text('Report post'),
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
+        return _FramePreviewOverlay(
+          frameAssets: widget.postDispatch.frameAssets,
+          initialIndex: initialIndex,
         );
       },
     );
+  }
+
+  Future<void> _sharePost() async {
+    final post = widget.postDispatch;
+    final shareText =
+        '${post.authorHarbor.displayHarborName} on Coastin\n'
+        '${post.captionCurrent}\n'
+        '${coastalPostOriginLine(post)} · ${post.topicLabel}';
+    try {
+      await _shareChannel.invokeMethod<void>('shareText', {'text': shareText});
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      await ShoreSafetyReef.showAccountDone(
+        context: context,
+        title: 'Share unavailable',
+        message:
+            'The system share sheet could not open right now. Please try again later.',
+      );
+    }
+  }
+
+  Future<void> _showPostInfo() async {
+    final outcome = await ShoreSafetyReef.showGuard(
+      context: context,
+      contentId: 'post:${widget.postDispatch.dispatchKey}',
+      contentKind: ShoreSafetyContentKind.post,
+      ownerName: widget.postDispatch.authorHarbor.displayHarborName,
+      ownerHandle: widget.postDispatch.authorHarbor.tideHandle,
+    );
+    if (!mounted || outcome == null) {
+      return;
+    }
+    await _restoreSafety();
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 }
 
@@ -307,6 +327,108 @@ class _DetailWash extends StatelessWidget {
             const Color(0xFFFFF7DA),
             const Color(0xFFEAF8E5),
             const Color(0xFFC4F8F1).withValues(alpha: 0.98),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FramePreviewOverlay extends StatefulWidget {
+  const _FramePreviewOverlay({
+    required this.frameAssets,
+    required this.initialIndex,
+  });
+
+  final List<String> frameAssets;
+  final int initialIndex;
+
+  @override
+  State<_FramePreviewOverlay> createState() => _FramePreviewOverlayState();
+}
+
+class _FramePreviewOverlayState extends State<_FramePreviewOverlay> {
+  late final PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.expand(
+      child: ColoredBox(
+        color: const Color(0xF2000000),
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              itemCount: widget.frameAssets.length,
+              onPageChanged: (index) => setState(() => _currentIndex = index),
+              itemBuilder: (context, index) {
+                return Center(
+                  child: InteractiveViewer(
+                    minScale: 1,
+                    maxScale: 4,
+                    child: Image.asset(
+                      widget.frameAssets[index],
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  ),
+                );
+              },
+            ),
+            Positioned(
+              left: 18,
+              top: 54,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFFFF).withValues(alpha: 0.16),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFFFFFFF).withValues(alpha: 0.28),
+                    ),
+                  ),
+                  child: const Icon(
+                    CupertinoIcons.xmark,
+                    color: Color(0xFFFFFFFF),
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+            if (widget.frameAssets.length > 1)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 42,
+                child: Text(
+                  '${_currentIndex + 1}/${widget.frameAssets.length}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFFFFFFFF),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -496,9 +618,13 @@ class _DetailAuthorRow extends StatelessWidget {
 }
 
 class _DetailFrameStrip extends StatelessWidget {
-  const _DetailFrameStrip({required this.frameAssets});
+  const _DetailFrameStrip({
+    required this.frameAssets,
+    required this.onFrameTap,
+  });
 
   final List<String> frameAssets;
+  final ValueChanged<int> onFrameTap;
 
   @override
   Widget build(BuildContext context) {
@@ -506,14 +632,18 @@ class _DetailFrameStrip extends StatelessWidget {
       children: [
         for (var index = 0; index < frameAssets.length; index++) ...[
           Expanded(
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(9),
-                child: Image.asset(
-                  frameAssets[index],
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.high,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onFrameTap(index),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(9),
+                  child: Image.asset(
+                    frameAssets[index],
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
+                  ),
                 ),
               ),
             ),
@@ -533,6 +663,8 @@ class _DetailActionRow extends StatelessWidget {
     required this.relayTally,
     required this.topicLabel,
     required this.onLoveTap,
+    required this.onShareTap,
+    required this.onMoreTap,
   });
 
   final bool isLoved;
@@ -541,6 +673,8 @@ class _DetailActionRow extends StatelessWidget {
   final int relayTally;
   final String topicLabel;
   final VoidCallback onLoveTap;
+  final VoidCallback onShareTap;
+  final VoidCallback onMoreTap;
 
   @override
   Widget build(BuildContext context) {
@@ -578,13 +712,18 @@ class _DetailActionRow extends StatelessWidget {
         _DetailCountGlyph(
           asset: CoastinAssetRegistry.feedShareGlyph,
           count: relayTally,
+          onTap: onShareTap,
         ),
         const SizedBox(width: 12),
-        Image.asset(
-          CoastinAssetRegistry.feedMoreGlyph,
-          width: 21,
-          height: 21,
-          fit: BoxFit.contain,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onMoreTap,
+          child: Image.asset(
+            CoastinAssetRegistry.feedMoreGlyph,
+            width: 21,
+            height: 21,
+            fit: BoxFit.contain,
+          ),
         ),
       ],
     );
@@ -686,14 +825,6 @@ class _DetailReplyRow extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (replyDrift.hasFreshSignal) ...[
-                    const SizedBox(width: 5),
-                    Image.asset(
-                      CoastinAssetRegistry.aquaInfoGlyph,
-                      width: 13,
-                      height: 13,
-                    ),
-                  ],
                   const SizedBox(width: 6),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,

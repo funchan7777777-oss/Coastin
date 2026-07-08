@@ -13,6 +13,8 @@ class HarborPassageStore {
   static const String _avatarImagePathKey = 'coastin.passage.avatarImagePath';
   static const String _profileWakeKey = 'coastin.passage.profileWake';
   static const String _signatureLineKey = 'coastin.passage.signatureLine';
+  static const String _countryLineKey = 'coastin.passage.countryLine';
+  static const String _birthLineKey = 'coastin.passage.birthLine';
 
   Future<HarborPassageRecord?> restoreSettledPassage() async {
     final prefs = await SharedPreferences.getInstance();
@@ -25,6 +27,8 @@ class HarborPassageStore {
       avatarImagePath: prefs.getString(_avatarImagePathKey) ?? '',
       profileWake: prefs.getString(_profileWakeKey) ?? '',
       signatureLine: prefs.getString(_signatureLineKey) ?? '',
+      countryLine: prefs.getString(_countryLineKey) ?? '',
+      birthLine: prefs.getString(_birthLineKey) ?? '',
     );
 
     return record.canRestoreHarbor ? record : null;
@@ -40,6 +44,8 @@ class HarborPassageStore {
     await prefs.setString(_avatarImagePathKey, record.avatarImagePath);
     await prefs.setString(_profileWakeKey, record.profileWake);
     await prefs.setString(_signatureLineKey, record.signatureLine);
+    await prefs.setString(_countryLineKey, record.countryLine);
+    await prefs.setString(_birthLineKey, record.birthLine);
   }
 
   Future<void> clearSettledPassage() async {
@@ -52,5 +58,7 @@ class HarborPassageStore {
     await prefs.remove(_avatarImagePathKey);
     await prefs.remove(_profileWakeKey);
     await prefs.remove(_signatureLineKey);
+    await prefs.remove(_countryLineKey);
+    await prefs.remove(_birthLineKey);
   }
 }

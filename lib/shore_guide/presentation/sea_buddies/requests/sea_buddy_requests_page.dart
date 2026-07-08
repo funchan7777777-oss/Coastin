@@ -7,6 +7,7 @@ import '../../../data/local/buddies/seeded_sea_buddy_deck.dart';
 import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/buddies/sea_buddy_request.dart';
+import '../../../domain/value_objects/coastin_country_label.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
 import '../../people/shore_persona_detail_page.dart';
 import '../widgets/sea_buddy_top_bar.dart';
@@ -72,7 +73,7 @@ class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
                         for (final request in _visibleRequests) ...[
                           _SeaRequestTile(
                             request: request,
-                            isAccepted: _snapshot.isFollowedBy(
+                            isAccepted: _snapshot.isFollowing(
                               request.requestPersona.tideHandle,
                             ),
                             onAcceptTap: () => _acceptRequest(request),
@@ -83,7 +84,7 @@ class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
                         if (_visibleRequests.isEmpty)
                           const Padding(
                             padding: EdgeInsets.only(top: 170),
-                            child: CoastinEmptyState(width: 104),
+                            child: CoastinEmptyState(width: 72),
                           ),
                       ],
                     ),
@@ -104,11 +105,17 @@ class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
             request.requestPersona.tideHandle,
           ),
         )
+        .where(
+          (request) =>
+              !_snapshot.isFollowing(request.requestPersona.tideHandle),
+        )
         .toList();
   }
 
   Future<void> _acceptRequest(SeaBuddyRequest request) async {
-    await _noticeStore.recordIncomingFollow(request.requestPersona.tideHandle);
+    final handle = request.requestPersona.tideHandle;
+    await _noticeStore.recordIncomingFollow(handle);
+    await _safetyStore.follow(handle);
     await _restoreSafety();
   }
 
@@ -224,7 +231,10 @@ class _SeaRequestTile extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        request.placeRibbon,
+                        coastinCountryForPersona(
+                          request.requestPersona,
+                          placeRibbon: request.placeRibbon,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

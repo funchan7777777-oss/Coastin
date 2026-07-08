@@ -273,7 +273,14 @@ class SeededCoastalFeedDeck {
       'The third photo has the calmest light.',
       'This topic is getting better every day.',
     ];
-    const tideMinutes = ['08:45', '09:12', '10:36', '12:28', '14:05', '16:18'];
+    const tideMinutes = [
+      '4m ago',
+      '12m ago',
+      '26m ago',
+      '38m ago',
+      '1h ago',
+      '2h ago',
+    ];
     return List.generate(count, (index) {
       final people = SeededShoreMomentDeck.shorelinePeople;
       return ShoreReplyDrift(

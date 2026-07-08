@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../domain/entities/shore_video_moment.dart';
+import '../../../domain/value_objects/coastin_country_label.dart';
 
 class MomentCaptionPanel extends StatelessWidget {
   const MomentCaptionPanel({
@@ -78,7 +79,10 @@ class MomentCaptionPanel extends StatelessWidget {
               const SizedBox(width: 5),
               Expanded(
                 child: Text(
-                  shoreMoment.placeRibbon,
+                  coastinCountryForPersona(
+                    shoreMoment.creatorPersona,
+                    placeRibbon: shoreMoment.placeRibbon,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

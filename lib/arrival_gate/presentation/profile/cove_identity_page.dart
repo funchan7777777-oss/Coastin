@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/assets/coastin_asset_registry.dart';
+import '../../../shared/ui/coastin_profile_pickers.dart';
 import '../../data/local/harbor_passage_store.dart';
 import '../../domain/entities/harbor_passage_record.dart';
 import '../../domain/value_objects/profile_wake_choice.dart';
@@ -42,6 +43,8 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
   final TextEditingController _signatureController = TextEditingController();
   ProfileWakeChoice? _chosenWake;
   String _avatarImagePath = '';
+  String _birthLine = '';
+  String _countryLine = '';
   bool _finishingProfile = false;
 
   @override
@@ -95,6 +98,8 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
                         avatarImagePath: _avatarImagePath,
                         docksideNameController: _docksideNameController,
                         signatureController: _signatureController,
+                        birthLine: _birthLine,
+                        countryLine: _countryLine,
                         chosenWake: _chosenWake,
                         finishingProfile: _finishingProfile,
                         completionButtonLabel: widget.completionButtonLabel,
@@ -109,6 +114,8 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
                         onWakeChosen: (wake) {
                           setState(() => _chosenWake = wake);
                         },
+                        onBirthRequested: _chooseBirthday,
+                        onCountryRequested: _chooseCountry,
                         onProfileFinished: _finishIdentityPassage,
                       ),
                     ),
@@ -183,6 +190,28 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
     }
   }
 
+  Future<void> _chooseBirthday() async {
+    final selectedBirthLine = await showCoastinBirthDatePicker(
+      context: context,
+      selectedBirthLine: _birthLine,
+    );
+    if (!mounted || selectedBirthLine == null) {
+      return;
+    }
+    setState(() => _birthLine = selectedBirthLine);
+  }
+
+  Future<void> _chooseCountry() async {
+    final selectedCountry = await showCoastinCountryPicker(
+      context: context,
+      selectedCountry: _countryLine,
+    );
+    if (!mounted || selectedCountry == null) {
+      return;
+    }
+    setState(() => _countryLine = selectedCountry);
+  }
+
   Future<void> _finishIdentityPassage() async {
     if (_finishingProfile) {
       return;
@@ -223,6 +252,8 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
         avatarImagePath: _avatarImagePath,
         profileWake: chosenWake.storageValue,
         signatureLine: _signatureController.text.trim(),
+        countryLine: _countryLine.trim(),
+        birthLine: _birthLine.trim(),
       ),
     );
     if (!mounted) {
@@ -237,6 +268,8 @@ class _IdentityPanel extends StatelessWidget {
     required this.avatarImagePath,
     required this.docksideNameController,
     required this.signatureController,
+    required this.birthLine,
+    required this.countryLine,
     required this.chosenWake,
     required this.finishingProfile,
     required this.completionButtonLabel,
@@ -244,12 +277,16 @@ class _IdentityPanel extends StatelessWidget {
     required this.onAvatarRemoved,
     required this.onNameCleared,
     required this.onWakeChosen,
+    required this.onBirthRequested,
+    required this.onCountryRequested,
     required this.onProfileFinished,
   });
 
   final String avatarImagePath;
   final TextEditingController docksideNameController;
   final TextEditingController signatureController;
+  final String birthLine;
+  final String countryLine;
   final ProfileWakeChoice? chosenWake;
   final bool finishingProfile;
   final String completionButtonLabel;
@@ -257,6 +294,8 @@ class _IdentityPanel extends StatelessWidget {
   final VoidCallback onAvatarRemoved;
   final VoidCallback onNameCleared;
   final ValueChanged<ProfileWakeChoice> onWakeChosen;
+  final VoidCallback onBirthRequested;
+  final VoidCallback onCountryRequested;
   final VoidCallback onProfileFinished;
 
   @override
@@ -304,6 +343,18 @@ class _IdentityPanel extends StatelessWidget {
           textInputAction: TextInputAction.next,
           trailingAsset: CoastinAssetRegistry.clearEntryBadge,
           onTrailingTap: onNameCleared,
+        ),
+        const SizedBox(height: 17),
+        _IdentitySelectorField(
+          label: 'Date of Birth',
+          value: birthLine.isEmpty ? 'Not selected' : birthLine,
+          onTap: onBirthRequested,
+        ),
+        const SizedBox(height: 17),
+        _IdentitySelectorField(
+          label: 'Select country',
+          value: countryLine.isEmpty ? 'Not selected' : countryLine,
+          onTap: onCountryRequested,
         ),
         const SizedBox(height: 17),
         _SignatureBerth(signatureController: signatureController),
@@ -418,6 +469,71 @@ class _AvatarHarborTile extends StatelessWidget {
               ),
             ),
           ),
+      ],
+    );
+  }
+}
+
+class _IdentitySelectorField extends StatelessWidget {
+  const _IdentitySelectorField({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0x8A5B767D),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0,
+          ),
+        ),
+        const SizedBox(height: 7),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Container(
+            height: 52,
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            decoration: BoxDecoration(
+              color: const Color(0xF7FFFFFF),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0x8A5B767D),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  CupertinoIcons.chevron_right,
+                  color: Color(0x805B767D),
+                  size: 19,
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

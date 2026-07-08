@@ -70,8 +70,9 @@ class _MyCoastPageState extends State<MyCoastPage> {
         ? record!.displayName
         : 'Emilie';
     final signature = record?.signatureLine.trim().isNotEmpty == true
-        ? record!.signatureLine
-        : 'This hand brewed coffee is very fragrant and has a faint jasmine aroma~';
+        ? record!.signatureLine.trim()
+        : '';
+    final countryLine = _profileCountryLine(record);
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFE9FBF6),
@@ -104,6 +105,7 @@ class _MyCoastPageState extends State<MyCoastPage> {
                         _MyCoastHeader(
                           record: record,
                           displayName: displayName,
+                          countryLine: countryLine,
                           signature: signature,
                           onSettingsTap: _openSettings,
                           onEditTap: _openEdit,
@@ -117,7 +119,11 @@ class _MyCoastPageState extends State<MyCoastPage> {
                         const SizedBox(height: 16),
                         _WalletStrip(onTap: _openWallet),
                         const SizedBox(height: 18),
-                        const _MedalShelf(),
+                        _MedalShelf(
+                          postCount: _ProfileGrid.approvedPostCount,
+                          videoCount: _ProfileGrid.approvedVideoCount,
+                          photoCount: _ProfileGrid.approvedPhotoCount,
+                        ),
                         const SizedBox(height: 22),
                         _ProfilePostSwitch(
                           showVideos: _showVideos,
@@ -173,23 +179,123 @@ class _MyCoastPageState extends State<MyCoastPage> {
   void _showLikesLedger() {
     showCupertinoDialog<void>(
       context: context,
+      barrierDismissible: true,
       builder: (context) {
-        return CupertinoAlertDialog(
-          title: const Text('Coast likes'),
-          content: const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text(
-              'No public Coastin likes are recorded for this profile yet.',
+        return const _CoastLikesDialog();
+      },
+    );
+  }
+}
+
+class _CoastLikesDialog extends StatelessWidget {
+  const _CoastLikesDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 34),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF7FFFD),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: const Color(0xFF8DEDE6).withValues(alpha: 0.72),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0C6D7C).withValues(alpha: 0.16),
+                blurRadius: 26,
+                offset: const Offset(0, 16),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(26, 28, 26, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 58,
+                  height: 58,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF35D5DC), Color(0xFF2D67CE)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2D67CE).withValues(alpha: 0.20),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Image.asset(
+                    CoastinAssetRegistry.coinShell,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'Coast likes',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: TidewashPalette.inkBlue,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w900,
+                    decoration: TextDecoration.none,
+                    letterSpacing: 0,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'No public Coastin likes are recorded for this profile yet.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: TidewashPalette.harborSlate,
+                    fontSize: 14,
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                    decoration: TextDecoration.none,
+                    letterSpacing: 0,
+                  ),
+                ),
+                const SizedBox(height: 22),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    height: 48,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF35D5DC), Color(0xFF2D67CE)],
+                      ),
+                    ),
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(
+                        color: Color(0xFFFFFFFF),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        decoration: TextDecoration.none,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+        ),
+      ),
     );
   }
 }
@@ -198,6 +304,7 @@ class _MyCoastHeader extends StatelessWidget {
   const _MyCoastHeader({
     required this.record,
     required this.displayName,
+    required this.countryLine,
     required this.signature,
     required this.onSettingsTap,
     required this.onEditTap,
@@ -205,6 +312,7 @@ class _MyCoastHeader extends StatelessWidget {
 
   final HarborPassageRecord? record;
   final String displayName;
+  final String countryLine;
   final String signature;
   final VoidCallback onSettingsTap;
   final VoidCallback onEditTap;
@@ -279,39 +387,45 @@ class _MyCoastHeader extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 5),
-                  const Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.location_solid,
-                        color: Color(0xFFFF62AC),
-                        size: 15,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        '23 - Australia',
-                        style: TextStyle(
-                          color: Color(0xFF48B9FF),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          shadows: [_profileShadow],
+                  if (countryLine.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Icon(
+                          CupertinoIcons.location_solid,
+                          color: Color(0xFFFF62AC),
+                          size: 15,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    signature,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFFFFFFFF),
-                      fontSize: 13,
-                      height: 1.3,
-                      fontWeight: FontWeight.w700,
-                      shadows: [_profileShadow],
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            countryLine,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFF48B9FF),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                              shadows: [_profileShadow],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  ],
+                  if (signature.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      signature,
+                      style: const TextStyle(
+                        color: Color(0xFFFFFFFF),
+                        fontSize: 13,
+                        height: 1.3,
+                        fontWeight: FontWeight.w700,
+                        shadows: [_profileShadow],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -470,17 +584,53 @@ class _WalletStrip extends StatelessWidget {
 }
 
 class _MedalShelf extends StatelessWidget {
-  const _MedalShelf();
+  const _MedalShelf({
+    required this.postCount,
+    required this.videoCount,
+    required this.photoCount,
+  });
 
-  static const _medals = [
-    (CoastinAssetRegistry.medalNewbie, 'Newbie', '3/3 posts'),
-    (CoastinAssetRegistry.summerMedalLocked, 'Summer Lover', '1/5 posts'),
-    (CoastinAssetRegistry.medalSurfer, 'Pro Surfer', '1/10 videos'),
-    (CoastinAssetRegistry.cameraMedalLocked, 'Photographer', '1/20 photos'),
-  ];
+  final int postCount;
+  final int videoCount;
+  final int photoCount;
 
   @override
   Widget build(BuildContext context) {
+    final medals = [
+      _MedalGoal(
+        unlockedAsset: CoastinAssetRegistry.medalNewbie,
+        lockedAsset: CoastinAssetRegistry.medalPalmLocked,
+        title: 'Newbie',
+        currentCount: postCount,
+        goalCount: 3,
+        unitLabel: 'posts',
+      ),
+      _MedalGoal(
+        unlockedAsset: CoastinAssetRegistry.summerMedal,
+        lockedAsset: CoastinAssetRegistry.summerMedalLocked,
+        title: 'Summer Lover',
+        currentCount: postCount,
+        goalCount: 5,
+        unitLabel: 'posts',
+      ),
+      _MedalGoal(
+        unlockedAsset: CoastinAssetRegistry.medalSurfer,
+        lockedAsset: CoastinAssetRegistry.medalBoardLocked,
+        title: 'Pro Surfer',
+        currentCount: videoCount,
+        goalCount: 10,
+        unitLabel: 'videos',
+      ),
+      _MedalGoal(
+        unlockedAsset: CoastinAssetRegistry.medalPhotographer,
+        lockedAsset: CoastinAssetRegistry.cameraMedalLocked,
+        title: 'Photographer',
+        currentCount: photoCount,
+        goalCount: 20,
+        unitLabel: 'photos',
+      ),
+    ];
+
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
       decoration: BoxDecoration(
@@ -501,21 +651,49 @@ class _MedalShelf extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              for (var index = 0; index < _medals.length; index++) ...[
+              for (var index = 0; index < medals.length; index++) ...[
                 Expanded(
                   child: _MedalTile(
-                    asset: _medals[index].$1,
-                    title: _medals[index].$2,
-                    progress: _medals[index].$3,
+                    asset: medals[index].asset,
+                    title: medals[index].title,
+                    progress: medals[index].progressLine,
                   ),
                 ),
-                if (index != _medals.length - 1) const SizedBox(width: 8),
+                if (index != medals.length - 1) const SizedBox(width: 8),
               ],
             ],
           ),
         ],
       ),
     );
+  }
+}
+
+class _MedalGoal {
+  const _MedalGoal({
+    required this.unlockedAsset,
+    required this.lockedAsset,
+    required this.title,
+    required this.currentCount,
+    required this.goalCount,
+    required this.unitLabel,
+  });
+
+  final String unlockedAsset;
+  final String lockedAsset;
+  final String title;
+  final int currentCount;
+  final int goalCount;
+  final String unitLabel;
+
+  String get asset => currentCount >= goalCount ? unlockedAsset : lockedAsset;
+
+  String? get progressLine {
+    if (currentCount <= 0) {
+      return null;
+    }
+    final shownCount = currentCount > goalCount ? goalCount : currentCount;
+    return '$shownCount/$goalCount $unitLabel';
   }
 }
 
@@ -528,7 +706,7 @@ class _MedalTile extends StatelessWidget {
 
   final String asset;
   final String title;
-  final String progress;
+  final String? progress;
 
   @override
   Widget build(BuildContext context) {
@@ -546,17 +724,20 @@ class _MedalTile extends StatelessWidget {
             fontWeight: FontWeight.w800,
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          progress,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Color(0xFF8EA2A0),
-            fontSize: 9,
-            fontWeight: FontWeight.w700,
+        if (progress != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            progress!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF8EA2A0),
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ),
+        ] else
+          const SizedBox(height: 13),
         const SizedBox(height: 4),
         Image.asset(
           CoastinAssetRegistry.coinTrailArrow,
@@ -615,6 +796,9 @@ class _ProfileGrid extends StatelessWidget {
   final bool showVideos;
   static const List<String> _approvedVideoTiles = [];
   static const List<String> _approvedPostTiles = [];
+  static int get approvedVideoCount => _approvedVideoTiles.length;
+  static int get approvedPostCount => _approvedPostTiles.length;
+  static int get approvedPhotoCount => _approvedPostTiles.length;
 
   @override
   Widget build(BuildContext context) {
@@ -667,6 +851,15 @@ class _ProfileGrid extends StatelessWidget {
   List<String> _approvedCoastTiles(bool showVideos) {
     return showVideos ? _approvedVideoTiles : _approvedPostTiles;
   }
+}
+
+String _profileCountryLine(HarborPassageRecord? record) {
+  final countryLine = record?.countryLine.trim() ?? '';
+  if (countryLine.isEmpty) {
+    return '';
+  }
+  final parts = countryLine.split('-');
+  return parts.length > 1 ? parts.last.trim() : countryLine;
 }
 
 const Shadow _profileShadow = Shadow(
