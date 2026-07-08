@@ -6,18 +6,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../shore_persona_catalog.dart';
 import '../safety/shore_safety_store.dart';
 
-enum ShoreSystemNoticeKind {
+enum ShoreSystemNoticeChannel {
   follow('follow'),
   comment('comment');
 
-  const ShoreSystemNoticeKind(this.storageKey);
+  const ShoreSystemNoticeChannel(this.storageKey);
 
   final String storageKey;
 
-  static ShoreSystemNoticeKind fromStorage(String value) {
-    return ShoreSystemNoticeKind.values.firstWhere(
-      (kind) => kind.storageKey == value,
-      orElse: () => ShoreSystemNoticeKind.follow,
+  static ShoreSystemNoticeChannel fromStorage(String value) {
+    return ShoreSystemNoticeChannel.values.firstWhere(
+      (channel) => channel.storageKey == value,
+      orElse: () => ShoreSystemNoticeChannel.follow,
     );
   }
 }
@@ -25,14 +25,14 @@ enum ShoreSystemNoticeKind {
 class ShoreSystemNotice {
   const ShoreSystemNotice({
     required this.noticeKey,
-    required this.kind,
+    required this.noticeChannel,
     required this.actorHandle,
     required this.noticeLine,
     required this.createdAt,
   });
 
   final String noticeKey;
-  final ShoreSystemNoticeKind kind;
+  final ShoreSystemNoticeChannel noticeChannel;
   final String actorHandle;
   final String noticeLine;
   final DateTime createdAt;
@@ -40,7 +40,7 @@ class ShoreSystemNotice {
   Map<String, Object?> toJson() {
     return {
       'noticeKey': noticeKey,
-      'kind': kind.storageKey,
+      'noticeChannel': noticeChannel.storageKey,
       'actorHandle': actorHandle,
       'noticeLine': noticeLine,
       'createdAt': createdAt.toIso8601String(),
@@ -53,11 +53,11 @@ class ShoreSystemNotice {
       final createdAt =
           DateTime.tryParse(decoded['createdAt'] as String? ?? '') ??
           DateTime.now();
+      final storedChannel =
+          decoded['noticeChannel'] as String? ?? decoded['kind'] as String? ?? '';
       return ShoreSystemNotice(
         noticeKey: decoded['noticeKey'] as String? ?? '',
-        kind: ShoreSystemNoticeKind.fromStorage(
-          decoded['kind'] as String? ?? '',
-        ),
+        noticeChannel: ShoreSystemNoticeChannel.fromStorage(storedChannel),
         actorHandle: decoded['actorHandle'] as String? ?? '',
         noticeLine: decoded['noticeLine'] as String? ?? '',
         createdAt: createdAt,
@@ -72,14 +72,14 @@ class ShoreSystemNoticeStore {
   const ShoreSystemNoticeStore();
 
   static const String _noticeLedgerKey = 'coastin.systemNotices.ledger';
-  static const String _loginFollowerSeedKey =
+  static const String _loginFollowerArrivalFlagKey =
       'coastin.systemNotices.loginFollowerArrivals';
 
   static const ShoreSafetyStore _safetyStore = ShoreSafetyStore();
 
-  Future<void> ensureLoginFollowerDrift() async {
+  Future<void> ensureLoginFollowerArrivals() async {
     final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool(_loginFollowerSeedKey) ?? false) {
+    if (prefs.getBool(_loginFollowerArrivalFlagKey) ?? false) {
       return;
     }
 
@@ -92,7 +92,7 @@ class ShoreSystemNoticeStore {
         )
         .toList();
     if (candidatePeople.isEmpty) {
-      await prefs.setBool(_loginFollowerSeedKey, true);
+      await prefs.setBool(_loginFollowerArrivalFlagKey, true);
       return;
     }
 
@@ -105,7 +105,7 @@ class ShoreSystemNoticeStore {
       await recordIncomingFollow(persona.tideHandle);
     }
 
-    await prefs.setBool(_loginFollowerSeedKey, true);
+    await prefs.setBool(_loginFollowerArrivalFlagKey, true);
   }
 
   Future<List<ShoreSystemNotice>> restoreNotices() async {
@@ -129,7 +129,7 @@ class ShoreSystemNoticeStore {
     await _appendNotice(
       ShoreSystemNotice(
         noticeKey: _noticeKey('follow', actorHandle),
-        kind: ShoreSystemNoticeKind.follow,
+        noticeChannel: ShoreSystemNoticeChannel.follow,
         actorHandle: actorHandle,
         noticeLine: 'started following your Coastin profile.',
         createdAt: DateTime.now(),
@@ -144,7 +144,7 @@ class ShoreSystemNoticeStore {
     await _appendNotice(
       ShoreSystemNotice(
         noticeKey: _noticeKey('comment', actorHandle),
-        kind: ShoreSystemNoticeKind.comment,
+        noticeChannel: ShoreSystemNoticeChannel.comment,
         actorHandle: actorHandle,
         noticeLine: noticeLine,
         createdAt: DateTime.now(),
@@ -155,7 +155,7 @@ class ShoreSystemNoticeStore {
   Future<void> clearNoticeLedger() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_noticeLedgerKey);
-    await prefs.remove(_loginFollowerSeedKey);
+    await prefs.remove(_loginFollowerArrivalFlagKey);
   }
 
   Future<void> _appendNotice(ShoreSystemNotice notice) async {

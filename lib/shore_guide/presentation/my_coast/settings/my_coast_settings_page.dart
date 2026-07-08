@@ -41,44 +41,44 @@ class MyCoastSettingsPage extends StatelessWidget {
               child: Column(
                 children: [
                   MyCoastTopBar(
-                    title: 'Settings',
+                          title: 'Settings',
                     onBack: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(height: 24),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.blockedPersonGlyph,
-                    title: 'Blacklist',
+                    ledgerTitle: 'Blacklist',
                     onTap: () =>
-                        _openNetwork(context, MyCoastNetworkKind.blacklist),
+                        _openNetwork(context, MyCoastNetworkHarbor.blacklist),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.documentGlyph,
-                    title: 'Privacy Policy',
+                    ledgerTitle: 'Privacy Policy',
                     onTap: () =>
                         _openPolicy(context, HarborPolicyKind.privacyPolicy),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.documentGlyph,
-                    title: 'Terms of Service',
+                    ledgerTitle: 'Terms of Service',
                     onTap: () =>
                         _openPolicy(context, HarborPolicyKind.userAgreement),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.settingsListGlyph,
-                    title: 'Community guidelines',
+                    ledgerTitle: 'Community guidelines',
                     onTap: () => _openGuidelines(context),
                   ),
                   const SizedBox(height: 20),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.redTrashGlyph,
-                    title: 'Deletion of account',
+                    ledgerTitle: 'Deletion of account',
                     isWarning: true,
                     hasChevron: false,
                     onTap: () => _confirmClear(context, isDeletion: true),
                   ),
                   _SettingRow(
                     iconAsset: CoastinAssetRegistry.redPowerGlyph,
-                    title: 'Log Out',
+                    ledgerTitle: 'Log Out',
                     isWarning: true,
                     hasChevron: false,
                     onTap: () => _confirmClear(context, isDeletion: false),
@@ -92,9 +92,9 @@ class MyCoastSettingsPage extends StatelessWidget {
     );
   }
 
-  static void _openNetwork(BuildContext context, MyCoastNetworkKind kind) {
+  static void _openNetwork(BuildContext context, MyCoastNetworkHarbor harborLedger) {
     Navigator.of(context).push(
-      CupertinoPageRoute<void>(builder: (_) => MyCoastNetworkPage(kind: kind)),
+      CupertinoPageRoute<void>(builder: (_) => MyCoastNetworkPage(harborLedger: harborLedger)),
     );
   }
 
@@ -140,7 +140,7 @@ class MyCoastSettingsPage extends StatelessWidget {
                 await _passageStore.clearSettledPassage();
                 if (isDeletion) {
                   await _safetyStore.clearLocalLedger();
-                  await _messageStore.clearAllThreads();
+                  await _messageStore.clearAllHarborSignals();
                   await _noticeStore.clearNoticeLedger();
                   await _walletStore.clearWallet();
                 }
@@ -192,7 +192,7 @@ class MyCoastSettingsPage extends StatelessWidget {
 
 class _SettingRow extends StatelessWidget {
   const _SettingRow({
-    required this.title,
+    required this.ledgerTitle,
     required this.onTap,
     required this.iconAsset,
     this.isWarning = false,
@@ -200,7 +200,7 @@ class _SettingRow extends StatelessWidget {
   });
 
   final String iconAsset;
-  final String title;
+  final String ledgerTitle;
   final bool isWarning;
   final bool hasChevron;
   final VoidCallback onTap;
@@ -225,7 +225,7 @@ class _SettingRow extends StatelessWidget {
             const SizedBox(width: 14),
             Expanded(
               child: Text(
-                title,
+                ledgerTitle,
                 style: TextStyle(
                   color: color,
                   fontSize: 15,

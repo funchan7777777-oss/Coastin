@@ -14,21 +14,21 @@ import '../widgets/coast_person_row.dart';
 import '../widgets/my_coast_top_bar.dart';
 import '../widgets/my_coast_wash.dart';
 
-enum MyCoastNetworkKind {
+enum MyCoastNetworkHarbor {
   blacklist('Blacklist'),
   follow('Follow'),
   fans('Fans'),
   friend('Friend');
 
-  const MyCoastNetworkKind(this.title);
+  const MyCoastNetworkHarbor(this.ledgerTitle);
 
-  final String title;
+  final String ledgerTitle;
 }
 
 class MyCoastNetworkPage extends StatefulWidget {
-  const MyCoastNetworkPage({super.key, required this.kind});
+  const MyCoastNetworkPage({super.key, required this.harborLedger});
 
-  final MyCoastNetworkKind kind;
+  final MyCoastNetworkHarbor harborLedger;
 
   @override
   State<MyCoastNetworkPage> createState() => _MyCoastNetworkPageState();
@@ -62,11 +62,11 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
 
   @override
   Widget build(BuildContext context) {
-    final visiblePeople = _peopleForKind(widget.kind, _snapshot);
-    final blockedEntries = widget.kind == MyCoastNetworkKind.blacklist
+    final visiblePeople = _peopleForHarborLedger(widget.harborLedger, _snapshot);
+    final blockedEntries = widget.harborLedger == MyCoastNetworkHarbor.blacklist
         ? _blockedEntries(_snapshot)
         : const <_BlockedHarborEntry>[];
-    final hasContent = widget.kind == MyCoastNetworkKind.blacklist
+    final hasContent = widget.harborLedger == MyCoastNetworkHarbor.blacklist
         ? blockedEntries.isNotEmpty
         : visiblePeople.isNotEmpty;
 
@@ -87,11 +87,11 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
                     child: Column(
                       children: [
                         MyCoastTopBar(
-                          title: widget.kind.title,
+                          title: widget.harborLedger.ledgerTitle,
                           onBack: () => Navigator.of(context).pop(),
                         ),
                         const SizedBox(height: 26),
-                        if (widget.kind == MyCoastNetworkKind.blacklist)
+                        if (widget.harborLedger == MyCoastNetworkHarbor.blacklist)
                           for (final entry in blockedEntries)
                             _BlockedHarborRow(
                               entry: entry,
@@ -128,35 +128,35 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
   }
 
   String _actionAsset(ShorelinePersona persona) {
-    return switch (widget.kind) {
-      MyCoastNetworkKind.blacklist => CoastinAssetRegistry.deletePill,
-      MyCoastNetworkKind.follow => CoastinAssetRegistry.followedBadge,
-      MyCoastNetworkKind.fans =>
+    return switch (widget.harborLedger) {
+      MyCoastNetworkHarbor.blacklist => CoastinAssetRegistry.deletePill,
+      MyCoastNetworkHarbor.follow => CoastinAssetRegistry.followedBadge,
+      MyCoastNetworkHarbor.fans =>
         _snapshot.isFollowing(persona.tideHandle)
             ? CoastinAssetRegistry.followedBadge
             : CoastinAssetRegistry.followBadge,
-      MyCoastNetworkKind.friend => CoastinAssetRegistry.chatPill,
+      MyCoastNetworkHarbor.friend => CoastinAssetRegistry.chatPill,
     };
   }
 
   Future<void> _handleAction(ShorelinePersona persona) async {
-    if (widget.kind == MyCoastNetworkKind.friend) {
-      final thread = SeaBuddyHarborCatalog.buddyThreads.firstWhere(
-        (thread) => thread.buddyHarbor.tideHandle == persona.tideHandle,
-        orElse: () => ShorePersonaCatalog.threadForPersona(persona),
+    if (widget.harborLedger == MyCoastNetworkHarbor.friend) {
+      final buddyThread = SeaBuddyHarborCatalog.buddyThreads.firstWhere(
+        (buddyThread) => buddyThread.buddyHarbor.tideHandle == persona.tideHandle,
+        orElse: () => ShorePersonaCatalog.harborThreadForPersona(persona),
       );
       Navigator.of(context).push(
         CupertinoPageRoute<void>(
-          builder: (_) => SeaBuddyChatPage(buddyThread: thread),
+          builder: (_) => SeaBuddyChatPage(buddyThread: buddyThread),
         ),
       );
       return;
     }
-    if (widget.kind == MyCoastNetworkKind.blacklist) {
+    if (widget.harborLedger == MyCoastNetworkHarbor.blacklist) {
       await _unblockHandle(persona.tideHandle);
       return;
     }
-    if (widget.kind == MyCoastNetworkKind.fans) {
+    if (widget.harborLedger == MyCoastNetworkHarbor.fans) {
       if (_snapshot.isFollowing(persona.tideHandle)) {
         await _safetyStore.unfollow(persona.tideHandle);
       } else {
@@ -165,7 +165,7 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
       await _restoreSafety();
       return;
     }
-    if (widget.kind == MyCoastNetworkKind.follow) {
+    if (widget.harborLedger == MyCoastNetworkHarbor.follow) {
       await _safetyStore.unfollow(persona.tideHandle);
       await _restoreSafety();
     }
@@ -337,8 +337,8 @@ class _BlockedHarborRow extends StatelessWidget {
   }
 }
 
-List<ShorelinePersona> _peopleForKind(
-  MyCoastNetworkKind kind,
+List<ShorelinePersona> _peopleForHarborLedger(
+  MyCoastNetworkHarbor harborLedger,
   ShoreSafetySnapshot snapshot,
 ) {
   final people = ShorePersonaCatalog.people;
@@ -346,12 +346,12 @@ List<ShorelinePersona> _peopleForKind(
     return handles.contains(persona.tideHandle);
   }
 
-  return switch (kind) {
-    MyCoastNetworkKind.blacklist =>
+  return switch (harborLedger) {
+    MyCoastNetworkHarbor.blacklist =>
       people
           .where((persona) => contains(snapshot.blockedHandles, persona))
           .toList(),
-    MyCoastNetworkKind.follow =>
+    MyCoastNetworkHarbor.follow =>
       people
           .where(
             (persona) =>
@@ -359,7 +359,7 @@ List<ShorelinePersona> _peopleForKind(
                 !contains(snapshot.blockedHandles, persona),
           )
           .toList(),
-    MyCoastNetworkKind.fans =>
+    MyCoastNetworkHarbor.fans =>
       people
           .where(
             (persona) =>
@@ -367,7 +367,7 @@ List<ShorelinePersona> _peopleForKind(
                 !contains(snapshot.blockedHandles, persona),
           )
           .toList(),
-    MyCoastNetworkKind.friend =>
+    MyCoastNetworkHarbor.friend =>
       people
           .where(
             (persona) =>

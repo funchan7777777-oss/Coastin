@@ -166,11 +166,11 @@ class _MyCoastPageState extends State<MyCoastPage> {
     ).push(CupertinoPageRoute<void>(builder: (_) => const MyCoastWalletPage()));
   }
 
-  void _openNetworkPage(MyCoastNetworkKind kind) {
+  void _openNetworkPage(MyCoastNetworkHarbor harborLedger) {
     Navigator.of(context)
         .push(
           CupertinoPageRoute<void>(
-            builder: (_) => MyCoastNetworkPage(kind: kind),
+            builder: (_) => MyCoastNetworkPage(harborLedger: harborLedger),
           ),
         )
         .then((_) => _restoreProfile());
@@ -476,7 +476,7 @@ class _ProfileStatsRow extends StatelessWidget {
   });
 
   final ShoreSafetySnapshot safetySnapshot;
-  final ValueChanged<MyCoastNetworkKind> onOpen;
+  final ValueChanged<MyCoastNetworkHarbor> onOpen;
   final VoidCallback onLikesTap;
 
   @override
@@ -501,17 +501,17 @@ class _ProfileStatsRow extends StatelessWidget {
         _ProfileStatTile(
           countText: '$followingCount',
           label: 'Follow',
-          onTap: () => onOpen(MyCoastNetworkKind.follow),
+          onTap: () => onOpen(MyCoastNetworkHarbor.follow),
         ),
         _ProfileStatTile(
           countText: '$fansCount',
           label: 'Fans',
-          onTap: () => onOpen(MyCoastNetworkKind.fans),
+          onTap: () => onOpen(MyCoastNetworkHarbor.fans),
         ),
         _ProfileStatTile(
           countText: '$friendCount',
           label: 'Friends',
-          onTap: () => onOpen(MyCoastNetworkKind.friend),
+          onTap: () => onOpen(MyCoastNetworkHarbor.friend),
         ),
         _ProfileStatTile(countText: '0', label: 'Likes', onTap: onLikesTap),
       ],
@@ -600,7 +600,7 @@ class _MedalShelf extends StatelessWidget {
       _MedalGoal(
         unlockedAsset: CoastinAssetRegistry.medalNewbie,
         lockedAsset: CoastinAssetRegistry.medalPalmLocked,
-        title: 'Newbie',
+        ledgerTitle: 'Newbie',
         currentCount: postCount,
         goalCount: 3,
         unitLabel: 'posts',
@@ -608,7 +608,7 @@ class _MedalShelf extends StatelessWidget {
       _MedalGoal(
         unlockedAsset: CoastinAssetRegistry.summerMedal,
         lockedAsset: CoastinAssetRegistry.summerMedalLocked,
-        title: 'Sun Keeper',
+        ledgerTitle: 'Sun Keeper',
         currentCount: postCount,
         goalCount: 5,
         unitLabel: 'posts',
@@ -616,7 +616,7 @@ class _MedalShelf extends StatelessWidget {
       _MedalGoal(
         unlockedAsset: CoastinAssetRegistry.medalSurfer,
         lockedAsset: CoastinAssetRegistry.medalBoardLocked,
-        title: 'Pro Surfer',
+        ledgerTitle: 'Pro Surfer',
         currentCount: videoCount,
         goalCount: 10,
         unitLabel: 'videos',
@@ -624,7 +624,7 @@ class _MedalShelf extends StatelessWidget {
       _MedalGoal(
         unlockedAsset: CoastinAssetRegistry.medalPhotographer,
         lockedAsset: CoastinAssetRegistry.cameraMedalLocked,
-        title: 'Photographer',
+        ledgerTitle: 'Photographer',
         currentCount: photoCount,
         goalCount: 20,
         unitLabel: 'photos',
@@ -655,7 +655,7 @@ class _MedalShelf extends StatelessWidget {
                 Expanded(
                   child: _MedalTile(
                     asset: medals[index].asset,
-                    title: medals[index].title,
+                    ledgerTitle: medals[index].ledgerTitle,
                     progress: medals[index].progressLine,
                     onRuleTap: () => _showMedalRule(context, medals[index]),
                   ),
@@ -674,7 +674,7 @@ class _MedalGoal {
   const _MedalGoal({
     required this.unlockedAsset,
     required this.lockedAsset,
-    required this.title,
+    required this.ledgerTitle,
     required this.currentCount,
     required this.goalCount,
     required this.unitLabel,
@@ -682,7 +682,7 @@ class _MedalGoal {
 
   final String unlockedAsset;
   final String lockedAsset;
-  final String title;
+  final String ledgerTitle;
   final int currentCount;
   final int goalCount;
   final String unitLabel;
@@ -710,13 +710,13 @@ class _MedalGoal {
 class _MedalTile extends StatelessWidget {
   const _MedalTile({
     required this.asset,
-    required this.title,
+    required this.ledgerTitle,
     required this.progress,
     required this.onRuleTap,
   });
 
   final String asset;
-  final String title;
+  final String ledgerTitle;
   final String? progress;
   final VoidCallback onRuleTap;
 
@@ -727,7 +727,7 @@ class _MedalTile extends StatelessWidget {
         Image.asset(asset, width: 52, height: 62, fit: BoxFit.contain),
         const SizedBox(height: 5),
         Text(
-          title,
+          ledgerTitle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
@@ -826,7 +826,7 @@ class _MedalRuleDialog extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                medalGoal.title,
+                medalGoal.ledgerTitle,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: TidewashPalette.inkBlue,

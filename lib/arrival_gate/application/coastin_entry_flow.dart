@@ -48,7 +48,7 @@ class _CoastinEntryFlowState extends State<CoastinEntryFlow> {
       return;
     }
     if (restoredPassage != null) {
-      await _noticeStore.ensureLoginFollowerDrift();
+      await _noticeStore.ensureLoginFollowerArrivals();
       if (!mounted) {
         return;
       }
@@ -60,11 +60,11 @@ class _CoastinEntryFlowState extends State<CoastinEntryFlow> {
   }
 
   void _openMorningBoard() {
-    _seedFollowersAndOpenBoard();
+    _openBoardAfterFollowerArrivals();
   }
 
-  Future<void> _seedFollowersAndOpenBoard() async {
-    await _noticeStore.ensureLoginFollowerDrift();
+  Future<void> _openBoardAfterFollowerArrivals() async {
+    await _noticeStore.ensureLoginFollowerArrivals();
     if (!mounted) {
       return;
     }

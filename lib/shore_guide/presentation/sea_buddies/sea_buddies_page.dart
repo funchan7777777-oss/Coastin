@@ -32,7 +32,7 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchTide = '';
   List<ShoreSystemNotice> _systemNotices = const [];
-  Map<String, SeaBuddySignalNote> _latestThreadNotes = const {};
+  Map<String, SeaBuddySignalNote> _latestBuddySignals = const {};
   ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
     reportedContentIds: {},
@@ -58,26 +58,26 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
     _restoreSafety();
   }
 
-  List<SeaBuddyHarborThread> get _visibleMutualThreads {
+  List<SeaBuddyHarborThread> get _visibleMutualHarborThreads {
     final query = _searchTide.trim().toLowerCase();
-    final threads = ShorePersonaCatalog.people
+    final buddyThreads = ShorePersonaCatalog.people
         .where((persona) {
           final handle = persona.tideHandle;
           return _snapshot.isMutualWith(handle) &&
               !_snapshot.blockedHandles.contains(handle);
         })
-        .map(ShorePersonaCatalog.threadForPersona)
+        .map(ShorePersonaCatalog.harborThreadForPersona)
         .toList();
     if (query.isEmpty) {
-      return threads;
+      return buddyThreads;
     }
-    return threads.where((thread) {
-      final savedPreview = _latestThreadNotes[thread.harborThreadMarker]?.signalText ?? '';
-      return thread.buddyHarbor.displayHarborName.toLowerCase().contains(
+    return buddyThreads.where((buddyThread) {
+      final savedPreview = _latestBuddySignals[buddyThread.harborThreadMarker]?.signalText ?? '';
+      return buddyThread.buddyHarbor.displayHarborName.toLowerCase().contains(
             query,
           ) ||
-          thread.localApproachRibbon.toLowerCase().contains(query) ||
-          thread.buddyHarbor.coastalStamp.toLowerCase().contains(query) ||
+          buddyThread.localApproachRibbon.toLowerCase().contains(query) ||
+          buddyThread.buddyHarbor.coastalStamp.toLowerCase().contains(query) ||
           savedPreview.toLowerCase().contains(query);
     }).toList();
   }
@@ -100,8 +100,8 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final visibleMutualThreads = _visibleMutualThreads;
-    final visibleThreads = visibleMutualThreads;
+    final visibleMutualHarborThreads = _visibleMutualHarborThreads;
+    final visibleBuddyThreads = visibleMutualHarborThreads;
     final visibleNotices = _visibleSystemNotices;
 
     return CupertinoPageScaffold(
@@ -133,9 +133,9 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
                         },
                       ),
                       const SizedBox(height: 24),
-                      if (visibleMutualThreads.isNotEmpty) ...[
+                      if (visibleMutualHarborThreads.isNotEmpty) ...[
                         _MutualBuddySection(
-                          threads: visibleMutualThreads,
+                          buddyThreads: visibleMutualHarborThreads,
                           onBuddyTap: _showMutualBuddyActions,
                         ),
                         const SizedBox(height: 24),
@@ -147,16 +147,16 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
                         ),
                         const SizedBox(height: 24),
                       ],
-                      for (final thread in visibleThreads) ...[
+                      for (final buddyThread in visibleBuddyThreads) ...[
                         _SeaBuddyHarborThreadRow(
-                          thread: thread,
-                          lastNote: _latestThreadNotes[thread.harborThreadMarker],
-                          onTap: () => _openChat(thread),
-                          onPersonaTap: () => _openPersona(thread),
+                          buddyThread: buddyThread,
+                          lastNote: _latestBuddySignals[buddyThread.harborThreadMarker],
+                          onTap: () => _openChat(buddyThread),
+                          onPersonaTap: () => _openPersona(buddyThread),
                         ),
                         const SizedBox(height: 22),
                       ],
-                      if (visibleThreads.isEmpty && visibleNotices.isEmpty)
+                      if (visibleBuddyThreads.isEmpty && visibleNotices.isEmpty)
                         const Padding(
                           padding: EdgeInsets.only(top: 86),
                           child: _NoBuddyContent(),
@@ -172,23 +172,23 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
     );
   }
 
-  void _openChat(SeaBuddyHarborThread thread) {
+  void _openChat(SeaBuddyHarborThread buddyThread) {
     Navigator.of(context)
         .push(
           CupertinoPageRoute<void>(
-            builder: (_) => SeaBuddyChatPage(buddyThread: thread),
+            builder: (_) => SeaBuddyChatPage(buddyThread: buddyThread),
           ),
         )
         .then((_) => _restoreSafety());
   }
 
-  void _openPersona(SeaBuddyHarborThread thread) {
+  void _openPersona(SeaBuddyHarborThread buddyThread) {
     Navigator.of(context)
         .push(
           CupertinoPageRoute<void>(
             builder: (_) => ShorePersonaDetailPage(
-              persona: thread.buddyHarbor,
-              localApproachRibbon: thread.localApproachRibbon,
+              persona: buddyThread.buddyHarbor,
+              localApproachRibbon: buddyThread.localApproachRibbon,
             ),
           ),
         )
@@ -200,13 +200,13 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
     if (persona == null) {
       return;
     }
-    final thread = ShorePersonaCatalog.threadForPersona(persona);
+    final buddyThread = ShorePersonaCatalog.harborThreadForPersona(persona);
     Navigator.of(context)
         .push(
           CupertinoPageRoute<void>(
             builder: (_) => ShorePersonaDetailPage(
               persona: persona,
-              localApproachRibbon: thread.localApproachRibbon,
+              localApproachRibbon: buddyThread.localApproachRibbon,
             ),
           ),
         )
@@ -223,20 +223,20 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
         .then((_) => _restoreSafety());
   }
 
-  void _showMutualBuddyActions(SeaBuddyHarborThread thread) {
+  void _showMutualBuddyActions(SeaBuddyHarborThread buddyThread) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (context) {
         return CupertinoActionSheet(
-          title: Text(thread.buddyHarbor.displayHarborName),
+          title: Text(buddyThread.buddyHarbor.displayHarborName),
           message: Text(
-            'Mutual follow - ${coastinCountryForPersona(thread.buddyHarbor, localApproachRibbon: thread.localApproachRibbon)}',
+            'Mutual follow - ${coastinCountryForPersona(buddyThread.buddyHarbor, localApproachRibbon: buddyThread.localApproachRibbon)}',
           ),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () {
                 Navigator.of(context).pop();
-                _openChat(thread);
+                _openChat(buddyThread);
               },
               child: const Text('Chat'),
             ),
@@ -244,7 +244,7 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
               isDestructiveAction: true,
               onPressed: () async {
                 Navigator.of(context).pop();
-                await _safetyStore.unfollow(thread.buddyHarbor.tideHandle);
+                await _safetyStore.unfollow(buddyThread.buddyHarbor.tideHandle);
                 await _restoreSafety();
               },
               child: const Text('Unfollow'),
@@ -262,14 +262,14 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
   Future<void> _restoreSafety() async {
     final snapshot = await _safetyStore.restoreSnapshot();
     final notices = await _noticeStore.restoreNotices();
-    final latestNotes = await _messageStore.restoreLatestNotes();
+    final latestSignals = await _messageStore.restoreLatestSignals();
     if (!mounted) {
       return;
     }
     setState(() {
       _snapshot = snapshot;
       _systemNotices = notices;
-      _latestThreadNotes = latestNotes;
+      _latestBuddySignals = latestSignals;
     });
   }
 }
@@ -341,9 +341,9 @@ class _SeaSearchField extends StatelessWidget {
 }
 
 class _MutualBuddySection extends StatelessWidget {
-  const _MutualBuddySection({required this.threads, required this.onBuddyTap});
+  const _MutualBuddySection({required this.buddyThreads, required this.onBuddyTap});
 
-  final List<SeaBuddyHarborThread> threads;
+  final List<SeaBuddyHarborThread> buddyThreads;
   final ValueChanged<SeaBuddyHarborThread> onBuddyTap;
 
   @override
@@ -401,13 +401,13 @@ class _MutualBuddySection extends StatelessWidget {
             child: ListView.separated(
               padding: EdgeInsets.zero,
               scrollDirection: Axis.horizontal,
-              itemCount: threads.length,
+              itemCount: buddyThreads.length,
               separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
-                final thread = threads[index];
+                final buddyThread = buddyThreads[index];
                 return _MutualBuddyChip(
-                  thread: thread,
-                  onTap: () => onBuddyTap(thread),
+                  buddyThread: buddyThread,
+                  onTap: () => onBuddyTap(buddyThread),
                 );
               },
             ),
@@ -419,14 +419,14 @@ class _MutualBuddySection extends StatelessWidget {
 }
 
 class _MutualBuddyChip extends StatelessWidget {
-  const _MutualBuddyChip({required this.thread, required this.onTap});
+  const _MutualBuddyChip({required this.buddyThread, required this.onTap});
 
-  final SeaBuddyHarborThread thread;
+  final SeaBuddyHarborThread buddyThread;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final persona = thread.buddyHarbor;
+    final persona = buddyThread.buddyHarbor;
     final genderGlyph = persona.profileCurrent == ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
@@ -473,8 +473,8 @@ class _MutualBuddyChip extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               coastinCountryForPersona(
-                thread.buddyHarbor,
-                localApproachRibbon: thread.localApproachRibbon,
+                buddyThread.buddyHarbor,
+                localApproachRibbon: buddyThread.localApproachRibbon,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -576,7 +576,7 @@ class _SeaSystemNoticeRow extends StatelessWidget {
     if (persona == null) {
       return const SizedBox.shrink();
     }
-    final isFollow = notice.kind == ShoreSystemNoticeKind.follow;
+    final isFollow = notice.noticeChannel == ShoreSystemNoticeChannel.follow;
     final badgeColor = isFollow
         ? const Color(0xFF2F69CF)
         : const Color(0xFF35CED7);
@@ -709,13 +709,13 @@ class _SeaSystemNoticeRow extends StatelessWidget {
 
 class _SeaBuddyHarborThreadRow extends StatelessWidget {
   const _SeaBuddyHarborThreadRow({
-    required this.thread,
+    required this.buddyThread,
     required this.lastNote,
     required this.onTap,
     required this.onPersonaTap,
   });
 
-  final SeaBuddyHarborThread thread;
+  final SeaBuddyHarborThread buddyThread;
   final SeaBuddySignalNote? lastNote;
   final VoidCallback onTap;
   final VoidCallback onPersonaTap;
@@ -723,7 +723,7 @@ class _SeaBuddyHarborThreadRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final genderGlyph =
-        thread.buddyHarbor.profileCurrent == ShoreProfileCurrent.feminine
+        buddyThread.buddyHarbor.profileCurrent == ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
     final savedPreview = lastNote == null
@@ -745,7 +745,7 @@ class _SeaBuddyHarborThreadRow extends StatelessWidget {
               children: [
                 ClipOval(
                   child: Image.asset(
-                    thread.buddyHarbor.avatarAsset,
+                    buddyThread.buddyHarbor.avatarAsset,
                     width: 56,
                     height: 56,
                     fit: BoxFit.cover,
@@ -772,7 +772,7 @@ class _SeaBuddyHarborThreadRow extends StatelessWidget {
                         behavior: HitTestBehavior.opaque,
                         onTap: onPersonaTap,
                         child: Text(
-                          thread.buddyHarbor.displayHarborName,
+                          buddyThread.buddyHarbor.displayHarborName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -793,8 +793,8 @@ class _SeaBuddyHarborThreadRow extends StatelessWidget {
                     Flexible(
                       child: Text(
                         coastinCountryForPersona(
-                          thread.buddyHarbor,
-                          localApproachRibbon: thread.localApproachRibbon,
+                          buddyThread.buddyHarbor,
+                          localApproachRibbon: buddyThread.localApproachRibbon,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

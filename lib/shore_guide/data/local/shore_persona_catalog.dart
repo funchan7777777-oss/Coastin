@@ -19,23 +19,23 @@ class ShorePersonaCatalog {
     return null;
   }
 
-  static SeaBuddyHarborThread threadForPersona(ShorelinePersona persona) {
-    for (final thread in SeaBuddyHarborCatalog.buddyThreads) {
-      if (thread.buddyHarbor.tideHandle == persona.tideHandle) {
+  static SeaBuddyHarborThread harborThreadForPersona(ShorelinePersona persona) {
+    for (final buddyThread in SeaBuddyHarborCatalog.buddyThreads) {
+      if (buddyThread.buddyHarbor.tideHandle == persona.tideHandle) {
         return SeaBuddyHarborThread(
-          harborThreadMarker: thread.harborThreadMarker,
-          buddyHarbor: thread.buddyHarbor,
-          localApproachRibbon: thread.localApproachRibbon,
-          lastSignalTime: thread.lastSignalTime,
+          harborThreadMarker: buddyThread.harborThreadMarker,
+          buddyHarbor: buddyThread.buddyHarbor,
+          localApproachRibbon: buddyThread.localApproachRibbon,
+          lastSignalTime: buddyThread.lastSignalTime,
           lastSignalPreview: '',
           unreadSignalCount: 0,
-          callWarmupLine: thread.callWarmupLine,
+          callWarmupLine: buddyThread.callWarmupLine,
           signalNotes: const [],
         );
       }
     }
     return SeaBuddyHarborThread(
-      harborThreadMarker: 'thread-${persona.tideHandle}',
+      harborThreadMarker: 'harbor-${persona.tideHandle}',
       buddyHarbor: persona,
       localApproachRibbon: persona.profileCurrent.isFeminine
           ? '23 - Australia'

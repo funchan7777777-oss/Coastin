@@ -199,10 +199,10 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
   }
 
   void _openChat() {
-    final thread = ShorePersonaCatalog.threadForPersona(widget.persona);
+    final buddyThread = ShorePersonaCatalog.harborThreadForPersona(widget.persona);
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => SeaBuddyChatPage(buddyThread: thread),
+        builder: (_) => SeaBuddyChatPage(buddyThread: buddyThread),
       ),
     );
   }
@@ -211,10 +211,10 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     if (!await _canStartPrivateAction() || !mounted) {
       return;
     }
-    final thread = ShorePersonaCatalog.threadForPersona(widget.persona);
+    final buddyThread = ShorePersonaCatalog.harborThreadForPersona(widget.persona);
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => SeaBuddyCallPage(buddyThread: thread),
+        builder: (_) => SeaBuddyCallPage(buddyThread: buddyThread),
       ),
     );
   }
@@ -235,8 +235,8 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
       return;
     }
     if (outcome == ShoreSafetyOutcome.blocked) {
-      await _messageStore.clearThread(
-        ShorePersonaCatalog.threadForPersona(widget.persona).harborThreadMarker,
+      await _messageStore.clearHarborSignals(
+        ShorePersonaCatalog.harborThreadForPersona(widget.persona).harborThreadMarker,
       );
     }
     if (mounted) {

@@ -27,13 +27,13 @@ class SeaBuddyChatPage extends StatefulWidget {
 class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   final SeaBuddyMessageStore _messageStore = const SeaBuddyMessageStore();
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
-  List<SeaBuddySignalNote> _notes = const [];
+  List<SeaBuddySignalNote> _signals = const [];
   final TextEditingController _replyController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _restoreNotes();
+    _restoreSignals();
   }
 
   @override
@@ -72,14 +72,14 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
                           onPersonaTap: _openPersona,
                         ),
                         const SizedBox(height: 26),
-                        if (_notes.isEmpty)
+                        if (_signals.isEmpty)
                           const Padding(
                             padding: EdgeInsets.only(top: 80),
                             child: CoastinEmptyState(width: 104),
                           )
                         else
-                          for (final note in _notes) ...[
-                            _SeaChatBubble(note: note),
+                          for (final signal in _signals) ...[
+                            _SeaChatBubble(signal: signal),
                             const SizedBox(height: 20),
                           ],
                       ],
@@ -94,7 +94,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
               bottom: 24,
               child: _SeaReplyComposer(
                 controller: _replyController,
-                onSend: _sendNote,
+                onSend: _sendSignal,
               ),
             ),
           ],
@@ -103,12 +103,12 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     );
   }
 
-  Future<void> _restoreNotes() async {
-    final notes = await _messageStore.restoreNotes(widget.buddyThread.harborThreadMarker);
+  Future<void> _restoreSignals() async {
+    final signals = await _messageStore.restoreSignals(widget.buddyThread.harborThreadMarker);
     if (!mounted) {
       return;
     }
-    setState(() => _notes = notes);
+    setState(() => _signals = signals);
   }
 
   Future<bool> _ensureMutual() async {
@@ -130,7 +130,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     return false;
   }
 
-  Future<void> _sendNote() async {
+  Future<void> _sendSignal() async {
     final text = _replyController.text.trim();
     if (text.isEmpty) {
       return;
@@ -150,17 +150,17 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     if (!await _ensureMutual()) {
       return;
     }
-    final note = SeaBuddySignalNote(
+    final signal = SeaBuddySignalNote(
       signalMarker: 'local-${DateTime.now().microsecondsSinceEpoch}',
       signalText: text,
       sentFromViewerHarbor: true,
     );
-    await _messageStore.appendNote(widget.buddyThread.harborThreadMarker, note);
+    await _messageStore.appendSignal(widget.buddyThread.harborThreadMarker, signal);
     if (!mounted) {
       return;
     }
     setState(() {
-      _notes = [..._notes, note];
+      _signals = [..._signals, signal];
       _replyController.clear();
     });
   }
@@ -202,7 +202,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
       return;
     }
     if (outcome == ShoreSafetyOutcome.blocked) {
-      await _messageStore.clearThread(widget.buddyThread.harborThreadMarker);
+      await _messageStore.clearHarborSignals(widget.buddyThread.harborThreadMarker);
       if (!mounted) {
         return;
       }
@@ -272,14 +272,14 @@ class _ChatBuddyHeader extends StatelessWidget {
 }
 
 class _SeaChatBubble extends StatelessWidget {
-  const _SeaChatBubble({required this.note});
+  const _SeaChatBubble({required this.signal});
 
-  final SeaBuddySignalNote note;
+  final SeaBuddySignalNote signal;
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: note.sentFromViewerHarbor
+      alignment: signal.sentFromViewerHarbor
           ? Alignment.centerRight
           : Alignment.centerLeft,
       child: ConstrainedBox(
@@ -289,20 +289,20 @@ class _SeaChatBubble extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           decoration: BoxDecoration(
-            color: note.sentFromViewerHarbor
+            color: signal.sentFromViewerHarbor
                 ? const Color(0xFF2F68D3)
                 : const Color(0xFFFFFFFF).withValues(alpha: 0.92),
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(18),
               topRight: const Radius.circular(18),
-              bottomLeft: Radius.circular(note.sentFromViewerHarbor ? 18 : 6),
-              bottomRight: Radius.circular(note.sentFromViewerHarbor ? 6 : 18),
+              bottomLeft: Radius.circular(signal.sentFromViewerHarbor ? 18 : 6),
+              bottomRight: Radius.circular(signal.sentFromViewerHarbor ? 6 : 18),
             ),
           ),
           child: Text(
-            note.signalText,
+            signal.signalText,
             style: TextStyle(
-              color: note.sentFromViewerHarbor
+              color: signal.sentFromViewerHarbor
                   ? const Color(0xFFFFFFFF)
                   : TidewashPalette.inkBlue,
               fontSize: 15,
