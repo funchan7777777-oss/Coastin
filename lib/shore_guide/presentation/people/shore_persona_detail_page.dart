@@ -79,7 +79,10 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
   Widget build(BuildContext context) {
     final persona = widget.persona;
     final isFollowing = _snapshot.isFollowing(persona.tideHandle);
-    final profileOriginLine = _profileOriginLine(persona, widget.localApproachRibbon);
+    final profileOriginLine = _profileOriginLine(
+      persona,
+      widget.localApproachRibbon,
+    );
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFBDF8F3),
@@ -151,8 +154,8 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
                           lovedDispatches: _lovedDispatches,
                           onPostLoveChanged: (post, isLoved) {
                             setState(
-                              () =>
-                                  _lovedDispatches[post.shoreDispatchMarker] = isLoved,
+                              () => _lovedDispatches[post.shoreDispatchMarker] =
+                                  isLoved,
                             );
                           },
                           onPostFollowChanged: (_) => _restoreSafety(),
@@ -199,7 +202,9 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
   }
 
   void _openChat() {
-    final buddyThread = ShorePersonaCatalog.harborThreadForPersona(widget.persona);
+    final buddyThread = ShorePersonaCatalog.harborThreadForPersona(
+      widget.persona,
+    );
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => SeaBuddyChatPage(buddyThread: buddyThread),
@@ -211,7 +216,9 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     if (!await _canStartPrivateAction() || !mounted) {
       return;
     }
-    final buddyThread = ShorePersonaCatalog.harborThreadForPersona(widget.persona);
+    final buddyThread = ShorePersonaCatalog.harborThreadForPersona(
+      widget.persona,
+    );
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => SeaBuddyCallPage(buddyThread: buddyThread),
@@ -236,7 +243,9 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     }
     if (outcome == ShoreSafetyOutcome.blocked) {
       await _messageStore.clearHarborSignals(
-        ShorePersonaCatalog.harborThreadForPersona(widget.persona).harborThreadMarker,
+        ShorePersonaCatalog.harborThreadForPersona(
+          widget.persona,
+        ).harborThreadMarker,
       );
     }
     if (mounted) {
@@ -752,8 +761,14 @@ class _MomentFirstFrameTileState extends State<_MomentFirstFrameTile> {
   }
 }
 
-String _profileOriginLine(ShorelinePersona persona, String? localApproachRibbon) {
-  return coastinCountryForPersona(persona, localApproachRibbon: localApproachRibbon);
+String _profileOriginLine(
+  ShorelinePersona persona,
+  String? localApproachRibbon,
+) {
+  return coastinCountryForPersona(
+    persona,
+    localApproachRibbon: localApproachRibbon,
+  );
 }
 
 const Shadow _profileShadow = Shadow(

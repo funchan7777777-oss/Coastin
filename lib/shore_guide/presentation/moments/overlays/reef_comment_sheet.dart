@@ -17,7 +17,7 @@ class ReefCommentSheet extends StatefulWidget {
   const ReefCommentSheet({
     super.key,
     required this.isOpen,
-    required this.commentDrifts,
+    required this.commentTideMarks,
     required this.viewerPersona,
     required this.bottomDockClearance,
     required this.onClose,
@@ -26,7 +26,7 @@ class ReefCommentSheet extends StatefulWidget {
   });
 
   final bool isOpen;
-  final List<ShoreCommentTideMark> commentDrifts;
+  final List<ShoreCommentTideMark> commentTideMarks;
   final ShorelinePersona viewerPersona;
   final double bottomDockClearance;
   final VoidCallback onClose;
@@ -46,15 +46,15 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
   @override
   void initState() {
     super.initState();
-    _visibleComments = List.of(widget.commentDrifts);
+    _visibleComments = List.of(widget.commentTideMarks);
     _restoreVisibleComments();
   }
 
   @override
   void didUpdateWidget(covariant ReefCommentSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.commentDrifts != widget.commentDrifts) {
-      _visibleComments = List.of(widget.commentDrifts);
+    if (oldWidget.commentTideMarks != widget.commentTideMarks) {
+      _visibleComments = List.of(widget.commentTideMarks);
       _commentController.clear();
       _restoreVisibleComments();
     }
@@ -153,7 +153,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
                 separatorBuilder: (_, _) => const SizedBox(height: 16),
                 itemBuilder: (context, index) {
                   return _ReefCommentRow(
-                    commentDrift: _visibleComments[index],
+                    commentTideMark: _visibleComments[index],
                     onPersonaTap: () => _openPersona(_visibleComments[index]),
                     onReportTap: () => _reportComment(_visibleComments[index]),
                   );
@@ -218,7 +218,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     if (!mounted) {
       return;
     }
-    final visibleComments = widget.commentDrifts
+    final visibleComments = widget.commentTideMarks
         .where(
           (comment) => snapshot.isVisibleContent(
             'comment:${comment.commentMarker}',
@@ -232,31 +232,31 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     widget.onVisibleCountChanged(visibleComments.length);
   }
 
-  void _openPersona(ShoreCommentTideMark commentDrift) {
+  void _openPersona(ShoreCommentTideMark commentTideMark) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
-          persona: commentDrift.commentHarbor,
+          persona: commentTideMark.commentHarbor,
           localApproachRibbon: 'Shared shore note',
         ),
       ),
     );
   }
 
-  Future<void> _reportComment(ShoreCommentTideMark commentDrift) async {
+  Future<void> _reportComment(ShoreCommentTideMark commentTideMark) async {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
-      contentId: 'comment:${commentDrift.commentMarker}',
+      contentId: 'comment:${commentTideMark.commentMarker}',
       contentChannel: ShoreSafetyContentChannel.comment,
-      ownerName: commentDrift.commentHarbor.displayHarborName,
-      ownerHandle: commentDrift.commentHarbor.tideHandle,
+      ownerName: commentTideMark.commentHarbor.displayHarborName,
+      ownerHandle: commentTideMark.commentHarbor.tideHandle,
     );
     if (!mounted || outcome == null) {
       return;
     }
     setState(() {
       _visibleComments.removeWhere(
-        (comment) => comment.commentMarker == commentDrift.commentMarker,
+        (comment) => comment.commentMarker == commentTideMark.commentMarker,
       );
     });
     widget.onVisibleCountChanged(_visibleComments.length);
@@ -329,19 +329,20 @@ class _CommentComposer extends StatelessWidget {
 
 class _ReefCommentRow extends StatelessWidget {
   const _ReefCommentRow({
-    required this.commentDrift,
+    required this.commentTideMark,
     required this.onPersonaTap,
     required this.onReportTap,
   });
 
-  final ShoreCommentTideMark commentDrift;
+  final ShoreCommentTideMark commentTideMark;
   final VoidCallback onPersonaTap;
   final VoidCallback onReportTap;
 
   @override
   Widget build(BuildContext context) {
     final genderGlyph =
-        commentDrift.commentHarbor.profileCurrent == ShoreProfileCurrent.feminine
+        commentTideMark.commentHarbor.profileCurrent ==
+            ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
 
@@ -356,7 +357,7 @@ class _ReefCommentRow extends StatelessWidget {
             children: [
               ClipOval(
                 child: Image.asset(
-                  commentDrift.commentHarbor.avatarAsset,
+                  commentTideMark.commentHarbor.avatarAsset,
                   width: 42,
                   height: 42,
                   fit: BoxFit.cover,
@@ -383,7 +384,7 @@ class _ReefCommentRow extends StatelessWidget {
                       behavior: HitTestBehavior.opaque,
                       onTap: onPersonaTap,
                       child: Text(
-                        commentDrift.commentHarbor.displayHarborName,
+                        commentTideMark.commentHarbor.displayHarborName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -396,7 +397,7 @@ class _ReefCommentRow extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    commentDrift.commentClock,
+                    commentTideMark.commentClock,
                     style: TextStyle(
                       color: TidewashPalette.harborSlate.withValues(
                         alpha: 0.64,
@@ -420,7 +421,7 @@ class _ReefCommentRow extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               Text(
-                commentDrift.commentText,
+                commentTideMark.commentText,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

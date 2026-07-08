@@ -59,7 +59,9 @@ class CoastalPostCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            _PostFrameGrid(shorelineFrameAssets: shoreDispatch.shorelineFrameAssets),
+            _PostFrameGrid(
+              shorelineFrameAssets: shoreDispatch.shorelineFrameAssets,
+            ),
             const SizedBox(height: 12),
             _TopicPill(tideTopicLabel: shoreDispatch.tideTopicLabel),
             const SizedBox(height: 10),
@@ -228,7 +230,8 @@ class _PostFrameGrid extends StatelessWidget {
               ),
             ),
           ),
-          if (index != shorelineFrameAssets.length - 1) const SizedBox(width: 6),
+          if (index != shorelineFrameAssets.length - 1)
+            const SizedBox(width: 6),
         ],
       ],
     );

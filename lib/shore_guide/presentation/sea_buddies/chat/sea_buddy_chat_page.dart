@@ -104,7 +104,9 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   }
 
   Future<void> _restoreSignals() async {
-    final signals = await _messageStore.restoreSignals(widget.buddyThread.harborThreadMarker);
+    final signals = await _messageStore.restoreSignals(
+      widget.buddyThread.harborThreadMarker,
+    );
     if (!mounted) {
       return;
     }
@@ -155,7 +157,10 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
       signalText: text,
       sentFromViewerHarbor: true,
     );
-    await _messageStore.appendSignal(widget.buddyThread.harborThreadMarker, signal);
+    await _messageStore.appendSignal(
+      widget.buddyThread.harborThreadMarker,
+      signal,
+    );
     if (!mounted) {
       return;
     }
@@ -202,7 +207,9 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
       return;
     }
     if (outcome == ShoreSafetyOutcome.blocked) {
-      await _messageStore.clearHarborSignals(widget.buddyThread.harborThreadMarker);
+      await _messageStore.clearHarborSignals(
+        widget.buddyThread.harborThreadMarker,
+      );
       if (!mounted) {
         return;
       }
@@ -296,7 +303,9 @@ class _SeaChatBubble extends StatelessWidget {
               topLeft: const Radius.circular(18),
               topRight: const Radius.circular(18),
               bottomLeft: Radius.circular(signal.sentFromViewerHarbor ? 18 : 6),
-              bottomRight: Radius.circular(signal.sentFromViewerHarbor ? 6 : 18),
+              bottomRight: Radius.circular(
+                signal.sentFromViewerHarbor ? 6 : 18,
+              ),
             ),
           ),
           child: Text(

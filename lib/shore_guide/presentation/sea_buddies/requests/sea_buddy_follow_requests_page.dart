@@ -17,10 +17,12 @@ class SeaBuddyFollowRequestsPage extends StatefulWidget {
   const SeaBuddyFollowRequestsPage({super.key});
 
   @override
-  State<SeaBuddyFollowRequestsPage> createState() => _SeaBuddyFollowRequestsPageState();
+  State<SeaBuddyFollowRequestsPage> createState() =>
+      _SeaBuddyFollowRequestsPageState();
 }
 
-class _SeaBuddyFollowRequestsPageState extends State<SeaBuddyFollowRequestsPage> {
+class _SeaBuddyFollowRequestsPageState
+    extends State<SeaBuddyFollowRequestsPage> {
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
   ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
@@ -106,8 +108,7 @@ class _SeaBuddyFollowRequestsPageState extends State<SeaBuddyFollowRequestsPage>
           ),
         )
         .where(
-          (request) =>
-              !_snapshot.isFollowing(request.requestHarbor.tideHandle),
+          (request) => !_snapshot.isFollowing(request.requestHarbor.tideHandle),
         )
         .toList();
   }

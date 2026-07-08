@@ -41,7 +41,7 @@ class MyCoastSettingsPage extends StatelessWidget {
               child: Column(
                 children: [
                   MyCoastTopBar(
-                          title: 'Settings',
+                    title: 'Settings',
                     onBack: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(height: 24),
@@ -92,13 +92,21 @@ class MyCoastSettingsPage extends StatelessWidget {
     );
   }
 
-  static void _openNetwork(BuildContext context, MyCoastNetworkHarbor harborLedger) {
+  static void _openNetwork(
+    BuildContext context,
+    MyCoastNetworkHarbor harborLedger,
+  ) {
     Navigator.of(context).push(
-      CupertinoPageRoute<void>(builder: (_) => MyCoastNetworkPage(harborLedger: harborLedger)),
+      CupertinoPageRoute<void>(
+        builder: (_) => MyCoastNetworkPage(harborLedger: harborLedger),
+      ),
     );
   }
 
-  static void _openPolicy(BuildContext context, HarborPolicyChannel policyChannel) {
+  static void _openPolicy(
+    BuildContext context,
+    HarborPolicyChannel policyChannel,
+  ) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => HarborPolicyWebviewPage(policyChannel: policyChannel),

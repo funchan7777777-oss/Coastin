@@ -7,7 +7,8 @@ import '../../../domain/entities/buddies/sea_buddy_signal_note.dart';
 class SeaBuddyMessageStore {
   const SeaBuddyMessageStore();
 
-  static const String _harborThreadMarkersKey = 'coastin.buddies.harborThreadMarkers';
+  static const String _harborThreadMarkersKey =
+      'coastin.buddies.harborThreadMarkers';
 
   String _harborSignalLedgerKey(String harborThreadMarker) {
     return 'coastin.buddies.harborSignal.$harborThreadMarker.signalNotes';
@@ -18,9 +19,12 @@ class SeaBuddyMessageStore {
     return prefs.getStringList(_harborThreadMarkersKey)?.toSet() ?? {};
   }
 
-  Future<List<SeaBuddySignalNote>> restoreSignals(String harborThreadMarker) async {
+  Future<List<SeaBuddySignalNote>> restoreSignals(
+    String harborThreadMarker,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
-    final encodedSignals = prefs.getStringList(_harborSignalLedgerKey(harborThreadMarker)) ?? [];
+    final encodedSignals =
+        prefs.getStringList(_harborSignalLedgerKey(harborThreadMarker)) ?? [];
     return [
       for (final encoded in encodedSignals)
         if (_decodeSignal(encoded) != null) _decodeSignal(encoded)!,
@@ -39,9 +43,13 @@ class SeaBuddyMessageStore {
     return latestSignals;
   }
 
-  Future<void> appendSignal(String harborThreadMarker, SeaBuddySignalNote signal) async {
+  Future<void> appendSignal(
+    String harborThreadMarker,
+    SeaBuddySignalNote signal,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
-    final signals = prefs.getStringList(_harborSignalLedgerKey(harborThreadMarker)) ?? [];
+    final signals =
+        prefs.getStringList(_harborSignalLedgerKey(harborThreadMarker)) ?? [];
     signals.add(
       jsonEncode({
         'signalMarker': signal.signalMarker,
@@ -49,24 +57,36 @@ class SeaBuddyMessageStore {
         'sentFromViewerHarbor': signal.sentFromViewerHarbor,
       }),
     );
-    await prefs.setStringList(_harborSignalLedgerKey(harborThreadMarker), signals);
+    await prefs.setStringList(
+      _harborSignalLedgerKey(harborThreadMarker),
+      signals,
+    );
 
-    final harborThreadMarkers = prefs.getStringList(_harborThreadMarkersKey)?.toSet() ?? {};
+    final harborThreadMarkers =
+        prefs.getStringList(_harborThreadMarkersKey)?.toSet() ?? {};
     harborThreadMarkers.add(harborThreadMarker);
-    await prefs.setStringList(_harborThreadMarkersKey, harborThreadMarkers.toList()..sort());
+    await prefs.setStringList(
+      _harborThreadMarkersKey,
+      harborThreadMarkers.toList()..sort(),
+    );
   }
 
   Future<void> clearHarborSignals(String harborThreadMarker) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_harborSignalLedgerKey(harborThreadMarker));
-    final harborThreadMarkers = prefs.getStringList(_harborThreadMarkersKey)?.toSet() ?? {};
+    final harborThreadMarkers =
+        prefs.getStringList(_harborThreadMarkersKey)?.toSet() ?? {};
     harborThreadMarkers.remove(harborThreadMarker);
-    await prefs.setStringList(_harborThreadMarkersKey, harborThreadMarkers.toList()..sort());
+    await prefs.setStringList(
+      _harborThreadMarkersKey,
+      harborThreadMarkers.toList()..sort(),
+    );
   }
 
   Future<void> clearAllHarborSignals() async {
     final prefs = await SharedPreferences.getInstance();
-    final harborThreadMarkers = prefs.getStringList(_harborThreadMarkersKey) ?? [];
+    final harborThreadMarkers =
+        prefs.getStringList(_harborThreadMarkersKey) ?? [];
     for (final harborThreadMarker in harborThreadMarkers) {
       await prefs.remove(_harborSignalLedgerKey(harborThreadMarker));
     }

@@ -72,7 +72,8 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
       return buddyThreads;
     }
     return buddyThreads.where((buddyThread) {
-      final savedPreview = _latestBuddySignals[buddyThread.harborThreadMarker]?.signalText ?? '';
+      final savedPreview =
+          _latestBuddySignals[buddyThread.harborThreadMarker]?.signalText ?? '';
       return buddyThread.buddyHarbor.displayHarborName.toLowerCase().contains(
             query,
           ) ||
@@ -150,7 +151,9 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
                       for (final buddyThread in visibleBuddyThreads) ...[
                         _SeaBuddyHarborThreadRow(
                           buddyThread: buddyThread,
-                          lastNote: _latestBuddySignals[buddyThread.harborThreadMarker],
+                          lastNote:
+                              _latestBuddySignals[buddyThread
+                                  .harborThreadMarker],
                           onTap: () => _openChat(buddyThread),
                           onPersonaTap: () => _openPersona(buddyThread),
                         ),
@@ -341,7 +344,10 @@ class _SeaSearchField extends StatelessWidget {
 }
 
 class _MutualBuddySection extends StatelessWidget {
-  const _MutualBuddySection({required this.buddyThreads, required this.onBuddyTap});
+  const _MutualBuddySection({
+    required this.buddyThreads,
+    required this.onBuddyTap,
+  });
 
   final List<SeaBuddyHarborThread> buddyThreads;
   final ValueChanged<SeaBuddyHarborThread> onBuddyTap;

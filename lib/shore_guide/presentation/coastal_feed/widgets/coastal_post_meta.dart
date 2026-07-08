@@ -8,4 +8,5 @@ String coastalPostOriginLine(CoastalPostDispatch post) {
   );
 }
 
-int coastalPostCommentCount(CoastalPostDispatch post) => post.commentTideMarks.length;
+int coastalPostCommentCount(CoastalPostDispatch post) =>
+    post.commentTideMarks.length;

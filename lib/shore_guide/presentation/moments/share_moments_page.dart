@@ -62,8 +62,12 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     ShoreSafetyStore.safetyRevision.addListener(_handleSafetyRevision);
     _currentMomentIndex = _initialMomentIndex();
     _momentController = PageController(initialPage: _currentMomentIndex);
-    _likedMoments = {for (final moment in _moments) moment.shoreMomentMarker: false};
-    _pausedMoments = {for (final moment in _moments) moment.shoreMomentMarker: false};
+    _likedMoments = {
+      for (final moment in _moments) moment.shoreMomentMarker: false,
+    };
+    _pausedMoments = {
+      for (final moment in _moments) moment.shoreMomentMarker: false,
+    };
     _restoreSafety();
   }
 
@@ -174,14 +178,15 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
             if (activeMoment != null)
               ReefCommentSheet(
                 isOpen: _commentsOpen,
-                commentDrifts: activeMoment.commentTideMarks,
+                commentTideMarks: activeMoment.commentTideMarks,
                 viewerPersona: ShoreMomentHarborCatalog.shorelinePeople[36],
                 bottomDockClearance: widget.bottomDockClearance,
                 onClose: () => setState(() => _commentsOpen = false),
                 onChanged: _restoreSafety,
                 onVisibleCountChanged: (count) {
                   setState(() {
-                    _commentCountOverrides[activeMoment.shoreMomentMarker] = count;
+                    _commentCountOverrides[activeMoment.shoreMomentMarker] =
+                        count;
                   });
                 },
               ),

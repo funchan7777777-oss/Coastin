@@ -262,7 +262,10 @@ class CoastalDispatchHarborCatalog {
     ),
   ];
 
-  static List<ShoreCommentTideMark> _commentTideMarks(int offset, {int count = 4}) {
+  static List<ShoreCommentTideMark> _commentTideMarks(
+    int offset, {
+    int count = 4,
+  }) {
     const replies = [
       'This spot makes the whole walk slow down in the best way.',
       'The color is so clean today; saving this route for the weekend.',

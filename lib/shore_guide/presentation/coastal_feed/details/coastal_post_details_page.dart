@@ -133,10 +133,12 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                           filterQuality: FilterQuality.high,
                         ),
                         const SizedBox(height: 18),
-                        for (final commentTideMark in _visibleCommentTideMarks) ...[
+                        for (final commentTideMark
+                            in _visibleCommentTideMarks) ...[
                           _DetailCommentRow(
                             commentTideMark: commentTideMark,
-                            onPersonaTap: () => _openCommentHarbor(commentTideMark),
+                            onPersonaTap: () =>
+                                _openCommentHarbor(commentTideMark),
                             onReportTap: () => _reportComment(commentTideMark),
                           ),
                           const SizedBox(height: 20),
@@ -661,7 +663,8 @@ class _DetailFrameStrip extends StatelessWidget {
               ),
             ),
           ),
-          if (index != shorelineFrameAssets.length - 1) const SizedBox(width: 7),
+          if (index != shorelineFrameAssets.length - 1)
+            const SizedBox(width: 7),
         ],
       ],
     );

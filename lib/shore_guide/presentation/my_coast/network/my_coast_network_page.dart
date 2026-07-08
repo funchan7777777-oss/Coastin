@@ -62,7 +62,10 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
 
   @override
   Widget build(BuildContext context) {
-    final visiblePeople = _peopleForHarborLedger(widget.harborLedger, _snapshot);
+    final visiblePeople = _peopleForHarborLedger(
+      widget.harborLedger,
+      _snapshot,
+    );
     final blockedEntries = widget.harborLedger == MyCoastNetworkHarbor.blacklist
         ? _blockedEntries(_snapshot)
         : const <_BlockedHarborEntry>[];
@@ -91,7 +94,8 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
                           onBack: () => Navigator.of(context).pop(),
                         ),
                         const SizedBox(height: 26),
-                        if (widget.harborLedger == MyCoastNetworkHarbor.blacklist)
+                        if (widget.harborLedger ==
+                            MyCoastNetworkHarbor.blacklist)
                           for (final entry in blockedEntries)
                             _BlockedHarborRow(
                               entry: entry,
@@ -142,7 +146,8 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
   Future<void> _handleAction(ShorelinePersona persona) async {
     if (widget.harborLedger == MyCoastNetworkHarbor.friend) {
       final buddyThread = SeaBuddyHarborCatalog.buddyThreads.firstWhere(
-        (buddyThread) => buddyThread.buddyHarbor.tideHandle == persona.tideHandle,
+        (buddyThread) =>
+            buddyThread.buddyHarbor.tideHandle == persona.tideHandle,
         orElse: () => ShorePersonaCatalog.harborThreadForPersona(persona),
       );
       Navigator.of(context).push(
@@ -218,7 +223,9 @@ class _BlockedHarborRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final persona = entry.persona;
     final displayName = persona?.displayHarborName ?? entry.handle;
-    final localApproachRibbon = persona == null ? '' : _placeForPersona(persona);
+    final localApproachRibbon = persona == null
+        ? ''
+        : _placeForPersona(persona);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,

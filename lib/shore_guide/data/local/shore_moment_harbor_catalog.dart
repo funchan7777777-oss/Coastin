@@ -293,7 +293,9 @@ class ShoreMomentHarborCatalog {
   static final List<ShoreVideoMoment> shoreVideoMoments = List.unmodifiable(
     List.generate(_momentVideoAssets.length, (index) {
       final commentStart = (index * 3 + 8) % shorelinePeople.length;
-      final commentTideMarks = List.generate(_commentCounts[index], (commentIndex) {
+      final commentTideMarks = List.generate(_commentCounts[index], (
+        commentIndex,
+      ) {
         final persona =
             shorelinePeople[(commentStart + commentIndex * 5) %
                 shorelinePeople.length];
@@ -301,8 +303,10 @@ class ShoreMomentHarborCatalog {
           commentMarker: 'comment-${index + 1}-$commentIndex',
           commentHarbor: persona,
           commentClock:
-              _commentClockMarks[(index + commentIndex) % _commentClockMarks.length],
-          commentText: _commentLines[(index * 2 + commentIndex) % _commentLines.length],
+              _commentClockMarks[(index + commentIndex) %
+                  _commentClockMarks.length],
+          commentText:
+              _commentLines[(index * 2 + commentIndex) % _commentLines.length],
           hasFreshSignal: commentIndex == 0 || (index + commentIndex) % 4 == 0,
         );
       });

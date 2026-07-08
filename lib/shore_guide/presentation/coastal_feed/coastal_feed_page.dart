@@ -52,7 +52,8 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     return CoastalDispatchHarborCatalog.coastalDispatches
         .where(
           (post) =>
-              _selectedTopicKey == null || post.tideTopicMarker == _selectedTopicKey,
+              _selectedTopicKey == null ||
+              post.tideTopicMarker == _selectedTopicKey,
         )
         .where(
           (post) => _safetySnapshot.isVisibleContent(
@@ -117,7 +118,9 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
                       for (final post in _visibleDispatches)
                         CoastalPostCard(
                           shoreDispatch: post,
-                          isLoved: _lovedDispatches[post.shoreDispatchMarker] ?? false,
+                          isLoved:
+                              _lovedDispatches[post.shoreDispatchMarker] ??
+                              false,
                           isFollowed: _safetySnapshot.isFollowing(
                             post.shorelineKeeper.tideHandle,
                           ),
@@ -159,7 +162,9 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
   Map<String, String> get _topicParticipationLines {
     return {
       for (final topicLane in CoastalDispatchHarborCatalog.topicLanes)
-        topicLane.tideTopicMarker: _topicParticipationLine(topicLane.tideTopicMarker),
+        topicLane.tideTopicMarker: _topicParticipationLine(
+          topicLane.tideTopicMarker,
+        ),
     };
   }
 
@@ -184,7 +189,8 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
       }
       authorHandles.add(post.shorelineKeeper.tideHandle);
       commentSignals +=
-          _commentCounts[post.shoreDispatchMarker] ?? coastalPostCommentCount(post);
+          _commentCounts[post.shoreDispatchMarker] ??
+          coastalPostCommentCount(post);
       if (_lovedDispatches[post.shoreDispatchMarker] == true) {
         localLoveSignals += 1;
       }
@@ -210,8 +216,9 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
   void _openPostRelease() {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) =>
-            const ShoreReleasePage(initialReleaseChannel: ShoreReleaseChannel.post),
+        builder: (_) => const ShoreReleasePage(
+          initialReleaseChannel: ShoreReleaseChannel.post,
+        ),
       ),
     );
   }
@@ -222,13 +229,19 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
         builder: (_) => CoastalPostDetailsPage(
           shoreDispatch: post,
           isLoved: _lovedDispatches[post.shoreDispatchMarker] ?? false,
-          isFollowed: _safetySnapshot.isFollowing(post.shorelineKeeper.tideHandle),
+          isFollowed: _safetySnapshot.isFollowing(
+            post.shorelineKeeper.tideHandle,
+          ),
           onLoveChanged: (isLoved) {
-            setState(() => _lovedDispatches[post.shoreDispatchMarker] = isLoved);
+            setState(
+              () => _lovedDispatches[post.shoreDispatchMarker] = isLoved,
+            );
           },
           onFollowChanged: (_) => _restoreSafety(),
           onCommentCountChanged: (commentCount) {
-            setState(() => _commentCounts[post.shoreDispatchMarker] = commentCount);
+            setState(
+              () => _commentCounts[post.shoreDispatchMarker] = commentCount,
+            );
           },
         ),
       ),
@@ -627,7 +640,9 @@ class _TopicCard extends StatelessWidget {
               Positioned(
                 left: 14,
                 top: 60,
-                child: _TopicPeopleBadge(harborParticipationLine: harborParticipationLine),
+                child: _TopicPeopleBadge(
+                  harborParticipationLine: harborParticipationLine,
+                ),
               ),
             ] else
               Positioned(
@@ -637,7 +652,9 @@ class _TopicCard extends StatelessWidget {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: _TopicPeopleText(harborParticipationLine: harborParticipationLine),
+                  child: _TopicPeopleText(
+                    harborParticipationLine: harborParticipationLine,
+                  ),
                 ),
               ),
             if (isLarge)
