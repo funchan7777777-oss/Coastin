@@ -24,14 +24,24 @@ class CommunityGuidelinesPage extends StatelessWidget {
           'Upload only content you own or have permission to use. Do not share illegal activity, dangerous instructions, sexual content, threats, hate, or harassment.',
     ),
     _GuidelineCurrent(
+      title: 'Filtering before posting',
+      body:
+          'Coastin checks profile text, captions, comments, and messages before they are saved. Unsafe wording, private contact details, and outside-app handles are blocked locally.',
+    ),
+    _GuidelineCurrent(
       title: 'Respect safety controls',
       body:
-          'Reports and blocks are reviewed locally for your account experience. Report unsafe posts, comments, or profiles instead of engaging with them.',
+          'Use Report on unsafe posts, comments, videos, profiles, or chat threads. Use Block to hide that person and their content from your Coastin experience.',
     ),
     _GuidelineCurrent(
       title: 'Moderation before visibility',
       body:
           'New public posts and videos may be held for review before appearing in Coastin feeds. Repeated abuse can limit account access.',
+    ),
+    _GuidelineCurrent(
+      title: 'Reach Coastin safety',
+      body:
+          'For urgent safety concerns or appeal requests, use the Coastin App Store support contact and include the profile name, content type, and approximate time.',
     ),
   ];
 

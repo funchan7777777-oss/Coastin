@@ -65,7 +65,9 @@ class ShoreContentSafetyGate {
 
   static final List<_ShoreUnsafeTextRule> _unsafeTextRules = [
     _ShoreUnsafeTextRule(RegExp(r'\b(?:nude|naked|porn|nsfw)\b')),
-    _ShoreUnsafeTextRule(RegExp(r'\b(?:escort|hookup|sugar daddy|sugar baby)\b')),
+    _ShoreUnsafeTextRule(
+      RegExp(r'\b(?:escort|hookup|sugar daddy|sugar baby)\b'),
+    ),
     _ShoreUnsafeTextRule(RegExp(r'\b(?:kill|bomb|weapon|rape|self harm)\b')),
     _ShoreUnsafeTextRule(RegExp(r'\b(?:doxx|stalk|harass)\b')),
     _ShoreUnsafeTextRule(RegExp(r'\b(?:cocaine|meth|fentanyl)\b')),
