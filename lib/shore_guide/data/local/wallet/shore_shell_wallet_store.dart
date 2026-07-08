@@ -17,6 +17,12 @@ enum ShoreShellExpense {
     label: 'Open sun guide',
     routeLine: 'Unlock the summer sun protection guide.',
     shorelineUnlockKey: 'summerSunProtectionGuide',
+  ),
+  coveRoutePlanner(
+    cost: 45,
+    label: 'Open cove route planner',
+    routeLine: 'Unlock a tide, shade, and pause comfort route planner.',
+    shorelineUnlockKey: 'coveRoutePlanner',
   );
 
   const ShoreShellExpense({

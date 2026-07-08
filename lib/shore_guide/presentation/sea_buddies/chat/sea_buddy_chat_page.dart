@@ -8,6 +8,7 @@ import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/buddies/sea_buddy_note.dart';
 import '../../../domain/entities/buddies/sea_buddy_thread.dart';
 import '../../people/shore_persona_detail_page.dart';
+import '../../safety/shore_safety_action.dart';
 import '../../safety/shore_safety_reef.dart';
 import '../call/sea_buddy_call_page.dart';
 import '../widgets/sea_buddy_top_bar.dart';
@@ -176,38 +177,24 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     );
   }
 
-  void _showThreadInfo() {
-    showCupertinoModalPopup<void>(
+  Future<void> _showThreadInfo() async {
+    final outcome = await ShoreSafetyReef.showGuard(
       context: context,
-      builder: (context) {
-        return CupertinoActionSheet(
-          title: Text(widget.thread.buddyPersona.displayHarborName),
-          message: Text(widget.thread.buddyPersona.coastalStamp),
-          actions: [
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _openVideoCall();
-              },
-              child: const Text('Start video call'),
-            ),
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _messageStore.clearThread(widget.thread.threadKey);
-                await _restoreNotes();
-              },
-              child: const Text('Clear conversation'),
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-        );
-      },
+      contentId: 'profile:${widget.thread.buddyPersona.tideHandle}',
+      contentKind: ShoreSafetyContentKind.profile,
+      ownerName: widget.thread.buddyPersona.displayHarborName,
+      ownerHandle: widget.thread.buddyPersona.tideHandle,
     );
+    if (!mounted || outcome == null) {
+      return;
+    }
+    if (outcome == ShoreSafetyOutcome.blocked) {
+      await _messageStore.clearThread(widget.thread.threadKey);
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop();
+    }
   }
 }
 

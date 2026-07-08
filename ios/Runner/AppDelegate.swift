@@ -1,9 +1,11 @@
 import Flutter
+import AVFoundation
 import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private var shareChannel: FlutterMethodChannel?
+  private var callPermissionChannel: FlutterMethodChannel?
 
   override func application(
     _ application: UIApplication,
@@ -19,6 +21,10 @@ import UIKit
     }
     shareChannel = FlutterMethodChannel(
       name: "coastin/share",
+      binaryMessenger: registrar.messenger()
+    )
+    callPermissionChannel = FlutterMethodChannel(
+      name: "coastin/shore_call_permissions",
       binaryMessenger: registrar.messenger()
     )
     shareChannel?.setMethodCallHandler { [weak self] call, result in
@@ -41,6 +47,54 @@ import UIKit
         return
       }
       self?.presentShareSheet(text: text, result: result)
+    }
+    callPermissionChannel?.setMethodCallHandler { [weak self] call, result in
+      guard call.method == "requestCallAccess" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      guard let self else {
+        result(
+          FlutterError(
+            code: "CALL_PERMISSION_BRIDGE_UNAVAILABLE",
+            message: "Coastin could not open the video call permission bridge.",
+            details: nil
+          )
+        )
+        return
+      }
+      self.requestCallAccess(result: result)
+    }
+  }
+
+  private func requestCallAccess(result: @escaping FlutterResult) {
+    requestCaptureAccess(for: .video) { cameraAllowed in
+      self.requestCaptureAccess(for: .audio) { microphoneAllowed in
+        DispatchQueue.main.async {
+          result([
+            "camera": cameraAllowed,
+            "microphone": microphoneAllowed,
+          ])
+        }
+      }
+    }
+  }
+
+  private func requestCaptureAccess(
+    for mediaType: AVMediaType,
+    completion: @escaping (Bool) -> Void
+  ) {
+    switch AVCaptureDevice.authorizationStatus(for: mediaType) {
+    case .authorized:
+      completion(true)
+    case .notDetermined:
+      AVCaptureDevice.requestAccess(for: mediaType) { allowed in
+        completion(allowed)
+      }
+    case .denied, .restricted:
+      completion(false)
+    @unknown default:
+      completion(false)
     }
   }
 

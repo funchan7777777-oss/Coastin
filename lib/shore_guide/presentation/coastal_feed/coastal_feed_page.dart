@@ -4,6 +4,7 @@ import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../app/theme/tidewash_palette.dart';
 import '../../../shared/ui/tokens/shore_spacing.dart';
 import '../../data/local/feed/seeded_coastal_feed_deck.dart';
+import '../../data/local/seeded_harbor_board.dart';
 import '../../data/local/safety/shore_safety_store.dart';
 import '../../data/local/wallet/shore_shell_wallet_store.dart';
 import '../../domain/entities/feed/coastal_post_dispatch.dart';
@@ -15,6 +16,7 @@ import '../safety/shore_safety_action.dart';
 import '../safety/shore_safety_reef.dart';
 import 'details/coastal_post_details_page.dart';
 import 'guide/sun_guard_guide_page.dart';
+import 'planner/cove_route_planner_page.dart';
 import 'widgets/coastal_post_card.dart';
 import 'widgets/coastal_post_meta.dart';
 
@@ -103,6 +105,8 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
                       _FeedHeader(onReleaseTap: _openPostRelease),
                       const SizedBox(height: 22),
                       _SunGuideBanner(onTap: _openSunGuide),
+                      const SizedBox(height: 12),
+                      _RoutePlannerBanner(onTap: _openRoutePlanner),
                       const SizedBox(height: 22),
                       _TopicShelf(
                         selectedTopicKey: _selectedTopicKey,
@@ -244,6 +248,23 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     ).push(CupertinoPageRoute<void>(builder: (_) => const SunGuardGuidePage()));
   }
 
+  Future<void> _openRoutePlanner() async {
+    final canOpen = await ShoreShellReef.confirmAndSpend(
+      context: context,
+      expense: ShoreShellExpense.coveRoutePlanner,
+    );
+    if (!canOpen || !mounted) {
+      return;
+    }
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => const CoveRoutePlannerPage(
+          harborBoard: SeededHarborBoard.pacificMorningBoard,
+        ),
+      ),
+    );
+  }
+
   void _openAuthor(CoastalPostDispatch post) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
@@ -370,6 +391,106 @@ class _SunGuideBanner extends StatelessWidget {
   }
 }
 
+class _RoutePlannerBanner extends StatelessWidget {
+  const _RoutePlannerBanner({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 94),
+        padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFEFFFFB), Color(0xFFD7F0FF)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFBFEFE8), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF2F68D3).withValues(alpha: 0.10),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2F68D3),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(
+                CupertinoIcons.map,
+                color: Color(0xFFFFFFFF),
+                size: 27,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Cove route planner',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: TidewashPalette.inkBlue,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    'Tune tide, shade, and cove pauses before you go.',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: TidewashPalette.harborSlate.withValues(
+                        alpha: 0.76,
+                      ),
+                      fontSize: 12,
+                      height: 1.22,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFFFF).withValues(alpha: 0.84),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Text(
+                '45 once',
+                style: TextStyle(
+                  color: Color(0xFF2F68D3),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _TopicShelf extends StatelessWidget {
   const _TopicShelf({
     required this.selectedTopicKey,
@@ -458,6 +579,10 @@ class _TopicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cardRadius = BorderRadius.circular(14);
+    final borderColor = isSelected
+        ? const Color(0xFF2F68D3)
+        : const Color(0x00FFFFFF);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -467,13 +592,11 @@ class _TopicCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: Color(topicLane.highlightTint),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFF2F68D3)
-                : const Color(0x00FFFFFF),
-            width: 1.4,
-          ),
+          borderRadius: cardRadius,
+        ),
+        foregroundDecoration: BoxDecoration(
+          borderRadius: cardRadius,
+          border: Border.all(color: borderColor, width: 1.4),
         ),
         child: Stack(
           children: [

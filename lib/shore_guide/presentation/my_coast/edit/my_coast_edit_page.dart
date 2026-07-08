@@ -328,6 +328,7 @@ class _EditAvatarBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasAvatar = avatarPath.isNotEmpty && File(avatarPath).existsSync();
+    final pickerRadius = BorderRadius.circular(30);
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -340,7 +341,10 @@ class _EditAvatarBox extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: const Color(0xFFFFFFFF).withValues(alpha: 0.82),
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: pickerRadius,
+            ),
+            foregroundDecoration: BoxDecoration(
+              borderRadius: pickerRadius,
               border: Border.all(
                 color: const Color(0xFF56E4DD).withValues(alpha: 0.66),
                 width: 1.4,

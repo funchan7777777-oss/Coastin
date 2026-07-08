@@ -397,7 +397,7 @@ class _MutualBuddySection extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           SizedBox(
-            height: 92,
+            height: 106,
             child: ListView.separated(
               padding: EdgeInsets.zero,
               scrollDirection: Axis.horizontal,
@@ -435,8 +435,9 @@ class _MutualBuddyChip extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: SizedBox(
-        width: 76,
+        width: 82,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Stack(
               clipBehavior: Clip.none,

@@ -424,7 +424,7 @@ class _ShellUseChart extends StatelessWidget {
             const SizedBox(height: 8),
           ],
           Text(
-            'Chat and video chat are free after mutual follow.',
+            'Guide and planner unlocks are one-time spends. Chat and video chat are free after mutual follow.',
             style: TextStyle(
               color: TidewashPalette.harborSlate.withValues(alpha: 0.72),
               fontSize: 12,

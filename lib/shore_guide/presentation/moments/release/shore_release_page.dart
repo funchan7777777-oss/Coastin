@@ -603,6 +603,7 @@ class _HarborMediaDropZone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dropZoneRadius = BorderRadius.circular(30);
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -615,7 +616,10 @@ class _HarborMediaDropZone extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: const Color(0xFFFFFFFF).withValues(alpha: 0.8),
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: dropZoneRadius,
+            ),
+            foregroundDecoration: BoxDecoration(
+              borderRadius: dropZoneRadius,
               border: Border.all(
                 color: const Color(0xFF56E4DD).withValues(alpha: 0.66),
                 width: 1.4,
