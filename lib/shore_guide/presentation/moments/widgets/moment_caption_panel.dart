@@ -25,12 +25,12 @@ class MomentCaptionPanel extends StatelessWidget {
     return Positioned(
       left: 24,
       right: 24,
-      bottom: bottomDockClearance + 28,
+      bottom: bottomDockClearance + 12,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: GestureDetector(
@@ -50,13 +50,19 @@ class MomentCaptionPanel extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                shoreMoment.clockRibbon,
-                style: const TextStyle(
-                  color: TidewashPalette.saltCard,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  shadows: [_darkShoreShadow],
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onFollowTap,
+                child: SizedBox(
+                  width: 76,
+                  height: 32,
+                  child: Image.asset(
+                    isFollowed
+                        ? CoastinAssetRegistry.followedBadge
+                        : CoastinAssetRegistry.followBadge,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
                 ),
               ),
             ],
@@ -83,51 +89,31 @@ class MomentCaptionPanel extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+              Text(
+                'Posted ${shoreMoment.clockRibbon}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFFEAFBFF),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  shadows: [_darkShoreShadow],
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Text(
-                  shoreMoment.captionTide,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: TidewashPalette.saltCard,
-                    fontSize: 15,
-                    height: 1.25,
-                    fontWeight: FontWeight.w700,
-                    shadows: [_darkShoreShadow],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onFollowTap,
-                child: SizedBox(
-                  width: 82,
-                  height: 34,
-                  child: Image.asset(
-                    isFollowed
-                        ? CoastinAssetRegistry.followedBadge
-                        : CoastinAssetRegistry.followBadge,
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: Container(
-              width: 98,
-              height: 4,
-              color: TidewashPalette.saltCard.withValues(alpha: 0.86),
+          Text(
+            shoreMoment.captionTide,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: TidewashPalette.saltCard,
+              fontSize: 15,
+              height: 1.25,
+              fontWeight: FontWeight.w700,
+              shadows: [_darkShoreShadow],
             ),
           ),
         ],

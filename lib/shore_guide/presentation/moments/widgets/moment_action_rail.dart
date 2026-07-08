@@ -10,12 +10,10 @@ class MomentActionRail extends StatelessWidget {
     super.key,
     required this.creatorPersona,
     required this.isLiked,
-    required this.isPaused,
     required this.likeCount,
     required this.replyCount,
-    required this.infoCount,
+    required this.bottomDockClearance,
     required this.onLikeTap,
-    required this.onPlayTap,
     required this.onCommentTap,
     required this.onInfoTap,
     required this.onPersonaTap,
@@ -23,12 +21,10 @@ class MomentActionRail extends StatelessWidget {
 
   final ShorelinePersona creatorPersona;
   final bool isLiked;
-  final bool isPaused;
   final int likeCount;
   final int replyCount;
-  final int infoCount;
+  final double bottomDockClearance;
   final VoidCallback onLikeTap;
-  final VoidCallback onPlayTap;
   final VoidCallback onCommentTap;
   final VoidCallback onInfoTap;
   final VoidCallback onPersonaTap;
@@ -36,8 +32,8 @@ class MomentActionRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      right: 24,
-      bottom: 160,
+      right: 18,
+      bottom: bottomDockClearance + 154,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -46,7 +42,7 @@ class MomentActionRail extends StatelessWidget {
             onTap: onPersonaTap,
             child: _MomentPortraitBubble(creatorPersona: creatorPersona),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           _MomentImageButton(
             asset: isLiked
                 ? CoastinAssetRegistry.likeLitBadge
@@ -55,28 +51,19 @@ class MomentActionRail extends StatelessWidget {
             onTap: onLikeTap,
           ),
           _CountWash(count: likeCount),
-          const SizedBox(height: 12),
-          _MomentImageButton(
-            asset: isPaused
-                ? CoastinAssetRegistry.playRoundBadge
-                : CoastinAssetRegistry.pauseRoundBadge,
-            spokenLabel: isPaused ? 'Play video' : 'Pause video',
-            onTap: onPlayTap,
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           _MomentImageButton(
             asset: CoastinAssetRegistry.commentRoundBadge,
             spokenLabel: 'Open comments',
             onTap: onCommentTap,
           ),
           _CountWash(count: replyCount),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           _MomentImageButton(
             asset: CoastinAssetRegistry.infoRoundBadge,
-            spokenLabel: 'Open safety choices',
+            spokenLabel: 'Open report and safety choices',
             onTap: onInfoTap,
           ),
-          _CountWash(count: infoCount),
         ],
       ),
     );
@@ -99,8 +86,8 @@ class _MomentPortraitBubble extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
-          width: 64,
-          height: 64,
+          width: 56,
+          height: 56,
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -118,8 +105,8 @@ class _MomentPortraitBubble extends StatelessWidget {
           right: -2,
           bottom: -3,
           child: Container(
-            width: 20,
-            height: 20,
+            width: 18,
+            height: 18,
             padding: const EdgeInsets.all(2),
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
@@ -153,8 +140,8 @@ class _MomentImageButton extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: SizedBox(
-          width: 54,
-          height: 54,
+          width: 48,
+          height: 48,
           child: Image.asset(
             asset,
             fit: BoxFit.contain,
@@ -179,7 +166,7 @@ class _CountWash extends StatelessWidget {
         _compactCount(count),
         style: const TextStyle(
           color: TidewashPalette.saltCard,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.w800,
           shadows: [
             Shadow(

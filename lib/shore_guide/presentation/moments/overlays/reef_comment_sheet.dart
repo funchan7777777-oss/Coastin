@@ -19,6 +19,7 @@ class ReefCommentSheet extends StatefulWidget {
     required this.viewerPersona,
     required this.onClose,
     required this.onChanged,
+    required this.onVisibleCountChanged,
   });
 
   final bool isOpen;
@@ -26,6 +27,7 @@ class ReefCommentSheet extends StatefulWidget {
   final ShorelinePersona viewerPersona;
   final VoidCallback onClose;
   final VoidCallback onChanged;
+  final ValueChanged<int> onVisibleCountChanged;
 
   @override
   State<ReefCommentSheet> createState() => _ReefCommentSheetState();
@@ -195,6 +197,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
       );
       _commentController.clear();
     });
+    widget.onVisibleCountChanged(_visibleComments.length);
     _noticeStore.recordCommentNotice(
       actorHandle: widget.viewerPersona.tideHandle,
       noticeLine: 'Your comment was added to the Coastin discussion.',
@@ -206,16 +209,18 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     if (!mounted) {
       return;
     }
+    final visibleComments = widget.commentDrifts
+        .where(
+          (comment) => snapshot.isVisibleContent(
+            'comment:${comment.replyMarker}',
+            comment.replyAuthor.tideHandle,
+          ),
+        )
+        .toList();
     setState(() {
-      _visibleComments = widget.commentDrifts
-          .where(
-            (comment) => snapshot.isVisibleContent(
-              'comment:${comment.replyMarker}',
-              comment.replyAuthor.tideHandle,
-            ),
-          )
-          .toList();
+      _visibleComments = visibleComments;
     });
+    widget.onVisibleCountChanged(visibleComments.length);
   }
 
   void _openPersona(ShoreReplyDrift commentDrift) {
@@ -245,6 +250,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
         (comment) => comment.replyMarker == commentDrift.replyMarker,
       );
     });
+    widget.onVisibleCountChanged(_visibleComments.length);
     widget.onChanged();
   }
 }

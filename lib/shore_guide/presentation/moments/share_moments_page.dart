@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 
+import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../shared/ui/coastin_empty_state.dart';
 import '../../data/local/safety/shore_safety_store.dart';
 import '../../data/local/seeded_shore_moment_deck.dart';
@@ -31,6 +34,7 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
 
   late final Map<String, bool> _likedMoments;
   late final Map<String, bool> _pausedMoments;
+  final Map<String, int> _commentCountOverrides = {};
   ShoreSafetySnapshot _safetySnapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
     reportedContentIds: {},
@@ -104,6 +108,9 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
                       moment.creatorPersona.tideHandle,
                     ),
                     isPaused: _pausedMoments[moment.momentKey] ?? false,
+                    replyCount:
+                        _commentCountOverrides[moment.momentKey] ??
+                        _visibleReplyCount(moment),
                     bottomDockClearance: widget.bottomDockClearance,
                     onLikeTap: () => _toggleLike(moment),
                     onPlayTap: () => _togglePlayback(moment),
@@ -139,6 +146,11 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
                 viewerPersona: SeededShoreMomentDeck.shorelinePeople[36],
                 onClose: () => setState(() => _commentsOpen = false),
                 onChanged: _restoreSafety,
+                onVisibleCountChanged: (count) {
+                  setState(() {
+                    _commentCountOverrides[activeMoment.momentKey] = count;
+                  });
+                },
               ),
           ],
         ),
@@ -155,6 +167,17 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
           ),
         )
         .toList();
+  }
+
+  int _visibleReplyCount(ShoreVideoMoment moment) {
+    return moment.replyDrifts
+        .where(
+          (comment) => _safetySnapshot.isVisibleContent(
+            'comment:${comment.replyMarker}',
+            comment.replyAuthor.tideHandle,
+          ),
+        )
+        .length;
   }
 
   Future<void> _restoreSafety() async {
@@ -226,6 +249,7 @@ class _ShareMomentPane extends StatelessWidget {
     required this.isLiked,
     required this.isFollowed,
     required this.isPaused,
+    required this.replyCount,
     required this.bottomDockClearance,
     required this.onLikeTap,
     required this.onPlayTap,
@@ -241,6 +265,7 @@ class _ShareMomentPane extends StatelessWidget {
   final bool isLiked;
   final bool isFollowed;
   final bool isPaused;
+  final int replyCount;
   final double bottomDockClearance;
   final VoidCallback onLikeTap;
   final VoidCallback onPlayTap;
@@ -262,26 +287,21 @@ class _ShareMomentPane extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onPlayTap,
-          child: ShoreVideoStage(
-            videoAsset: shoreMoment.videoAsset,
-            shouldDrift: isActive,
-            isPausedByViewer: isPaused,
-          ),
+        ShoreVideoStage(
+          videoAsset: shoreMoment.videoAsset,
+          shouldDrift: isActive,
+          isPausedByViewer: isPaused,
         ),
         const _VideoReadabilityScrim(),
+        _CenterPlaybackToggle(isPaused: isPaused, onTap: onPlayTap),
         ShareMomentHeader(onReleaseTap: onReleaseTap),
         MomentActionRail(
           creatorPersona: shoreMoment.creatorPersona,
           isLiked: isLiked,
-          isPaused: isPaused,
           likeCount: adjustedLikeCount,
-          replyCount: shoreMoment.replyTally,
-          infoCount: shoreMoment.infoTally,
+          replyCount: replyCount,
+          bottomDockClearance: bottomDockClearance,
           onLikeTap: onLikeTap,
-          onPlayTap: onPlayTap,
           onCommentTap: onCommentTap,
           onInfoTap: onInfoTap,
           onPersonaTap: onPersonaTap,
@@ -294,6 +314,87 @@ class _ShareMomentPane extends StatelessWidget {
           onPersonaTap: onPersonaTap,
         ),
       ],
+    );
+  }
+}
+
+class _CenterPlaybackToggle extends StatefulWidget {
+  const _CenterPlaybackToggle({required this.isPaused, required this.onTap});
+
+  final bool isPaused;
+  final VoidCallback onTap;
+
+  @override
+  State<_CenterPlaybackToggle> createState() => _CenterPlaybackToggleState();
+}
+
+class _CenterPlaybackToggleState extends State<_CenterPlaybackToggle> {
+  Timer? _hideCueTimer;
+  bool _showPlaybackCue = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _showPlaybackCue = widget.isPaused;
+  }
+
+  @override
+  void didUpdateWidget(covariant _CenterPlaybackToggle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isPaused == widget.isPaused) {
+      return;
+    }
+
+    _hideCueTimer?.cancel();
+    setState(() => _showPlaybackCue = true);
+    if (!widget.isPaused) {
+      _hideCueTimer = Timer(const Duration(milliseconds: 560), () {
+        if (mounted) {
+          setState(() => _showPlaybackCue = false);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _hideCueTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Semantics(
+        button: true,
+        label: widget.isPaused ? 'Play video' : 'Pause video',
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: SizedBox(
+            width: 168,
+            height: 168,
+            child: Center(
+              child: AnimatedOpacity(
+                opacity: widget.isPaused || _showPlaybackCue ? 0.94 : 0,
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+                child: SizedBox(
+                  width: 52,
+                  height: 52,
+                  child: Image.asset(
+                    widget.isPaused
+                        ? CoastinAssetRegistry.playRoundBadge
+                        : CoastinAssetRegistry.pauseRoundBadge,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
