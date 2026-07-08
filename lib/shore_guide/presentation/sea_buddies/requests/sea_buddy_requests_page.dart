@@ -3,24 +3,24 @@ import 'package:flutter/cupertino.dart';
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../../shared/ui/coastin_empty_state.dart';
-import '../../../data/local/buddies/seeded_sea_buddy_deck.dart';
+import '../../../data/local/buddies/sea_buddy_harbor_catalog.dart';
 import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
-import '../../../domain/entities/buddies/sea_buddy_request.dart';
+import '../../../domain/entities/buddies/sea_buddy_follow_request.dart';
 import '../../../domain/value_objects/coastin_country_label.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
 import '../../people/shore_persona_detail_page.dart';
 import '../widgets/sea_buddy_top_bar.dart';
 import '../widgets/sea_buddy_wash.dart';
 
-class SeaBuddyRequestsPage extends StatefulWidget {
-  const SeaBuddyRequestsPage({super.key});
+class SeaBuddyFollowRequestsPage extends StatefulWidget {
+  const SeaBuddyFollowRequestsPage({super.key});
 
   @override
-  State<SeaBuddyRequestsPage> createState() => _SeaBuddyRequestsPageState();
+  State<SeaBuddyFollowRequestsPage> createState() => _SeaBuddyFollowRequestsPageState();
 }
 
-class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
+class _SeaBuddyFollowRequestsPageState extends State<SeaBuddyFollowRequestsPage> {
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
   ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
@@ -74,7 +74,7 @@ class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
                           _SeaRequestTile(
                             request: request,
                             isAccepted: _snapshot.isFollowing(
-                              request.requestPersona.tideHandle,
+                              request.requestHarbor.tideHandle,
                             ),
                             onAcceptTap: () => _acceptRequest(request),
                             onOpen: () => _openRequestProfile(request),
@@ -98,33 +98,33 @@ class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
     );
   }
 
-  List<SeaBuddyRequest> get _visibleRequests {
-    return SeededSeaBuddyDeck.buddyRequests
+  List<SeaBuddyFollowRequest> get _visibleRequests {
+    return SeaBuddyHarborCatalog.buddyRequests
         .where(
           (request) => !_snapshot.blockedHandles.contains(
-            request.requestPersona.tideHandle,
+            request.requestHarbor.tideHandle,
           ),
         )
         .where(
           (request) =>
-              !_snapshot.isFollowing(request.requestPersona.tideHandle),
+              !_snapshot.isFollowing(request.requestHarbor.tideHandle),
         )
         .toList();
   }
 
-  Future<void> _acceptRequest(SeaBuddyRequest request) async {
-    final handle = request.requestPersona.tideHandle;
+  Future<void> _acceptRequest(SeaBuddyFollowRequest request) async {
+    final handle = request.requestHarbor.tideHandle;
     await _noticeStore.recordIncomingFollow(handle);
     await _safetyStore.follow(handle);
     await _restoreSafety();
   }
 
-  void _openRequestProfile(SeaBuddyRequest request) {
+  void _openRequestProfile(SeaBuddyFollowRequest request) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
-          persona: request.requestPersona,
-          placeRibbon: request.placeRibbon,
+          persona: request.requestHarbor,
+          localApproachRibbon: request.localApproachRibbon,
         ),
       ),
     );
@@ -147,14 +147,14 @@ class _SeaRequestTile extends StatelessWidget {
     required this.onOpen,
   });
 
-  final SeaBuddyRequest request;
+  final SeaBuddyFollowRequest request;
   final bool isAccepted;
   final VoidCallback onAcceptTap;
   final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
-    final persona = request.requestPersona;
+    final persona = request.requestHarbor;
     final genderGlyph = persona.profileCurrent == ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
@@ -232,8 +232,8 @@ class _SeaRequestTile extends StatelessWidget {
                     Expanded(
                       child: Text(
                         coastinCountryForPersona(
-                          request.requestPersona,
-                          placeRibbon: request.placeRibbon,
+                          request.requestHarbor,
+                          localApproachRibbon: request.localApproachRibbon,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -248,7 +248,7 @@ class _SeaRequestTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  request.requestLine,
+                  request.approachNote,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

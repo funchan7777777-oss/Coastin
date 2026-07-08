@@ -4,12 +4,12 @@ import 'package:video_player/video_player.dart';
 class ShoreVideoStage extends StatefulWidget {
   const ShoreVideoStage({
     super.key,
-    required this.videoAsset,
+    required this.tideClipAsset,
     required this.shouldDrift,
     required this.isPausedByViewer,
   });
 
-  final String videoAsset;
+  final String tideClipAsset;
   final bool shouldDrift;
   final bool isPausedByViewer;
 
@@ -30,7 +30,7 @@ class _ShoreVideoStageState extends State<ShoreVideoStage> {
   @override
   void didUpdateWidget(covariant ShoreVideoStage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.videoAsset != widget.videoAsset) {
+    if (oldWidget.tideClipAsset != widget.tideClipAsset) {
       _videoController.dispose();
       _isReady = false;
       _prepareVideoController();
@@ -49,7 +49,7 @@ class _ShoreVideoStageState extends State<ShoreVideoStage> {
   }
 
   void _prepareVideoController() {
-    final controller = VideoPlayerController.asset(widget.videoAsset);
+    final controller = VideoPlayerController.asset(widget.tideClipAsset);
     _videoController = controller;
     controller
       ..setLooping(true)

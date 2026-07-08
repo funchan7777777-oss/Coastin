@@ -8,7 +8,7 @@ import '../../../domain/value_objects/shore_profile_current.dart';
 class MomentActionRail extends StatelessWidget {
   const MomentActionRail({
     super.key,
-    required this.creatorPersona,
+    required this.shorelineKeeper,
     required this.isLiked,
     required this.likeCount,
     required this.replyCount,
@@ -19,7 +19,7 @@ class MomentActionRail extends StatelessWidget {
     required this.onPersonaTap,
   });
 
-  final ShorelinePersona creatorPersona;
+  final ShorelinePersona shorelineKeeper;
   final bool isLiked;
   final int likeCount;
   final int replyCount;
@@ -40,7 +40,7 @@ class MomentActionRail extends StatelessWidget {
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: onPersonaTap,
-            child: _MomentPortraitBubble(creatorPersona: creatorPersona),
+            child: _MomentPortraitBubble(shorelineKeeper: shorelineKeeper),
           ),
           const SizedBox(height: 18),
           _MomentImageButton(
@@ -71,14 +71,14 @@ class MomentActionRail extends StatelessWidget {
 }
 
 class _MomentPortraitBubble extends StatelessWidget {
-  const _MomentPortraitBubble({required this.creatorPersona});
+  const _MomentPortraitBubble({required this.shorelineKeeper});
 
-  final ShorelinePersona creatorPersona;
+  final ShorelinePersona shorelineKeeper;
 
   @override
   Widget build(BuildContext context) {
     final genderGlyph =
-        creatorPersona.profileCurrent == ShoreProfileCurrent.feminine
+        shorelineKeeper.profileCurrent == ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
 
@@ -95,7 +95,7 @@ class _MomentPortraitBubble extends StatelessWidget {
           ),
           child: ClipOval(
             child: Image.asset(
-              creatorPersona.avatarAsset,
+              shorelineKeeper.avatarAsset,
               fit: BoxFit.cover,
               filterQuality: FilterQuality.high,
             ),

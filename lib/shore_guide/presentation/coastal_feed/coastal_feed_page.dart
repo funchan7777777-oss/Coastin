@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../app/theme/tidewash_palette.dart';
 import '../../../shared/ui/tokens/shore_spacing.dart';
-import '../../data/local/feed/seeded_coastal_feed_deck.dart';
-import '../../data/local/seeded_harbor_board.dart';
+import '../../data/local/feed/coastal_dispatch_harbor_catalog.dart';
+import '../../data/local/harbor_readiness_tide_catalog.dart';
 import '../../data/local/safety/shore_safety_store.dart';
 import '../../data/local/wallet/shore_shell_wallet_store.dart';
 import '../../domain/entities/feed/coastal_post_dispatch.dart';
@@ -32,12 +32,12 @@ class CoastalFeedPage extends StatefulWidget {
 class _CoastalFeedPageState extends State<CoastalFeedPage> {
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   final Map<String, bool> _lovedDispatches = {
-    for (final post in SeededCoastalFeedDeck.coastalDispatches)
-      post.dispatchKey: post.isInitiallyLoved,
+    for (final post in CoastalDispatchHarborCatalog.coastalDispatches)
+      post.shoreDispatchMarker: post.startsShellLiked,
   };
   final Map<String, int> _replyCounts = {
-    for (final post in SeededCoastalFeedDeck.coastalDispatches)
-      post.dispatchKey: coastalPostReplyCount(post),
+    for (final post in CoastalDispatchHarborCatalog.coastalDispatches)
+      post.shoreDispatchMarker: coastalPostReplyCount(post),
   };
   ShoreSafetySnapshot _safetySnapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
@@ -49,15 +49,15 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
   String? _selectedTopicKey;
 
   List<CoastalPostDispatch> get _visibleDispatches {
-    return SeededCoastalFeedDeck.coastalDispatches
+    return CoastalDispatchHarborCatalog.coastalDispatches
         .where(
           (post) =>
-              _selectedTopicKey == null || post.topicKey == _selectedTopicKey,
+              _selectedTopicKey == null || post.tideTopicMarker == _selectedTopicKey,
         )
         .where(
           (post) => _safetySnapshot.isVisibleContent(
-            'post:${post.dispatchKey}',
-            post.authorHarbor.tideHandle,
+            'post:${post.shoreDispatchMarker}',
+            post.shorelineKeeper.tideHandle,
           ),
         )
         .toList();
@@ -110,19 +110,19 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
                       const SizedBox(height: 22),
                       _TopicShelf(
                         selectedTopicKey: _selectedTopicKey,
-                        participationLines: _topicParticipationLines,
+                        harborParticipationLines: _topicParticipationLines,
                         onTopicTap: _toggleTopic,
                       ),
                       const SizedBox(height: 20),
                       for (final post in _visibleDispatches)
                         CoastalPostCard(
-                          postDispatch: post,
-                          isLoved: _lovedDispatches[post.dispatchKey] ?? false,
+                          shoreDispatch: post,
+                          isLoved: _lovedDispatches[post.shoreDispatchMarker] ?? false,
                           isFollowed: _safetySnapshot.isFollowing(
-                            post.authorHarbor.tideHandle,
+                            post.shorelineKeeper.tideHandle,
                           ),
                           replyCount:
-                              _replyCounts[post.dispatchKey] ??
+                              _replyCounts[post.shoreDispatchMarker] ??
                               coastalPostReplyCount(post),
                           onOpen: () => _openPostDetails(post),
                           onLoveTap: () => _toggleLove(post),
@@ -143,52 +143,52 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
 
   void _toggleTopic(CoastalTopicLane topicLane) {
     setState(() {
-      _selectedTopicKey = _selectedTopicKey == topicLane.laneKey
+      _selectedTopicKey = _selectedTopicKey == topicLane.tideTopicMarker
           ? null
-          : topicLane.laneKey;
+          : topicLane.tideTopicMarker;
     });
   }
 
   void _toggleLove(CoastalPostDispatch post) {
     setState(() {
-      _lovedDispatches[post.dispatchKey] =
-          !(_lovedDispatches[post.dispatchKey] ?? false);
+      _lovedDispatches[post.shoreDispatchMarker] =
+          !(_lovedDispatches[post.shoreDispatchMarker] ?? false);
     });
   }
 
   Map<String, String> get _topicParticipationLines {
     return {
-      for (final topicLane in SeededCoastalFeedDeck.topicLanes)
-        topicLane.laneKey: _topicParticipationLine(topicLane.laneKey),
+      for (final topicLane in CoastalDispatchHarborCatalog.topicLanes)
+        topicLane.tideTopicMarker: _topicParticipationLine(topicLane.tideTopicMarker),
     };
   }
 
-  String _topicParticipationLine(String topicKey) {
-    final count = _topicParticipationCount(topicKey);
+  String _topicParticipationLine(String tideTopicMarker) {
+    final count = _topicParticipationCount(tideTopicMarker);
     return count == 1 ? '1 person' : '$count people';
   }
 
-  int _topicParticipationCount(String topicKey) {
+  int _topicParticipationCount(String tideTopicMarker) {
     final authorHandles = <String>{};
     var replySignals = 0;
     var localLoveSignals = 0;
     var relaySignals = 0;
 
-    for (final post in SeededCoastalFeedDeck.coastalDispatches) {
-      if (post.topicKey != topicKey ||
+    for (final post in CoastalDispatchHarborCatalog.coastalDispatches) {
+      if (post.tideTopicMarker != tideTopicMarker ||
           !_safetySnapshot.isVisibleContent(
-            'post:${post.dispatchKey}',
-            post.authorHarbor.tideHandle,
+            'post:${post.shoreDispatchMarker}',
+            post.shorelineKeeper.tideHandle,
           )) {
         continue;
       }
-      authorHandles.add(post.authorHarbor.tideHandle);
+      authorHandles.add(post.shorelineKeeper.tideHandle);
       replySignals +=
-          _replyCounts[post.dispatchKey] ?? coastalPostReplyCount(post);
-      if (_lovedDispatches[post.dispatchKey] == true) {
+          _replyCounts[post.shoreDispatchMarker] ?? coastalPostReplyCount(post);
+      if (_lovedDispatches[post.shoreDispatchMarker] == true) {
         localLoveSignals += 1;
       }
-      relaySignals += post.relayTally > 0 ? 1 : 0;
+      relaySignals += post.shoreShareCount > 0 ? 1 : 0;
     }
 
     return authorHandles.length +
@@ -198,7 +198,7 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
   }
 
   Future<void> _toggleFollow(CoastalPostDispatch post) async {
-    final handle = post.authorHarbor.tideHandle;
+    final handle = post.shorelineKeeper.tideHandle;
     if (_safetySnapshot.isFollowing(handle)) {
       await _safetyStore.unfollow(handle);
     } else {
@@ -220,15 +220,15 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => CoastalPostDetailsPage(
-          postDispatch: post,
-          isLoved: _lovedDispatches[post.dispatchKey] ?? false,
-          isFollowed: _safetySnapshot.isFollowing(post.authorHarbor.tideHandle),
+          shoreDispatch: post,
+          isLoved: _lovedDispatches[post.shoreDispatchMarker] ?? false,
+          isFollowed: _safetySnapshot.isFollowing(post.shorelineKeeper.tideHandle),
           onLoveChanged: (isLoved) {
-            setState(() => _lovedDispatches[post.dispatchKey] = isLoved);
+            setState(() => _lovedDispatches[post.shoreDispatchMarker] = isLoved);
           },
           onFollowChanged: (_) => _restoreSafety(),
           onReplyCountChanged: (replyCount) {
-            setState(() => _replyCounts[post.dispatchKey] = replyCount);
+            setState(() => _replyCounts[post.shoreDispatchMarker] = replyCount);
           },
         ),
       ),
@@ -259,7 +259,7 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => const CoveRoutePlannerPage(
-          harborBoard: SeededHarborBoard.pacificMorningBoard,
+          harborBoard: HarborReadinessTideCatalog.pacificMorningBoard,
         ),
       ),
     );
@@ -269,8 +269,8 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
-          persona: post.authorHarbor,
-          placeRibbon: post.placeRibbon,
+          persona: post.shorelineKeeper,
+          localApproachRibbon: post.localApproachRibbon,
         ),
       ),
     );
@@ -287,10 +287,10 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
   Future<void> _showPostHarborMenu(CoastalPostDispatch post) async {
     await ShoreSafetyReef.showGuard(
       context: context,
-      contentId: 'post:${post.dispatchKey}',
+      contentId: 'post:${post.shoreDispatchMarker}',
       contentKind: ShoreSafetyContentKind.post,
-      ownerName: post.authorHarbor.displayHarborName,
-      ownerHandle: post.authorHarbor.tideHandle,
+      ownerName: post.shorelineKeeper.displayHarborName,
+      ownerHandle: post.shorelineKeeper.tideHandle,
     );
     await _restoreSafety();
   }
@@ -494,17 +494,17 @@ class _RoutePlannerBanner extends StatelessWidget {
 class _TopicShelf extends StatelessWidget {
   const _TopicShelf({
     required this.selectedTopicKey,
-    required this.participationLines,
+    required this.harborParticipationLines,
     required this.onTopicTap,
   });
 
   final String? selectedTopicKey;
-  final Map<String, String> participationLines;
+  final Map<String, String> harborParticipationLines;
   final ValueChanged<CoastalTopicLane> onTopicTap;
 
   @override
   Widget build(BuildContext context) {
-    final topics = SeededCoastalFeedDeck.topicLanes;
+    final topics = CoastalDispatchHarborCatalog.topicLanes;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -523,10 +523,10 @@ class _TopicShelf extends StatelessWidget {
             Expanded(
               child: _TopicCard(
                 topicLane: topics[0],
-                participationLine:
-                    participationLines[topics[0].laneKey] ??
-                    topics[0].participationLine,
-                isSelected: selectedTopicKey == topics[0].laneKey,
+                harborParticipationLine:
+                    harborParticipationLines[topics[0].tideTopicMarker] ??
+                    topics[0].harborParticipationLine,
+                isSelected: selectedTopicKey == topics[0].tideTopicMarker,
                 isLarge: true,
                 onTap: () => onTopicTap(topics[0]),
               ),
@@ -537,19 +537,19 @@ class _TopicShelf extends StatelessWidget {
                 children: [
                   _TopicCard(
                     topicLane: topics[1],
-                    participationLine:
-                        participationLines[topics[1].laneKey] ??
-                        topics[1].participationLine,
-                    isSelected: selectedTopicKey == topics[1].laneKey,
+                    harborParticipationLine:
+                        harborParticipationLines[topics[1].tideTopicMarker] ??
+                        topics[1].harborParticipationLine,
+                    isSelected: selectedTopicKey == topics[1].tideTopicMarker,
                     onTap: () => onTopicTap(topics[1]),
                   ),
                   const SizedBox(height: 10),
                   _TopicCard(
                     topicLane: topics[2],
-                    participationLine:
-                        participationLines[topics[2].laneKey] ??
-                        topics[2].participationLine,
-                    isSelected: selectedTopicKey == topics[2].laneKey,
+                    harborParticipationLine:
+                        harborParticipationLines[topics[2].tideTopicMarker] ??
+                        topics[2].harborParticipationLine,
+                    isSelected: selectedTopicKey == topics[2].tideTopicMarker,
                     onTap: () => onTopicTap(topics[2]),
                   ),
                 ],
@@ -565,14 +565,14 @@ class _TopicShelf extends StatelessWidget {
 class _TopicCard extends StatelessWidget {
   const _TopicCard({
     required this.topicLane,
-    required this.participationLine,
+    required this.harborParticipationLine,
     required this.isSelected,
     required this.onTap,
     this.isLarge = false,
   });
 
   final CoastalTopicLane topicLane;
-  final String participationLine;
+  final String harborParticipationLine;
   final bool isSelected;
   final bool isLarge;
   final VoidCallback onTap;
@@ -591,7 +591,7 @@ class _TopicCard extends StatelessWidget {
         height: isLarge ? 168 : 78,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: Color(topicLane.highlightTint),
+          color: Color(topicLane.topicWashTint),
           borderRadius: cardRadius,
         ),
         foregroundDecoration: BoxDecoration(
@@ -602,7 +602,7 @@ class _TopicCard extends StatelessWidget {
           children: [
             Positioned.fill(
               child: Image.asset(
-                topicLane.topicCardAsset,
+                topicLane.topicHarborCardAsset,
                 fit: BoxFit.cover,
                 alignment: isLarge ? Alignment.bottomCenter : Alignment.center,
                 filterQuality: FilterQuality.high,
@@ -614,7 +614,7 @@ class _TopicCard extends StatelessWidget {
                 top: 22,
                 right: 12,
                 child: Text(
-                  topicLane.topicLabel,
+                  topicLane.tideTopicLabel,
                   maxLines: 2,
                   style: const TextStyle(
                     color: Color(0xFF2B333B),
@@ -627,7 +627,7 @@ class _TopicCard extends StatelessWidget {
               Positioned(
                 left: 14,
                 top: 60,
-                child: _TopicPeopleBadge(participationLine: participationLine),
+                child: _TopicPeopleBadge(harborParticipationLine: harborParticipationLine),
               ),
             ] else
               Positioned(
@@ -637,7 +637,7 @@ class _TopicCard extends StatelessWidget {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: _TopicPeopleText(participationLine: participationLine),
+                  child: _TopicPeopleText(harborParticipationLine: harborParticipationLine),
                 ),
               ),
             if (isLarge)
@@ -660,9 +660,9 @@ class _TopicCard extends StatelessWidget {
 }
 
 class _TopicPeopleBadge extends StatelessWidget {
-  const _TopicPeopleBadge({required this.participationLine});
+  const _TopicPeopleBadge({required this.harborParticipationLine});
 
-  final String participationLine;
+  final String harborParticipationLine;
 
   @override
   Widget build(BuildContext context) {
@@ -673,20 +673,20 @@ class _TopicPeopleBadge extends StatelessWidget {
         color: const Color(0xFFFFFFFF).withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(14),
       ),
-      child: _TopicPeopleText(participationLine: participationLine),
+      child: _TopicPeopleText(harborParticipationLine: harborParticipationLine),
     );
   }
 }
 
 class _TopicPeopleText extends StatelessWidget {
-  const _TopicPeopleText({required this.participationLine});
+  const _TopicPeopleText({required this.harborParticipationLine});
 
-  final String participationLine;
+  final String harborParticipationLine;
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      participationLine,
+      harborParticipationLine,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(

@@ -5,7 +5,7 @@ import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
-import '../../../domain/entities/shore_reply_drift.dart';
+import '../../../domain/entities/shore_comment_tide_mark.dart';
 import '../../../domain/entities/shoreline_persona.dart';
 import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
@@ -26,7 +26,7 @@ class ReefCommentSheet extends StatefulWidget {
   });
 
   final bool isOpen;
-  final List<ShoreReplyDrift> commentDrifts;
+  final List<ShoreCommentTideMark> commentDrifts;
   final ShorelinePersona viewerPersona;
   final double bottomDockClearance;
   final VoidCallback onClose;
@@ -40,7 +40,7 @@ class ReefCommentSheet extends StatefulWidget {
 class _ReefCommentSheetState extends State<ReefCommentSheet> {
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
-  late List<ShoreReplyDrift> _visibleComments;
+  late List<ShoreCommentTideMark> _visibleComments;
   final TextEditingController _commentController = TextEditingController();
 
   @override
@@ -196,11 +196,11 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     setState(() {
       _visibleComments.insert(
         0,
-        ShoreReplyDrift(
-          replyMarker: 'viewer-${DateTime.now().millisecondsSinceEpoch}',
-          replyAuthor: widget.viewerPersona,
-          tideMinute: 'now',
-          replyText: text,
+        ShoreCommentTideMark(
+          commentMarker: 'viewer-${DateTime.now().millisecondsSinceEpoch}',
+          commentHarbor: widget.viewerPersona,
+          commentClock: 'now',
+          commentText: text,
           hasFreshSignal: true,
         ),
       );
@@ -221,8 +221,8 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     final visibleComments = widget.commentDrifts
         .where(
           (comment) => snapshot.isVisibleContent(
-            'comment:${comment.replyMarker}',
-            comment.replyAuthor.tideHandle,
+            'comment:${comment.commentMarker}',
+            comment.commentHarbor.tideHandle,
           ),
         )
         .toList();
@@ -232,31 +232,31 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     widget.onVisibleCountChanged(visibleComments.length);
   }
 
-  void _openPersona(ShoreReplyDrift commentDrift) {
+  void _openPersona(ShoreCommentTideMark commentDrift) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
-          persona: commentDrift.replyAuthor,
-          placeRibbon: 'Shared shore note',
+          persona: commentDrift.commentHarbor,
+          localApproachRibbon: 'Shared shore note',
         ),
       ),
     );
   }
 
-  Future<void> _reportComment(ShoreReplyDrift commentDrift) async {
+  Future<void> _reportComment(ShoreCommentTideMark commentDrift) async {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
-      contentId: 'comment:${commentDrift.replyMarker}',
+      contentId: 'comment:${commentDrift.commentMarker}',
       contentKind: ShoreSafetyContentKind.comment,
-      ownerName: commentDrift.replyAuthor.displayHarborName,
-      ownerHandle: commentDrift.replyAuthor.tideHandle,
+      ownerName: commentDrift.commentHarbor.displayHarborName,
+      ownerHandle: commentDrift.commentHarbor.tideHandle,
     );
     if (!mounted || outcome == null) {
       return;
     }
     setState(() {
       _visibleComments.removeWhere(
-        (comment) => comment.replyMarker == commentDrift.replyMarker,
+        (comment) => comment.commentMarker == commentDrift.commentMarker,
       );
     });
     widget.onVisibleCountChanged(_visibleComments.length);
@@ -334,14 +334,14 @@ class _ReefCommentRow extends StatelessWidget {
     required this.onReportTap,
   });
 
-  final ShoreReplyDrift commentDrift;
+  final ShoreCommentTideMark commentDrift;
   final VoidCallback onPersonaTap;
   final VoidCallback onReportTap;
 
   @override
   Widget build(BuildContext context) {
     final genderGlyph =
-        commentDrift.replyAuthor.profileCurrent == ShoreProfileCurrent.feminine
+        commentDrift.commentHarbor.profileCurrent == ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
 
@@ -356,7 +356,7 @@ class _ReefCommentRow extends StatelessWidget {
             children: [
               ClipOval(
                 child: Image.asset(
-                  commentDrift.replyAuthor.avatarAsset,
+                  commentDrift.commentHarbor.avatarAsset,
                   width: 42,
                   height: 42,
                   fit: BoxFit.cover,
@@ -383,7 +383,7 @@ class _ReefCommentRow extends StatelessWidget {
                       behavior: HitTestBehavior.opaque,
                       onTap: onPersonaTap,
                       child: Text(
-                        commentDrift.replyAuthor.displayHarborName,
+                        commentDrift.commentHarbor.displayHarborName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -396,7 +396,7 @@ class _ReefCommentRow extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    commentDrift.tideMinute,
+                    commentDrift.commentClock,
                     style: TextStyle(
                       color: TidewashPalette.harborSlate.withValues(
                         alpha: 0.64,
@@ -420,7 +420,7 @@ class _ReefCommentRow extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               Text(
-                commentDrift.replyText,
+                commentDrift.commentText,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

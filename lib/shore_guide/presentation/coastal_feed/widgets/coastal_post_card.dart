@@ -9,7 +9,7 @@ import 'coastal_post_meta.dart';
 class CoastalPostCard extends StatelessWidget {
   const CoastalPostCard({
     super.key,
-    required this.postDispatch,
+    required this.shoreDispatch,
     required this.isLoved,
     required this.isFollowed,
     required this.replyCount,
@@ -20,7 +20,7 @@ class CoastalPostCard extends StatelessWidget {
     required this.onAuthorTap,
   });
 
-  final CoastalPostDispatch postDispatch;
+  final CoastalPostDispatch shoreDispatch;
   final bool isLoved;
   final bool isFollowed;
   final int replyCount;
@@ -32,7 +32,7 @@ class CoastalPostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final adjustedHeart = postDispatch.heartTally + (isLoved ? 1 : 0);
+    final adjustedHeart = shoreDispatch.shellLikeCount + (isLoved ? 1 : 0);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -43,14 +43,14 @@ class CoastalPostCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _AuthorRow(
-              postDispatch: postDispatch,
+              shoreDispatch: shoreDispatch,
               isFollowed: isFollowed,
               onFollowTap: onFollowTap,
               onAuthorTap: onAuthorTap,
             ),
             const SizedBox(height: 12),
             Text(
-              postDispatch.captionCurrent,
+              shoreDispatch.shorelineCaption,
               style: const TextStyle(
                 color: TidewashPalette.inkBlue,
                 fontSize: 15,
@@ -59,15 +59,15 @@ class CoastalPostCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            _PostFrameGrid(frameAssets: postDispatch.frameAssets),
+            _PostFrameGrid(shorelineFrameAssets: shoreDispatch.shorelineFrameAssets),
             const SizedBox(height: 12),
-            _TopicPill(topicLabel: postDispatch.topicLabel),
+            _TopicPill(tideTopicLabel: shoreDispatch.tideTopicLabel),
             const SizedBox(height: 10),
             _ActionCountRow(
               isLoved: isLoved,
               heartCount: adjustedHeart,
               replyCount: replyCount,
-              relayCount: postDispatch.relayTally,
+              relayCount: shoreDispatch.shoreShareCount,
               onLoveTap: onLoveTap,
               onMoreTap: onMoreTap,
             ),
@@ -80,20 +80,20 @@ class CoastalPostCard extends StatelessWidget {
 
 class _AuthorRow extends StatelessWidget {
   const _AuthorRow({
-    required this.postDispatch,
+    required this.shoreDispatch,
     required this.isFollowed,
     required this.onFollowTap,
     required this.onAuthorTap,
   });
 
-  final CoastalPostDispatch postDispatch;
+  final CoastalPostDispatch shoreDispatch;
   final bool isFollowed;
   final VoidCallback onFollowTap;
   final VoidCallback onAuthorTap;
 
   @override
   Widget build(BuildContext context) {
-    final author = postDispatch.authorHarbor;
+    final author = shoreDispatch.shorelineKeeper;
     final genderGlyph = author.profileCurrent == ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
@@ -149,7 +149,7 @@ class _AuthorRow extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    postDispatch.clockRibbon,
+                    shoreDispatch.postedAtRibbon,
                     style: const TextStyle(
                       color: TidewashPalette.harborSlate,
                       fontSize: 12,
@@ -169,7 +169,7 @@ class _AuthorRow extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      coastalPostOriginLine(postDispatch),
+                      coastalPostOriginLine(shoreDispatch),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -206,29 +206,29 @@ class _AuthorRow extends StatelessWidget {
 }
 
 class _PostFrameGrid extends StatelessWidget {
-  const _PostFrameGrid({required this.frameAssets});
+  const _PostFrameGrid({required this.shorelineFrameAssets});
 
-  final List<String> frameAssets;
+  final List<String> shorelineFrameAssets;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        for (var index = 0; index < frameAssets.length; index++) ...[
+        for (var index = 0; index < shorelineFrameAssets.length; index++) ...[
           Expanded(
             child: AspectRatio(
               aspectRatio: 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(9),
                 child: Image.asset(
-                  frameAssets[index],
+                  shorelineFrameAssets[index],
                   fit: BoxFit.cover,
                   filterQuality: FilterQuality.high,
                 ),
               ),
             ),
           ),
-          if (index != frameAssets.length - 1) const SizedBox(width: 6),
+          if (index != shorelineFrameAssets.length - 1) const SizedBox(width: 6),
         ],
       ],
     );
@@ -236,9 +236,9 @@ class _PostFrameGrid extends StatelessWidget {
 }
 
 class _TopicPill extends StatelessWidget {
-  const _TopicPill({required this.topicLabel});
+  const _TopicPill({required this.tideTopicLabel});
 
-  final String topicLabel;
+  final String tideTopicLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +258,7 @@ class _TopicPill extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            topicLabel,
+            tideTopicLabel,
             style: const TextStyle(
               color: Color(0xFFE9A72D),
               fontSize: 12,

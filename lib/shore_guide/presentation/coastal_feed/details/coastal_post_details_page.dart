@@ -5,9 +5,9 @@ import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
-import '../../../data/local/seeded_shore_moment_deck.dart';
+import '../../../data/local/shore_moment_harbor_catalog.dart';
 import '../../../domain/entities/feed/coastal_post_dispatch.dart';
-import '../../../domain/entities/shore_reply_drift.dart';
+import '../../../domain/entities/shore_comment_tide_mark.dart';
 import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
 import '../../people/shore_persona_detail_page.dart';
@@ -18,7 +18,7 @@ import '../widgets/coastal_post_meta.dart';
 class CoastalPostDetailsPage extends StatefulWidget {
   const CoastalPostDetailsPage({
     super.key,
-    required this.postDispatch,
+    required this.shoreDispatch,
     required this.isLoved,
     required this.isFollowed,
     required this.onLoveChanged,
@@ -26,7 +26,7 @@ class CoastalPostDetailsPage extends StatefulWidget {
     required this.onReplyCountChanged,
   });
 
-  final CoastalPostDispatch postDispatch;
+  final CoastalPostDispatch shoreDispatch;
   final bool isLoved;
   final bool isFollowed;
   final ValueChanged<bool> onLoveChanged;
@@ -44,8 +44,8 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
   final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
   late bool _isLoved = widget.isLoved;
   late bool _isFollowed = widget.isFollowed;
-  late final List<ShoreReplyDrift> _visibleReplies = List.of(
-    widget.postDispatch.replyDrifts,
+  late final List<ShoreCommentTideMark> _visibleReplies = List.of(
+    widget.shoreDispatch.commentTideMarks,
   );
   final TextEditingController _replyController = TextEditingController();
 
@@ -69,7 +69,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final post = widget.postDispatch;
+    final post = widget.shoreDispatch;
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFFDF7DC),
       child: MediaQuery(
@@ -93,14 +93,14 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                         ),
                         const SizedBox(height: 26),
                         _DetailAuthorRow(
-                          postDispatch: post,
+                          shoreDispatch: post,
                           isFollowed: _isFollowed,
                           onFollowTap: _toggleFollow,
                           onAuthorTap: _openAuthor,
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          post.captionCurrent,
+                          post.shorelineCaption,
                           style: const TextStyle(
                             color: TidewashPalette.inkBlue,
                             fontSize: 15,
@@ -110,16 +110,16 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                         ),
                         const SizedBox(height: 12),
                         _DetailFrameStrip(
-                          frameAssets: post.frameAssets,
+                          shorelineFrameAssets: post.shorelineFrameAssets,
                           onFrameTap: _openFramePreview,
                         ),
                         const SizedBox(height: 12),
                         _DetailActionRow(
                           isLoved: _isLoved,
-                          heartCount: post.heartTally + (_isLoved ? 1 : 0),
+                          heartCount: post.shellLikeCount + (_isLoved ? 1 : 0),
                           replyCount: _visibleReplies.length,
-                          relayTally: post.relayTally,
-                          topicLabel: post.topicLabel,
+                          shoreShareCount: post.shoreShareCount,
+                          tideTopicLabel: post.tideTopicLabel,
                           onLoveTap: _toggleLove,
                           onShareTap: _sharePost,
                           onMoreTap: _showPostInfo,
@@ -168,7 +168,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
   }
 
   Future<void> _toggleFollow() async {
-    final handle = widget.postDispatch.authorHarbor.tideHandle;
+    final handle = widget.shoreDispatch.shorelineKeeper.tideHandle;
     if (_isFollowed) {
       await _safetyStore.unfollow(handle);
     } else {
@@ -198,11 +198,11 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     setState(() {
       _visibleReplies.insert(
         0,
-        ShoreReplyDrift(
-          replyMarker: 'detail-${DateTime.now().microsecondsSinceEpoch}',
-          replyAuthor: SeededShoreMomentDeck.shorelinePeople[36],
-          tideMinute: 'now',
-          replyText: text,
+        ShoreCommentTideMark(
+          commentMarker: 'detail-${DateTime.now().microsecondsSinceEpoch}',
+          commentHarbor: ShoreMomentHarborCatalog.shorelinePeople[36],
+          commentClock: 'now',
+          commentText: text,
           hasFreshSignal: true,
         ),
       );
@@ -210,7 +210,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     });
     widget.onReplyCountChanged(_visibleReplies.length);
     _noticeStore.recordCommentNotice(
-      actorHandle: widget.postDispatch.authorHarbor.tideHandle,
+      actorHandle: widget.shoreDispatch.shorelineKeeper.tideHandle,
       noticeLine: 'Your comment was added under this Coastin post.',
     );
   }
@@ -219,31 +219,31 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
-          persona: widget.postDispatch.authorHarbor,
-          placeRibbon: widget.postDispatch.placeRibbon,
+          persona: widget.shoreDispatch.shorelineKeeper,
+          localApproachRibbon: widget.shoreDispatch.localApproachRibbon,
         ),
       ),
     );
   }
 
-  void _openReplyAuthor(ShoreReplyDrift reply) {
+  void _openReplyAuthor(ShoreCommentTideMark reply) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
-          persona: reply.replyAuthor,
-          placeRibbon: '23 - Australia',
+          persona: reply.commentHarbor,
+          localApproachRibbon: '23 - Australia',
         ),
       ),
     );
   }
 
-  Future<void> _reportReply(ShoreReplyDrift reply) async {
+  Future<void> _reportReply(ShoreCommentTideMark reply) async {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
-      contentId: 'comment:${reply.replyMarker}',
+      contentId: 'comment:${reply.commentMarker}',
       contentKind: ShoreSafetyContentKind.comment,
-      ownerName: reply.replyAuthor.displayHarborName,
-      ownerHandle: reply.replyAuthor.tideHandle,
+      ownerName: reply.commentHarbor.displayHarborName,
+      ownerHandle: reply.commentHarbor.tideHandle,
     );
     if (!mounted || outcome == null) {
       return;
@@ -258,15 +258,15 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
     }
     setState(() {
       _isFollowed = snapshot.isFollowing(
-        widget.postDispatch.authorHarbor.tideHandle,
+        widget.shoreDispatch.shorelineKeeper.tideHandle,
       );
       _visibleReplies
         ..clear()
         ..addAll(
-          widget.postDispatch.replyDrifts.where(
+          widget.shoreDispatch.commentTideMarks.where(
             (reply) => snapshot.isVisibleContent(
-              'comment:${reply.replyMarker}',
-              reply.replyAuthor.tideHandle,
+              'comment:${reply.commentMarker}',
+              reply.commentHarbor.tideHandle,
             ),
           ),
         );
@@ -280,7 +280,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
       barrierColor: const Color(0xE6000000),
       builder: (context) {
         return _FramePreviewOverlay(
-          frameAssets: widget.postDispatch.frameAssets,
+          shorelineFrameAssets: widget.shoreDispatch.shorelineFrameAssets,
           initialIndex: initialIndex,
         );
       },
@@ -288,11 +288,11 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
   }
 
   Future<void> _sharePost() async {
-    final post = widget.postDispatch;
+    final post = widget.shoreDispatch;
     final shareText =
-        '${post.authorHarbor.displayHarborName} on Coastin\n'
-        '${post.captionCurrent}\n'
-        '${coastalPostOriginLine(post)} · ${post.topicLabel}';
+        '${post.shorelineKeeper.displayHarborName} on Coastin\n'
+        '${post.shorelineCaption}\n'
+        '${coastalPostOriginLine(post)} · ${post.tideTopicLabel}';
     try {
       await _shareChannel.invokeMethod<void>('shareText', {'text': shareText});
     } catch (_) {
@@ -311,10 +311,10 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
   Future<void> _showPostInfo() async {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
-      contentId: 'post:${widget.postDispatch.dispatchKey}',
+      contentId: 'post:${widget.shoreDispatch.shoreDispatchMarker}',
       contentKind: ShoreSafetyContentKind.post,
-      ownerName: widget.postDispatch.authorHarbor.displayHarborName,
-      ownerHandle: widget.postDispatch.authorHarbor.tideHandle,
+      ownerName: widget.shoreDispatch.shorelineKeeper.displayHarborName,
+      ownerHandle: widget.shoreDispatch.shorelineKeeper.tideHandle,
     );
     if (!mounted || outcome == null) {
       return;
@@ -349,11 +349,11 @@ class _DetailWash extends StatelessWidget {
 
 class _FramePreviewOverlay extends StatefulWidget {
   const _FramePreviewOverlay({
-    required this.frameAssets,
+    required this.shorelineFrameAssets,
     required this.initialIndex,
   });
 
-  final List<String> frameAssets;
+  final List<String> shorelineFrameAssets;
   final int initialIndex;
 
   @override
@@ -386,7 +386,7 @@ class _FramePreviewOverlayState extends State<_FramePreviewOverlay> {
           children: [
             PageView.builder(
               controller: _pageController,
-              itemCount: widget.frameAssets.length,
+              itemCount: widget.shorelineFrameAssets.length,
               onPageChanged: (index) => setState(() => _currentIndex = index),
               itemBuilder: (context, index) {
                 return Center(
@@ -394,7 +394,7 @@ class _FramePreviewOverlayState extends State<_FramePreviewOverlay> {
                     minScale: 1,
                     maxScale: 4,
                     child: Image.asset(
-                      widget.frameAssets[index],
+                      widget.shorelineFrameAssets[index],
                       fit: BoxFit.contain,
                       filterQuality: FilterQuality.high,
                     ),
@@ -426,13 +426,13 @@ class _FramePreviewOverlayState extends State<_FramePreviewOverlay> {
                 ),
               ),
             ),
-            if (widget.frameAssets.length > 1)
+            if (widget.shorelineFrameAssets.length > 1)
               Positioned(
                 left: 0,
                 right: 0,
                 bottom: 42,
                 child: Text(
-                  '${_currentIndex + 1}/${widget.frameAssets.length}',
+                  '${_currentIndex + 1}/${widget.shorelineFrameAssets.length}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Color(0xFFFFFFFF),
@@ -507,20 +507,20 @@ class _DetailTopBar extends StatelessWidget {
 
 class _DetailAuthorRow extends StatelessWidget {
   const _DetailAuthorRow({
-    required this.postDispatch,
+    required this.shoreDispatch,
     required this.isFollowed,
     required this.onFollowTap,
     required this.onAuthorTap,
   });
 
-  final CoastalPostDispatch postDispatch;
+  final CoastalPostDispatch shoreDispatch;
   final bool isFollowed;
   final VoidCallback onFollowTap;
   final VoidCallback onAuthorTap;
 
   @override
   Widget build(BuildContext context) {
-    final author = postDispatch.authorHarbor;
+    final author = shoreDispatch.shorelineKeeper;
     final genderGlyph = author.profileCurrent == ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
@@ -574,7 +574,7 @@ class _DetailAuthorRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    postDispatch.clockRibbon,
+                    shoreDispatch.postedAtRibbon,
                     style: const TextStyle(
                       color: TidewashPalette.harborSlate,
                       fontSize: 12,
@@ -594,7 +594,7 @@ class _DetailAuthorRow extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      coastalPostOriginLine(postDispatch),
+                      coastalPostOriginLine(shoreDispatch),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -632,18 +632,18 @@ class _DetailAuthorRow extends StatelessWidget {
 
 class _DetailFrameStrip extends StatelessWidget {
   const _DetailFrameStrip({
-    required this.frameAssets,
+    required this.shorelineFrameAssets,
     required this.onFrameTap,
   });
 
-  final List<String> frameAssets;
+  final List<String> shorelineFrameAssets;
   final ValueChanged<int> onFrameTap;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        for (var index = 0; index < frameAssets.length; index++) ...[
+        for (var index = 0; index < shorelineFrameAssets.length; index++) ...[
           Expanded(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -653,7 +653,7 @@ class _DetailFrameStrip extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(9),
                   child: Image.asset(
-                    frameAssets[index],
+                    shorelineFrameAssets[index],
                     fit: BoxFit.cover,
                     filterQuality: FilterQuality.high,
                   ),
@@ -661,7 +661,7 @@ class _DetailFrameStrip extends StatelessWidget {
               ),
             ),
           ),
-          if (index != frameAssets.length - 1) const SizedBox(width: 7),
+          if (index != shorelineFrameAssets.length - 1) const SizedBox(width: 7),
         ],
       ],
     );
@@ -673,8 +673,8 @@ class _DetailActionRow extends StatelessWidget {
     required this.isLoved,
     required this.heartCount,
     required this.replyCount,
-    required this.relayTally,
-    required this.topicLabel,
+    required this.shoreShareCount,
+    required this.tideTopicLabel,
     required this.onLoveTap,
     required this.onShareTap,
     required this.onMoreTap,
@@ -683,8 +683,8 @@ class _DetailActionRow extends StatelessWidget {
   final bool isLoved;
   final int heartCount;
   final int replyCount;
-  final int relayTally;
-  final String topicLabel;
+  final int shoreShareCount;
+  final String tideTopicLabel;
   final VoidCallback onLoveTap;
   final VoidCallback onShareTap;
   final VoidCallback onMoreTap;
@@ -700,7 +700,7 @@ class _DetailActionRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
           ),
           child: Text(
-            topicLabel,
+            tideTopicLabel,
             style: const TextStyle(
               color: Color(0xFFE9A72D),
               fontSize: 12,
@@ -724,7 +724,7 @@ class _DetailActionRow extends StatelessWidget {
         const SizedBox(width: 22),
         _DetailCountGlyph(
           asset: CoastinAssetRegistry.feedShareGlyph,
-          count: relayTally,
+          count: shoreShareCount,
           onTap: onShareTap,
         ),
         const SizedBox(width: 12),
@@ -785,7 +785,7 @@ class _DetailReplyRow extends StatelessWidget {
     required this.onReportTap,
   });
 
-  final ShoreReplyDrift replyDrift;
+  final ShoreCommentTideMark replyDrift;
   final VoidCallback onPersonaTap;
   final VoidCallback onReportTap;
 
@@ -799,7 +799,7 @@ class _DetailReplyRow extends StatelessWidget {
           onTap: onPersonaTap,
           child: ClipOval(
             child: Image.asset(
-              replyDrift.replyAuthor.avatarAsset,
+              replyDrift.commentHarbor.avatarAsset,
               width: 48,
               height: 48,
               fit: BoxFit.cover,
@@ -819,7 +819,7 @@ class _DetailReplyRow extends StatelessWidget {
                       behavior: HitTestBehavior.opaque,
                       onTap: onPersonaTap,
                       child: Text(
-                        replyDrift.replyAuthor.displayHarborName,
+                        replyDrift.commentHarbor.displayHarborName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -831,7 +831,7 @@ class _DetailReplyRow extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    replyDrift.tideMinute,
+                    replyDrift.commentClock,
                     style: const TextStyle(
                       color: TidewashPalette.harborSlate,
                       fontSize: 12,
@@ -852,7 +852,7 @@ class _DetailReplyRow extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                replyDrift.replyText,
+                replyDrift.commentText,
                 style: const TextStyle(
                   color: TidewashPalette.inkBlue,
                   fontSize: 14,

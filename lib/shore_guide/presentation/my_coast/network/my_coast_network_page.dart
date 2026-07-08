@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../../shared/ui/coastin_empty_state.dart';
-import '../../../data/local/buddies/seeded_sea_buddy_deck.dart';
+import '../../../data/local/buddies/sea_buddy_harbor_catalog.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../data/local/shore_persona_catalog.dart';
 import '../../../domain/entities/shoreline_persona.dart';
@@ -104,7 +104,7 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
                           for (final persona in visiblePeople)
                             CoastPersonRow(
                               persona: persona,
-                              placeRibbon: _placeForPersona(persona),
+                              localApproachRibbon: _placeForPersona(persona),
                               summaryLine: persona.coastalStamp,
                               actionAsset: _actionAsset(persona),
                               onActionTap: () => _handleAction(persona),
@@ -141,13 +141,13 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
 
   Future<void> _handleAction(ShorelinePersona persona) async {
     if (widget.kind == MyCoastNetworkKind.friend) {
-      final thread = SeededSeaBuddyDeck.buddyThreads.firstWhere(
-        (thread) => thread.buddyPersona.tideHandle == persona.tideHandle,
+      final thread = SeaBuddyHarborCatalog.buddyThreads.firstWhere(
+        (thread) => thread.buddyHarbor.tideHandle == persona.tideHandle,
         orElse: () => ShorePersonaCatalog.threadForPersona(persona),
       );
       Navigator.of(context).push(
         CupertinoPageRoute<void>(
-          builder: (_) => SeaBuddyChatPage(thread: thread),
+          builder: (_) => SeaBuddyChatPage(buddyThread: thread),
         ),
       );
       return;
@@ -176,7 +176,7 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
           persona: persona,
-          placeRibbon: _placeForPersona(persona),
+          localApproachRibbon: _placeForPersona(persona),
         ),
       ),
     );
@@ -218,7 +218,7 @@ class _BlockedHarborRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final persona = entry.persona;
     final displayName = persona?.displayHarborName ?? entry.handle;
-    final placeRibbon = persona == null ? '' : _placeForPersona(persona);
+    final localApproachRibbon = persona == null ? '' : _placeForPersona(persona);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -267,7 +267,7 @@ class _BlockedHarborRow extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  if (placeRibbon.isNotEmpty) ...[
+                  if (localApproachRibbon.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -279,7 +279,7 @@ class _BlockedHarborRow extends StatelessWidget {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            placeRibbon,
+                            localApproachRibbon,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(

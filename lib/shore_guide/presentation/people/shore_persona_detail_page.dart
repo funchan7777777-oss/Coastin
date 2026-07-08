@@ -5,9 +5,9 @@ import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../app/theme/tidewash_palette.dart';
 import '../../../shared/ui/coastin_empty_state.dart';
 import '../../data/local/buddies/sea_buddy_message_store.dart';
-import '../../data/local/feed/seeded_coastal_feed_deck.dart';
+import '../../data/local/feed/coastal_dispatch_harbor_catalog.dart';
 import '../../data/local/safety/shore_safety_store.dart';
-import '../../data/local/seeded_shore_moment_deck.dart';
+import '../../data/local/shore_moment_harbor_catalog.dart';
 import '../../data/local/shore_persona_catalog.dart';
 import '../../domain/entities/feed/coastal_post_dispatch.dart';
 import '../../domain/entities/shore_video_moment.dart';
@@ -25,11 +25,11 @@ class ShorePersonaDetailPage extends StatefulWidget {
   const ShorePersonaDetailPage({
     super.key,
     required this.persona,
-    this.placeRibbon,
+    this.localApproachRibbon,
   });
 
   final ShorelinePersona persona;
-  final String? placeRibbon;
+  final String? localApproachRibbon;
 
   @override
   State<ShorePersonaDetailPage> createState() => _ShorePersonaDetailPageState();
@@ -39,8 +39,8 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   final SeaBuddyMessageStore _messageStore = const SeaBuddyMessageStore();
   final Map<String, bool> _lovedDispatches = {
-    for (final post in SeededCoastalFeedDeck.coastalDispatches)
-      post.dispatchKey: post.isInitiallyLoved,
+    for (final post in CoastalDispatchHarborCatalog.coastalDispatches)
+      post.shoreDispatchMarker: post.startsShellLiked,
   };
   ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
@@ -79,7 +79,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
   Widget build(BuildContext context) {
     final persona = widget.persona;
     final isFollowing = _snapshot.isFollowing(persona.tideHandle);
-    final profileOriginLine = _profileOriginLine(persona, widget.placeRibbon);
+    final profileOriginLine = _profileOriginLine(persona, widget.localApproachRibbon);
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFBDF8F3),
@@ -111,7 +111,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
                         const SizedBox(height: 48),
                         _ProfileBand(
                           persona: persona,
-                          placeRibbon: profileOriginLine,
+                          localApproachRibbon: profileOriginLine,
                           isFollowing: isFollowing,
                           onFollowTap: _toggleFollow,
                         ),
@@ -152,7 +152,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
                           onPostLoveChanged: (post, isLoved) {
                             setState(
                               () =>
-                                  _lovedDispatches[post.dispatchKey] = isLoved,
+                                  _lovedDispatches[post.shoreDispatchMarker] = isLoved,
                             );
                           },
                           onPostFollowChanged: (_) => _restoreSafety(),
@@ -202,7 +202,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     final thread = ShorePersonaCatalog.threadForPersona(widget.persona);
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => SeaBuddyChatPage(thread: thread),
+        builder: (_) => SeaBuddyChatPage(buddyThread: thread),
       ),
     );
   }
@@ -214,7 +214,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     final thread = ShorePersonaCatalog.threadForPersona(widget.persona);
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => SeaBuddyCallPage(thread: thread),
+        builder: (_) => SeaBuddyCallPage(buddyThread: thread),
       ),
     );
   }
@@ -236,7 +236,7 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
     }
     if (outcome == ShoreSafetyOutcome.blocked) {
       await _messageStore.clearThread(
-        ShorePersonaCatalog.threadForPersona(widget.persona).threadKey,
+        ShorePersonaCatalog.threadForPersona(widget.persona).harborThreadMarker,
       );
     }
     if (mounted) {
@@ -293,13 +293,13 @@ class _DetailTopLine extends StatelessWidget {
 class _ProfileBand extends StatelessWidget {
   const _ProfileBand({
     required this.persona,
-    required this.placeRibbon,
+    required this.localApproachRibbon,
     required this.isFollowing,
     required this.onFollowTap,
   });
 
   final ShorelinePersona persona;
-  final String placeRibbon;
+  final String localApproachRibbon;
   final bool isFollowing;
   final VoidCallback onFollowTap;
 
@@ -372,7 +372,7 @@ class _ProfileBand extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      placeRibbon,
+                      localApproachRibbon,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -565,29 +565,29 @@ class _PersonaWorkGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final videoMoments = SeededShoreMomentDeck.shoreVideoMoments
+    final videoMoments = ShoreMomentHarborCatalog.shoreVideoMoments
         .where(
           (moment) =>
-              moment.creatorPersona.tideHandle == persona.tideHandle &&
+              moment.shorelineKeeper.tideHandle == persona.tideHandle &&
               snapshot.isVisibleContent(
-                'moment:${moment.momentKey}',
+                'moment:${moment.shoreMomentMarker}',
                 persona.tideHandle,
               ),
         )
         .toList();
-    final posts = SeededCoastalFeedDeck.coastalDispatches
+    final posts = CoastalDispatchHarborCatalog.coastalDispatches
         .where(
           (post) =>
-              post.authorHarbor.tideHandle == persona.tideHandle &&
+              post.shorelineKeeper.tideHandle == persona.tideHandle &&
               snapshot.isVisibleContent(
-                'post:${post.dispatchKey}',
+                'post:${post.shoreDispatchMarker}',
                 persona.tideHandle,
               ),
         )
         .toList();
 
     final postTiles = posts
-        .where((post) => post.frameAssets.isNotEmpty)
+        .where((post) => post.shorelineFrameAssets.isNotEmpty)
         .take(6)
         .toList();
     final tileCount = showVideos ? videoMoments.length : postTiles.length;
@@ -618,12 +618,12 @@ class _PersonaWorkGrid extends StatelessWidget {
               Navigator.of(context).push(
                 CupertinoPageRoute<void>(
                   builder: (_) => CoastalPostDetailsPage(
-                    postDispatch: post,
+                    shoreDispatch: post,
                     isLoved:
-                        lovedDispatches[post.dispatchKey] ??
-                        post.isInitiallyLoved,
+                        lovedDispatches[post.shoreDispatchMarker] ??
+                        post.startsShellLiked,
                     isFollowed: snapshot.isFollowing(
-                      post.authorHarbor.tideHandle,
+                      post.shorelineKeeper.tideHandle,
                     ),
                     onLoveChanged: (isLoved) =>
                         onPostLoveChanged(post, isLoved),
@@ -636,7 +636,7 @@ class _PersonaWorkGrid extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(9),
               child: Image.asset(
-                post.frameAssets.first,
+                post.shorelineFrameAssets.first,
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.high,
               ),
@@ -651,7 +651,7 @@ class _PersonaWorkGrid extends StatelessWidget {
               CupertinoPageRoute<void>(
                 builder: (_) => ShareMomentsPage(
                   bottomDockClearance: 0,
-                  initialMomentKey: moment.momentKey,
+                  initialMomentKey: moment.shoreMomentMarker,
                   showBackButton: true,
                   showReleaseButton: false,
                 ),
@@ -687,7 +687,7 @@ class _MomentFirstFrameTileState extends State<_MomentFirstFrameTile> {
   @override
   void didUpdateWidget(covariant _MomentFirstFrameTile oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.moment.videoAsset == widget.moment.videoAsset) {
+    if (oldWidget.moment.tideClipAsset == widget.moment.tideClipAsset) {
       return;
     }
     _videoController.dispose();
@@ -702,7 +702,7 @@ class _MomentFirstFrameTileState extends State<_MomentFirstFrameTile> {
   }
 
   void _prepareVideoController() {
-    final controller = VideoPlayerController.asset(widget.moment.videoAsset);
+    final controller = VideoPlayerController.asset(widget.moment.tideClipAsset);
     _videoController = controller;
     controller
       ..setLooping(false)
@@ -752,8 +752,8 @@ class _MomentFirstFrameTileState extends State<_MomentFirstFrameTile> {
   }
 }
 
-String _profileOriginLine(ShorelinePersona persona, String? placeRibbon) {
-  return coastinCountryForPersona(persona, placeRibbon: placeRibbon);
+String _profileOriginLine(ShorelinePersona persona, String? localApproachRibbon) {
+  return coastinCountryForPersona(persona, localApproachRibbon: localApproachRibbon);
 }
 
 const Shadow _profileShadow = Shadow(

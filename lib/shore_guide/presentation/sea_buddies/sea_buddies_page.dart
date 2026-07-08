@@ -7,13 +7,13 @@ import '../../data/local/buddies/sea_buddy_message_store.dart';
 import '../../data/local/buddies/shore_system_notice_store.dart';
 import '../../data/local/shore_persona_catalog.dart';
 import '../../data/local/safety/shore_safety_store.dart';
-import '../../domain/entities/buddies/sea_buddy_note.dart';
-import '../../domain/entities/buddies/sea_buddy_thread.dart';
+import '../../domain/entities/buddies/sea_buddy_signal_note.dart';
+import '../../domain/entities/buddies/sea_buddy_harbor_thread.dart';
 import '../../domain/value_objects/coastin_country_label.dart';
 import '../../domain/value_objects/shore_profile_current.dart';
 import '../people/shore_persona_detail_page.dart';
 import 'chat/sea_buddy_chat_page.dart';
-import 'requests/sea_buddy_requests_page.dart';
+import 'requests/sea_buddy_follow_requests_page.dart';
 import 'widgets/sea_buddy_wash.dart';
 
 class SeaBuddiesPage extends StatefulWidget {
@@ -32,7 +32,7 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchTide = '';
   List<ShoreSystemNotice> _systemNotices = const [];
-  Map<String, SeaBuddyNote> _latestThreadNotes = const {};
+  Map<String, SeaBuddySignalNote> _latestThreadNotes = const {};
   ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
     reportedContentIds: {},
@@ -58,7 +58,7 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
     _restoreSafety();
   }
 
-  List<SeaBuddyThread> get _visibleMutualThreads {
+  List<SeaBuddyHarborThread> get _visibleMutualThreads {
     final query = _searchTide.trim().toLowerCase();
     final threads = ShorePersonaCatalog.people
         .where((persona) {
@@ -72,12 +72,12 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
       return threads;
     }
     return threads.where((thread) {
-      final savedPreview = _latestThreadNotes[thread.threadKey]?.noteText ?? '';
-      return thread.buddyPersona.displayHarborName.toLowerCase().contains(
+      final savedPreview = _latestThreadNotes[thread.harborThreadMarker]?.signalText ?? '';
+      return thread.buddyHarbor.displayHarborName.toLowerCase().contains(
             query,
           ) ||
-          thread.placeRibbon.toLowerCase().contains(query) ||
-          thread.buddyPersona.coastalStamp.toLowerCase().contains(query) ||
+          thread.localApproachRibbon.toLowerCase().contains(query) ||
+          thread.buddyHarbor.coastalStamp.toLowerCase().contains(query) ||
           savedPreview.toLowerCase().contains(query);
     }).toList();
   }
@@ -148,9 +148,9 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
                         const SizedBox(height: 24),
                       ],
                       for (final thread in visibleThreads) ...[
-                        _SeaBuddyThreadRow(
+                        _SeaBuddyHarborThreadRow(
                           thread: thread,
-                          lastNote: _latestThreadNotes[thread.threadKey],
+                          lastNote: _latestThreadNotes[thread.harborThreadMarker],
                           onTap: () => _openChat(thread),
                           onPersonaTap: () => _openPersona(thread),
                         ),
@@ -172,23 +172,23 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
     );
   }
 
-  void _openChat(SeaBuddyThread thread) {
+  void _openChat(SeaBuddyHarborThread thread) {
     Navigator.of(context)
         .push(
           CupertinoPageRoute<void>(
-            builder: (_) => SeaBuddyChatPage(thread: thread),
+            builder: (_) => SeaBuddyChatPage(buddyThread: thread),
           ),
         )
         .then((_) => _restoreSafety());
   }
 
-  void _openPersona(SeaBuddyThread thread) {
+  void _openPersona(SeaBuddyHarborThread thread) {
     Navigator.of(context)
         .push(
           CupertinoPageRoute<void>(
             builder: (_) => ShorePersonaDetailPage(
-              persona: thread.buddyPersona,
-              placeRibbon: thread.placeRibbon,
+              persona: thread.buddyHarbor,
+              localApproachRibbon: thread.localApproachRibbon,
             ),
           ),
         )
@@ -206,7 +206,7 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
           CupertinoPageRoute<void>(
             builder: (_) => ShorePersonaDetailPage(
               persona: persona,
-              placeRibbon: thread.placeRibbon,
+              localApproachRibbon: thread.localApproachRibbon,
             ),
           ),
         )
@@ -217,20 +217,20 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
     Navigator.of(context)
         .push(
           CupertinoPageRoute<void>(
-            builder: (_) => const SeaBuddyRequestsPage(),
+            builder: (_) => const SeaBuddyFollowRequestsPage(),
           ),
         )
         .then((_) => _restoreSafety());
   }
 
-  void _showMutualBuddyActions(SeaBuddyThread thread) {
+  void _showMutualBuddyActions(SeaBuddyHarborThread thread) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (context) {
         return CupertinoActionSheet(
-          title: Text(thread.buddyPersona.displayHarborName),
+          title: Text(thread.buddyHarbor.displayHarborName),
           message: Text(
-            'Mutual follow - ${coastinCountryForPersona(thread.buddyPersona, placeRibbon: thread.placeRibbon)}',
+            'Mutual follow - ${coastinCountryForPersona(thread.buddyHarbor, localApproachRibbon: thread.localApproachRibbon)}',
           ),
           actions: [
             CupertinoActionSheetAction(
@@ -244,7 +244,7 @@ class _SeaBuddiesPageState extends State<SeaBuddiesPage> {
               isDestructiveAction: true,
               onPressed: () async {
                 Navigator.of(context).pop();
-                await _safetyStore.unfollow(thread.buddyPersona.tideHandle);
+                await _safetyStore.unfollow(thread.buddyHarbor.tideHandle);
                 await _restoreSafety();
               },
               child: const Text('Unfollow'),
@@ -343,8 +343,8 @@ class _SeaSearchField extends StatelessWidget {
 class _MutualBuddySection extends StatelessWidget {
   const _MutualBuddySection({required this.threads, required this.onBuddyTap});
 
-  final List<SeaBuddyThread> threads;
-  final ValueChanged<SeaBuddyThread> onBuddyTap;
+  final List<SeaBuddyHarborThread> threads;
+  final ValueChanged<SeaBuddyHarborThread> onBuddyTap;
 
   @override
   Widget build(BuildContext context) {
@@ -421,12 +421,12 @@ class _MutualBuddySection extends StatelessWidget {
 class _MutualBuddyChip extends StatelessWidget {
   const _MutualBuddyChip({required this.thread, required this.onTap});
 
-  final SeaBuddyThread thread;
+  final SeaBuddyHarborThread thread;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final persona = thread.buddyPersona;
+    final persona = thread.buddyHarbor;
     final genderGlyph = persona.profileCurrent == ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
@@ -473,8 +473,8 @@ class _MutualBuddyChip extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               coastinCountryForPersona(
-                thread.buddyPersona,
-                placeRibbon: thread.placeRibbon,
+                thread.buddyHarbor,
+                localApproachRibbon: thread.localApproachRibbon,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -707,30 +707,30 @@ class _SeaSystemNoticeRow extends StatelessWidget {
   }
 }
 
-class _SeaBuddyThreadRow extends StatelessWidget {
-  const _SeaBuddyThreadRow({
+class _SeaBuddyHarborThreadRow extends StatelessWidget {
+  const _SeaBuddyHarborThreadRow({
     required this.thread,
     required this.lastNote,
     required this.onTap,
     required this.onPersonaTap,
   });
 
-  final SeaBuddyThread thread;
-  final SeaBuddyNote? lastNote;
+  final SeaBuddyHarborThread thread;
+  final SeaBuddySignalNote? lastNote;
   final VoidCallback onTap;
   final VoidCallback onPersonaTap;
 
   @override
   Widget build(BuildContext context) {
     final genderGlyph =
-        thread.buddyPersona.profileCurrent == ShoreProfileCurrent.feminine
+        thread.buddyHarbor.profileCurrent == ShoreProfileCurrent.feminine
         ? CoastinAssetRegistry.feminineTideGlyph
         : CoastinAssetRegistry.masculineTideGlyph;
     final savedPreview = lastNote == null
         ? 'Mutual connection. Start a local chat when you are ready.'
-        : lastNote!.sentByViewer
-        ? 'You: ${lastNote!.noteText}'
-        : lastNote!.noteText;
+        : lastNote!.sentFromViewerHarbor
+        ? 'You: ${lastNote!.signalText}'
+        : lastNote!.signalText;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -745,7 +745,7 @@ class _SeaBuddyThreadRow extends StatelessWidget {
               children: [
                 ClipOval(
                   child: Image.asset(
-                    thread.buddyPersona.avatarAsset,
+                    thread.buddyHarbor.avatarAsset,
                     width: 56,
                     height: 56,
                     fit: BoxFit.cover,
@@ -772,7 +772,7 @@ class _SeaBuddyThreadRow extends StatelessWidget {
                         behavior: HitTestBehavior.opaque,
                         onTap: onPersonaTap,
                         child: Text(
-                          thread.buddyPersona.displayHarborName,
+                          thread.buddyHarbor.displayHarborName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -793,8 +793,8 @@ class _SeaBuddyThreadRow extends StatelessWidget {
                     Flexible(
                       child: Text(
                         coastinCountryForPersona(
-                          thread.buddyPersona,
-                          placeRibbon: thread.placeRibbon,
+                          thread.buddyHarbor,
+                          localApproachRibbon: thread.localApproachRibbon,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

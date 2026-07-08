@@ -9,7 +9,7 @@ class CoastPersonRow extends StatelessWidget {
   const CoastPersonRow({
     super.key,
     required this.persona,
-    required this.placeRibbon,
+    required this.localApproachRibbon,
     required this.summaryLine,
     required this.actionAsset,
     required this.onActionTap,
@@ -17,7 +17,7 @@ class CoastPersonRow extends StatelessWidget {
   });
 
   final ShorelinePersona persona;
-  final String placeRibbon;
+  final String localApproachRibbon;
   final String summaryLine;
   final String actionAsset;
   final VoidCallback onActionTap;
@@ -82,7 +82,7 @@ class CoastPersonRow extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          placeRibbon,
+                          localApproachRibbon,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(

@@ -38,7 +38,7 @@ class MomentCaptionPanel extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: onPersonaTap,
                   child: Text(
-                    shoreMoment.creatorPersona.displayHarborName,
+                    shoreMoment.shorelineKeeper.displayHarborName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -80,8 +80,8 @@ class MomentCaptionPanel extends StatelessWidget {
               Expanded(
                 child: Text(
                   coastinCountryForPersona(
-                    shoreMoment.creatorPersona,
-                    placeRibbon: shoreMoment.placeRibbon,
+                    shoreMoment.shorelineKeeper,
+                    localApproachRibbon: shoreMoment.localApproachRibbon,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -95,7 +95,7 @@ class MomentCaptionPanel extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Posted ${shoreMoment.clockRibbon}',
+                'Posted ${shoreMoment.postedAtRibbon}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -109,7 +109,7 @@ class MomentCaptionPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            shoreMoment.captionTide,
+            shoreMoment.shorelineCaption,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(

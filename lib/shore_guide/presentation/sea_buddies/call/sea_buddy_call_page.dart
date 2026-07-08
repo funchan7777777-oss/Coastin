@@ -2,13 +2,13 @@ import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../../../../app/theme/tidewash_palette.dart';
-import '../../../domain/entities/buddies/sea_buddy_thread.dart';
+import '../../../domain/entities/buddies/sea_buddy_harbor_thread.dart';
 import 'sea_buddy_call_permissions.dart';
 
 class SeaBuddyCallPage extends StatefulWidget {
-  const SeaBuddyCallPage({super.key, required this.thread});
+  const SeaBuddyCallPage({super.key, required this.buddyThread});
 
-  final SeaBuddyThread thread;
+  final SeaBuddyHarborThread buddyThread;
 
   @override
   State<SeaBuddyCallPage> createState() => _SeaBuddyCallPageState();
@@ -104,7 +104,7 @@ class _SeaBuddyCallPageState extends State<SeaBuddyCallPage> {
 
   @override
   Widget build(BuildContext context) {
-    final firstName = widget.thread.buddyPersona.displayHarborName
+    final firstName = widget.buddyThread.buddyHarbor.displayHarborName
         .split(' ')
         .first;
     return CupertinoPageScaffold(
@@ -146,9 +146,9 @@ class _SeaBuddyCallPageState extends State<SeaBuddyCallPage> {
               right: 28,
               top: 108,
               child: _RemoteWaitingCard(
-                name: widget.thread.buddyPersona.displayHarborName,
-                stamp: widget.thread.buddyPersona.coastalStamp,
-                avatarAsset: widget.thread.buddyPersona.avatarAsset,
+                name: widget.buddyThread.buddyHarbor.displayHarborName,
+                stamp: widget.buddyThread.buddyHarbor.coastalStamp,
+                avatarAsset: widget.buddyThread.buddyHarbor.avatarAsset,
                 statusText: _isPreparingAccess
                     ? 'Checking camera and microphone access'
                     : 'Waiting for $firstName to answer',

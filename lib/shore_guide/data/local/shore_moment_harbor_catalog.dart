@@ -1,11 +1,11 @@
 import '../../../app/assets/coastin_asset_registry.dart';
-import '../../domain/entities/shore_reply_drift.dart';
+import '../../domain/entities/shore_comment_tide_mark.dart';
 import '../../domain/entities/shore_video_moment.dart';
 import '../../domain/entities/shoreline_persona.dart';
 import '../../domain/value_objects/shore_profile_current.dart';
 
-class SeededShoreMomentDeck {
-  const SeededShoreMomentDeck._();
+class ShoreMomentHarborCatalog {
+  const ShoreMomentHarborCatalog._();
 
   static const List<ShorelinePersona> shorelinePeople = [
     ShorelinePersona(
@@ -293,32 +293,32 @@ class SeededShoreMomentDeck {
   static final List<ShoreVideoMoment> shoreVideoMoments = List.unmodifiable(
     List.generate(_momentVideoAssets.length, (index) {
       final replyStart = (index * 3 + 8) % shorelinePeople.length;
-      final replyDrifts = List.generate(_replyCounts[index], (replyIndex) {
+      final commentTideMarks = List.generate(_replyCounts[index], (replyIndex) {
         final persona =
             shorelinePeople[(replyStart + replyIndex * 5) %
                 shorelinePeople.length];
-        return ShoreReplyDrift(
-          replyMarker: 'reply-${index + 1}-$replyIndex',
-          replyAuthor: persona,
-          tideMinute:
+        return ShoreCommentTideMark(
+          commentMarker: 'reply-${index + 1}-$replyIndex',
+          commentHarbor: persona,
+          commentClock:
               _replyMinutes[(index + replyIndex) % _replyMinutes.length],
-          replyText: _replyLines[(index * 2 + replyIndex) % _replyLines.length],
+          commentText: _replyLines[(index * 2 + replyIndex) % _replyLines.length],
           hasFreshSignal: replyIndex == 0 || (index + replyIndex) % 4 == 0,
         );
       });
       return ShoreVideoMoment(
-        momentKey: 'shore-drift-${index + 1}',
-        creatorPersona: shorelinePeople[index],
-        videoAsset: _momentVideoAssets[index],
-        placeRibbon: _placeRibbons[index],
-        clockRibbon: _clockRibbons[index],
-        captionTide: _captionTides[index],
-        likeTally: _likeTallies[index],
-        replyTally: replyDrifts.length,
-        infoTally: 0,
-        isInitiallyFollowed: index % 3 == 0,
-        isInitiallyLiked: false,
-        replyDrifts: replyDrifts,
+        shoreMomentMarker: 'shore-drift-${index + 1}',
+        shorelineKeeper: shorelinePeople[index],
+        tideClipAsset: _momentVideoAssets[index],
+        localApproachRibbon: _localApproachRibbons[index],
+        postedAtRibbon: _postedAtRibbons[index],
+        shorelineCaption: _shorelineCaptions[index],
+        shellLikeCount: _likeTallies[index],
+        commentCount: commentTideMarks.length,
+        guidePingCount: 0,
+        startsFollowed: index % 3 == 0,
+        startsShellLiked: false,
+        commentTideMarks: commentTideMarks,
       );
     }),
   );
@@ -341,7 +341,7 @@ class SeededShoreMomentDeck {
     CoastinAssetRegistry.duneTrailEveningClip,
   ];
 
-  static const List<String> _placeRibbons = [
+  static const List<String> _localApproachRibbons = [
     'Coral Cove - Australia',
     'Palm Rail - Maui',
     'Cove Lane - Cebu',
@@ -359,7 +359,7 @@ class SeededShoreMomentDeck {
     'Dune Trail - Durban',
   ];
 
-  static const List<String> _clockRibbons = [
+  static const List<String> _postedAtRibbons = [
     '12 min ago',
     '28 min ago',
     '43 min ago',
@@ -377,7 +377,7 @@ class SeededShoreMomentDeck {
     '8h ago',
   ];
 
-  static const List<String> _captionTides = [
+  static const List<String> _shorelineCaptions = [
     'Clear water near the tender lane, so we kept the swim inside the marked cove.',
     'Soft palms, salt air, and one quiet laugh before the shore gets crowded.',
     'The best view was the tiny silver line where the rail met the afternoon sea.',
@@ -391,7 +391,7 @@ class SeededShoreMomentDeck {
     'Cold jasmine coffee after a bright walk is a small kind of victory.',
     'Skate wheels sounded like rain on the warm path beside the water.',
     'Marina light went gold just as the boats started leaning into the breeze.',
-    'Reef picnic notes: bring extra water and never skip the mango slices.',
+    'Reef picnic signalNotes: bring extra water and never skip the mango slices.',
     'Dune trail evening had enough color to forgive the climb back up.',
   ];
 

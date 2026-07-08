@@ -5,8 +5,8 @@ import '../../../../app/theme/tidewash_palette.dart';
 import '../../../../shared/ui/coastin_empty_state.dart';
 import '../../../data/local/buddies/sea_buddy_message_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
-import '../../../domain/entities/buddies/sea_buddy_note.dart';
-import '../../../domain/entities/buddies/sea_buddy_thread.dart';
+import '../../../domain/entities/buddies/sea_buddy_signal_note.dart';
+import '../../../domain/entities/buddies/sea_buddy_harbor_thread.dart';
 import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../people/shore_persona_detail_page.dart';
 import '../../safety/shore_safety_action.dart';
@@ -16,9 +16,9 @@ import '../widgets/sea_buddy_top_bar.dart';
 import '../widgets/sea_buddy_wash.dart';
 
 class SeaBuddyChatPage extends StatefulWidget {
-  const SeaBuddyChatPage({super.key, required this.thread});
+  const SeaBuddyChatPage({super.key, required this.buddyThread});
 
-  final SeaBuddyThread thread;
+  final SeaBuddyHarborThread buddyThread;
 
   @override
   State<SeaBuddyChatPage> createState() => _SeaBuddyChatPageState();
@@ -27,7 +27,7 @@ class SeaBuddyChatPage extends StatefulWidget {
 class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   final SeaBuddyMessageStore _messageStore = const SeaBuddyMessageStore();
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
-  List<SeaBuddyNote> _notes = const [];
+  List<SeaBuddySignalNote> _notes = const [];
   final TextEditingController _replyController = TextEditingController();
 
   @override
@@ -67,7 +67,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
                         ),
                         const SizedBox(height: 10),
                         _ChatBuddyHeader(
-                          thread: widget.thread,
+                          buddyThread: widget.buddyThread,
                           onVideoTap: _openVideoCall,
                           onPersonaTap: _openPersona,
                         ),
@@ -104,7 +104,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   }
 
   Future<void> _restoreNotes() async {
-    final notes = await _messageStore.restoreNotes(widget.thread.threadKey);
+    final notes = await _messageStore.restoreNotes(widget.buddyThread.harborThreadMarker);
     if (!mounted) {
       return;
     }
@@ -112,7 +112,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   }
 
   Future<bool> _ensureMutual() async {
-    final handle = widget.thread.buddyPersona.tideHandle;
+    final handle = widget.buddyThread.buddyHarbor.tideHandle;
     final canChat = await _safetyStore.isMutual(handle);
     if (canChat) {
       return true;
@@ -122,7 +122,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     }
     await ShoreSafetyReef.showFollowRequired(
       context: context,
-      displayName: widget.thread.buddyPersona.displayHarborName,
+      displayName: widget.buddyThread.buddyHarbor.displayHarborName,
       onGoFollow: () async {
         await _safetyStore.follow(handle);
       },
@@ -150,12 +150,12 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     if (!await _ensureMutual()) {
       return;
     }
-    final note = SeaBuddyNote(
-      noteKey: 'local-${DateTime.now().microsecondsSinceEpoch}',
-      noteText: text,
-      sentByViewer: true,
+    final note = SeaBuddySignalNote(
+      signalMarker: 'local-${DateTime.now().microsecondsSinceEpoch}',
+      signalText: text,
+      sentFromViewerHarbor: true,
     );
-    await _messageStore.appendNote(widget.thread.threadKey, note);
+    await _messageStore.appendNote(widget.buddyThread.harborThreadMarker, note);
     if (!mounted) {
       return;
     }
@@ -174,7 +174,7 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     }
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => SeaBuddyCallPage(thread: widget.thread),
+        builder: (_) => SeaBuddyCallPage(buddyThread: widget.buddyThread),
       ),
     );
   }
@@ -183,8 +183,8 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
-          persona: widget.thread.buddyPersona,
-          placeRibbon: widget.thread.placeRibbon,
+          persona: widget.buddyThread.buddyHarbor,
+          localApproachRibbon: widget.buddyThread.localApproachRibbon,
         ),
       ),
     );
@@ -193,16 +193,16 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
   Future<void> _showThreadInfo() async {
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
-      contentId: 'profile:${widget.thread.buddyPersona.tideHandle}',
+      contentId: 'profile:${widget.buddyThread.buddyHarbor.tideHandle}',
       contentKind: ShoreSafetyContentKind.profile,
-      ownerName: widget.thread.buddyPersona.displayHarborName,
-      ownerHandle: widget.thread.buddyPersona.tideHandle,
+      ownerName: widget.buddyThread.buddyHarbor.displayHarborName,
+      ownerHandle: widget.buddyThread.buddyHarbor.tideHandle,
     );
     if (!mounted || outcome == null) {
       return;
     }
     if (outcome == ShoreSafetyOutcome.blocked) {
-      await _messageStore.clearThread(widget.thread.threadKey);
+      await _messageStore.clearThread(widget.buddyThread.harborThreadMarker);
       if (!mounted) {
         return;
       }
@@ -213,12 +213,12 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
 
 class _ChatBuddyHeader extends StatelessWidget {
   const _ChatBuddyHeader({
-    required this.thread,
+    required this.buddyThread,
     required this.onVideoTap,
     required this.onPersonaTap,
   });
 
-  final SeaBuddyThread thread;
+  final SeaBuddyHarborThread buddyThread;
   final VoidCallback onVideoTap;
   final VoidCallback onPersonaTap;
 
@@ -231,7 +231,7 @@ class _ChatBuddyHeader extends StatelessWidget {
           onTap: onPersonaTap,
           child: ClipOval(
             child: Image.asset(
-              thread.buddyPersona.avatarAsset,
+              buddyThread.buddyHarbor.avatarAsset,
               width: 92,
               height: 92,
               fit: BoxFit.cover,
@@ -244,7 +244,7 @@ class _ChatBuddyHeader extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           onTap: onPersonaTap,
           child: Text(
-            thread.buddyPersona.displayHarborName,
+            buddyThread.buddyHarbor.displayHarborName,
             style: const TextStyle(
               color: TidewashPalette.inkBlue,
               fontSize: 20,
@@ -274,12 +274,12 @@ class _ChatBuddyHeader extends StatelessWidget {
 class _SeaChatBubble extends StatelessWidget {
   const _SeaChatBubble({required this.note});
 
-  final SeaBuddyNote note;
+  final SeaBuddySignalNote note;
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: note.sentByViewer
+      alignment: note.sentFromViewerHarbor
           ? Alignment.centerRight
           : Alignment.centerLeft,
       child: ConstrainedBox(
@@ -289,20 +289,20 @@ class _SeaChatBubble extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           decoration: BoxDecoration(
-            color: note.sentByViewer
+            color: note.sentFromViewerHarbor
                 ? const Color(0xFF2F68D3)
                 : const Color(0xFFFFFFFF).withValues(alpha: 0.92),
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(18),
               topRight: const Radius.circular(18),
-              bottomLeft: Radius.circular(note.sentByViewer ? 18 : 6),
-              bottomRight: Radius.circular(note.sentByViewer ? 6 : 18),
+              bottomLeft: Radius.circular(note.sentFromViewerHarbor ? 18 : 6),
+              bottomRight: Radius.circular(note.sentFromViewerHarbor ? 6 : 18),
             ),
           ),
           child: Text(
-            note.noteText,
+            note.signalText,
             style: TextStyle(
-              color: note.sentByViewer
+              color: note.sentFromViewerHarbor
                   ? const Color(0xFFFFFFFF)
                   : TidewashPalette.inkBlue,
               fontSize: 15,

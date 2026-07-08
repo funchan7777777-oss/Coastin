@@ -1,32 +1,32 @@
-import 'shore_reply_drift.dart';
+import 'shore_comment_tide_mark.dart';
 import 'shoreline_persona.dart';
 
 class ShoreVideoMoment {
   const ShoreVideoMoment({
-    required this.momentKey,
-    required this.creatorPersona,
-    required this.videoAsset,
-    required this.placeRibbon,
-    required this.clockRibbon,
-    required this.captionTide,
-    required this.likeTally,
-    required this.replyTally,
-    required this.infoTally,
-    required this.isInitiallyFollowed,
-    required this.isInitiallyLiked,
-    required this.replyDrifts,
+    required this.shoreMomentMarker,
+    required this.shorelineKeeper,
+    required this.tideClipAsset,
+    required this.localApproachRibbon,
+    required this.postedAtRibbon,
+    required this.shorelineCaption,
+    required this.shellLikeCount,
+    required this.commentCount,
+    required this.guidePingCount,
+    required this.startsFollowed,
+    required this.startsShellLiked,
+    required this.commentTideMarks,
   });
 
-  final String momentKey;
-  final ShorelinePersona creatorPersona;
-  final String videoAsset;
-  final String placeRibbon;
-  final String clockRibbon;
-  final String captionTide;
-  final int likeTally;
-  final int replyTally;
-  final int infoTally;
-  final bool isInitiallyFollowed;
-  final bool isInitiallyLiked;
-  final List<ShoreReplyDrift> replyDrifts;
+  final String shoreMomentMarker;
+  final ShorelinePersona shorelineKeeper;
+  final String tideClipAsset;
+  final String localApproachRibbon;
+  final String postedAtRibbon;
+  final String shorelineCaption;
+  final int shellLikeCount;
+  final int commentCount;
+  final int guidePingCount;
+  final bool startsFollowed;
+  final bool startsShellLiked;
+  final List<ShoreCommentTideMark> commentTideMarks;
 }

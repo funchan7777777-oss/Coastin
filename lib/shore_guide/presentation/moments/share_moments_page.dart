@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../shared/ui/coastin_empty_state.dart';
 import '../../data/local/safety/shore_safety_store.dart';
-import '../../data/local/seeded_shore_moment_deck.dart';
+import '../../data/local/shore_moment_harbor_catalog.dart';
 import '../../domain/entities/shore_video_moment.dart';
 import 'overlays/reef_comment_sheet.dart';
 import '../people/shore_persona_detail_page.dart';
@@ -38,7 +38,7 @@ class ShareMomentsPage extends StatefulWidget {
 class _ShareMomentsPageState extends State<ShareMomentsPage> {
   late final PageController _momentController;
   final List<ShoreVideoMoment> _moments =
-      SeededShoreMomentDeck.shoreVideoMoments;
+      ShoreMomentHarborCatalog.shoreVideoMoments;
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
 
   late final Map<String, bool> _likedMoments;
@@ -62,18 +62,18 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     ShoreSafetyStore.safetyRevision.addListener(_handleSafetyRevision);
     _currentMomentIndex = _initialMomentIndex();
     _momentController = PageController(initialPage: _currentMomentIndex);
-    _likedMoments = {for (final moment in _moments) moment.momentKey: false};
-    _pausedMoments = {for (final moment in _moments) moment.momentKey: false};
+    _likedMoments = {for (final moment in _moments) moment.shoreMomentMarker: false};
+    _pausedMoments = {for (final moment in _moments) moment.shoreMomentMarker: false};
     _restoreSafety();
   }
 
   int _initialMomentIndex() {
-    final momentKey = widget.initialMomentKey;
-    if (momentKey == null) {
+    final shoreMomentMarker = widget.initialMomentKey;
+    if (shoreMomentMarker == null) {
       return 0;
     }
     final index = _moments.indexWhere(
-      (moment) => moment.momentKey == momentKey,
+      (moment) => moment.shoreMomentMarker == shoreMomentMarker,
     );
     return index < 0 ? 0 : index;
   }
@@ -128,16 +128,16 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
                 itemBuilder: (context, index) {
                   final moment = visibleMoments[index];
                   return _ShareMomentPane(
-                    key: ValueKey(moment.momentKey),
+                    key: ValueKey(moment.shoreMomentMarker),
                     shoreMoment: moment,
                     isActive: index == _currentMomentIndex,
-                    isLiked: _likedMoments[moment.momentKey] ?? false,
+                    isLiked: _likedMoments[moment.shoreMomentMarker] ?? false,
                     isFollowed: _safetySnapshot.isFollowing(
-                      moment.creatorPersona.tideHandle,
+                      moment.shorelineKeeper.tideHandle,
                     ),
-                    isPaused: _pausedMoments[moment.momentKey] ?? false,
+                    isPaused: _pausedMoments[moment.shoreMomentMarker] ?? false,
                     replyCount:
-                        _commentCountOverrides[moment.momentKey] ??
+                        _commentCountOverrides[moment.shoreMomentMarker] ??
                         _visibleReplyCount(moment),
                     bottomDockClearance: widget.bottomDockClearance,
                     onLikeTap: () => _toggleLike(moment),
@@ -174,14 +174,14 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
             if (activeMoment != null)
               ReefCommentSheet(
                 isOpen: _commentsOpen,
-                commentDrifts: activeMoment.replyDrifts,
-                viewerPersona: SeededShoreMomentDeck.shorelinePeople[36],
+                commentDrifts: activeMoment.commentTideMarks,
+                viewerPersona: ShoreMomentHarborCatalog.shorelinePeople[36],
                 bottomDockClearance: widget.bottomDockClearance,
                 onClose: () => setState(() => _commentsOpen = false),
                 onChanged: _restoreSafety,
                 onVisibleCountChanged: (count) {
                   setState(() {
-                    _commentCountOverrides[activeMoment.momentKey] = count;
+                    _commentCountOverrides[activeMoment.shoreMomentMarker] = count;
                   });
                 },
               ),
@@ -195,19 +195,19 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     return _moments
         .where(
           (moment) => _safetySnapshot.isVisibleContent(
-            'moment:${moment.momentKey}',
-            moment.creatorPersona.tideHandle,
+            'moment:${moment.shoreMomentMarker}',
+            moment.shorelineKeeper.tideHandle,
           ),
         )
         .toList();
   }
 
   int _visibleReplyCount(ShoreVideoMoment moment) {
-    return moment.replyDrifts
+    return moment.commentTideMarks
         .where(
           (comment) => _safetySnapshot.isVisibleContent(
-            'comment:${comment.replyMarker}',
-            comment.replyAuthor.tideHandle,
+            'comment:${comment.commentMarker}',
+            comment.commentHarbor.tideHandle,
           ),
         )
         .length;
@@ -241,20 +241,20 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
   }
 
   int _initialVisibleMomentIndex(ShoreSafetySnapshot snapshot) {
-    final momentKey = widget.initialMomentKey;
-    if (momentKey == null) {
+    final shoreMomentMarker = widget.initialMomentKey;
+    if (shoreMomentMarker == null) {
       return 0;
     }
     final visibleMoments = _moments
         .where(
           (moment) => snapshot.isVisibleContent(
-            'moment:${moment.momentKey}',
-            moment.creatorPersona.tideHandle,
+            'moment:${moment.shoreMomentMarker}',
+            moment.shorelineKeeper.tideHandle,
           ),
         )
         .toList();
     final index = visibleMoments.indexWhere(
-      (moment) => moment.momentKey == momentKey,
+      (moment) => moment.shoreMomentMarker == shoreMomentMarker,
     );
     return index < 0 ? _boundedMomentIndex(snapshot) : index;
   }
@@ -284,8 +284,8 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     final visibleCount = _moments
         .where(
           (moment) => snapshot.isVisibleContent(
-            'moment:${moment.momentKey}',
-            moment.creatorPersona.tideHandle,
+            'moment:${moment.shoreMomentMarker}',
+            moment.shorelineKeeper.tideHandle,
           ),
         )
         .length;
@@ -299,20 +299,20 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
 
   void _toggleLike(ShoreVideoMoment moment) {
     setState(() {
-      _likedMoments[moment.momentKey] =
-          !(_likedMoments[moment.momentKey] ?? false);
+      _likedMoments[moment.shoreMomentMarker] =
+          !(_likedMoments[moment.shoreMomentMarker] ?? false);
     });
   }
 
   void _togglePlayback(ShoreVideoMoment moment) {
     setState(() {
-      _pausedMoments[moment.momentKey] =
-          !(_pausedMoments[moment.momentKey] ?? false);
+      _pausedMoments[moment.shoreMomentMarker] =
+          !(_pausedMoments[moment.shoreMomentMarker] ?? false);
     });
   }
 
   Future<void> _toggleFollow(ShoreVideoMoment moment) async {
-    final handle = moment.creatorPersona.tideHandle;
+    final handle = moment.shorelineKeeper.tideHandle;
     if (_safetySnapshot.isFollowing(handle)) {
       await _safetyStore.unfollow(handle);
     } else {
@@ -331,8 +331,8 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
-          persona: moment.creatorPersona,
-          placeRibbon: moment.placeRibbon,
+          persona: moment.shorelineKeeper,
+          localApproachRibbon: moment.localApproachRibbon,
         ),
       ),
     );
@@ -345,10 +345,10 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
     });
     final outcome = await ShoreSafetyReef.showGuard(
       context: context,
-      contentId: 'moment:${moment.momentKey}',
+      contentId: 'moment:${moment.shoreMomentMarker}',
       contentKind: ShoreSafetyContentKind.moment,
-      ownerName: moment.creatorPersona.displayHarborName,
-      ownerHandle: moment.creatorPersona.tideHandle,
+      ownerName: moment.shorelineKeeper.displayHarborName,
+      ownerHandle: moment.shorelineKeeper.tideHandle,
     );
     if (!mounted) {
       return;
@@ -401,13 +401,13 @@ class _ShareMomentPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final adjustedLikeCount = shoreMoment.likeTally + (isLiked ? 1 : 0);
+    final adjustedLikeCount = shoreMoment.shellLikeCount + (isLiked ? 1 : 0);
 
     return Stack(
       fit: StackFit.expand,
       children: [
         ShoreVideoStage(
-          videoAsset: shoreMoment.videoAsset,
+          tideClipAsset: shoreMoment.tideClipAsset,
           shouldDrift: isActive,
           isPausedByViewer: isPaused,
         ),
@@ -419,7 +419,7 @@ class _ShareMomentPane extends StatelessWidget {
           showReleaseAction: showReleaseButton,
         ),
         MomentActionRail(
-          creatorPersona: shoreMoment.creatorPersona,
+          shorelineKeeper: shoreMoment.shorelineKeeper,
           isLiked: isLiked,
           likeCount: adjustedLikeCount,
           replyCount: replyCount,

@@ -4,8 +4,8 @@ import '../../domain/entities/shoreline_day_plan.dart';
 import '../../domain/value_objects/cove_pause_kind.dart';
 import '../../domain/value_objects/tide_window_slot.dart';
 
-class SeededHarborBoard {
-  const SeededHarborBoard._();
+class HarborReadinessTideCatalog {
+  const HarborReadinessTideCatalog._();
 
   static const ShorelineDayPlan pacificMorningBoard = ShorelineDayPlan(
     boardTitle: 'Coastin',

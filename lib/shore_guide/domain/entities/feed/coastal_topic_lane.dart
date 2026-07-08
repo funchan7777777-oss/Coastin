@@ -1,15 +1,15 @@
 class CoastalTopicLane {
   const CoastalTopicLane({
-    required this.laneKey,
-    required this.topicLabel,
-    required this.participationLine,
-    required this.topicCardAsset,
-    required this.highlightTint,
+    required this.tideTopicMarker,
+    required this.tideTopicLabel,
+    required this.harborParticipationLine,
+    required this.topicHarborCardAsset,
+    required this.topicWashTint,
   });
 
-  final String laneKey;
-  final String topicLabel;
-  final String participationLine;
-  final String topicCardAsset;
-  final int highlightTint;
+  final String tideTopicMarker;
+  final String tideTopicLabel;
+  final String harborParticipationLine;
+  final String topicHarborCardAsset;
+  final int topicWashTint;
 }

@@ -3,9 +3,9 @@ import '../../../domain/value_objects/coastin_country_label.dart';
 
 String coastalPostOriginLine(CoastalPostDispatch post) {
   return coastinCountryForPersona(
-    post.authorHarbor,
-    placeRibbon: post.placeRibbon,
+    post.shorelineKeeper,
+    localApproachRibbon: post.localApproachRibbon,
   );
 }
 
-int coastalPostReplyCount(CoastalPostDispatch post) => post.replyDrifts.length;
+int coastalPostReplyCount(CoastalPostDispatch post) => post.commentTideMarks.length;

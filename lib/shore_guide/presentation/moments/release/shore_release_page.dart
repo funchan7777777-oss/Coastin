@@ -538,7 +538,7 @@ class _ReleaseTopicChips extends StatelessWidget {
         for (var index = 0; index < _postTopics.length; index++) ...[
           Expanded(
             child: _ReleaseTopicChip(
-              topicLabel: _postTopics[index],
+              tideTopicLabel: _postTopics[index],
               isSelected: selectedTopic == _postTopics[index],
               onTap: () => onChanged(_postTopics[index]),
             ),
@@ -552,12 +552,12 @@ class _ReleaseTopicChips extends StatelessWidget {
 
 class _ReleaseTopicChip extends StatelessWidget {
   const _ReleaseTopicChip({
-    required this.topicLabel,
+    required this.tideTopicLabel,
     required this.isSelected,
     required this.onTap,
   });
 
-  final String topicLabel;
+  final String tideTopicLabel;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -583,7 +583,7 @@ class _ReleaseTopicChip extends StatelessWidget {
           ),
         ),
         child: Text(
-          topicLabel,
+          tideTopicLabel,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,

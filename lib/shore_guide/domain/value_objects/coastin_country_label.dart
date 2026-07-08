@@ -1,34 +1,34 @@
 import '../entities/shoreline_persona.dart';
 
-String coastinCountryFromPlaceRibbon(String? placeRibbon) {
-  return _countryFromPlaceRibbon(placeRibbon) ?? '';
+String coastinCountryFromApproachRibbon(String? localApproachRibbon) {
+  return _countryFromApproachRibbon(localApproachRibbon) ?? '';
 }
 
 String coastinCountryForPersona(
   ShorelinePersona persona, {
-  String? placeRibbon,
+  String? localApproachRibbon,
 }) {
-  final country = _countryFromPlaceRibbon(placeRibbon);
+  final country = _countryFromApproachRibbon(localApproachRibbon);
   if (country != null) {
     return country;
   }
   return _fallbackCountryForPersona(persona);
 }
 
-String? _countryFromPlaceRibbon(String? placeRibbon) {
-  final marker = _placeMarker(placeRibbon);
+String? _countryFromApproachRibbon(String? localApproachRibbon) {
+  final marker = _approachMarker(localApproachRibbon);
   if (marker.isEmpty) {
     return null;
   }
   return _countryByMarker[marker];
 }
 
-String _placeMarker(String? placeRibbon) {
-  final rawRibbon = placeRibbon?.trim() ?? '';
-  if (rawRibbon.isEmpty) {
+String _approachMarker(String? localApproachRibbon) {
+  final rawApproach = localApproachRibbon?.trim() ?? '';
+  if (rawApproach.isEmpty) {
     return '';
   }
-  final parts = rawRibbon.split(RegExp(r'\s+-\s+'));
+  final parts = rawApproach.split(RegExp(r'\s+-\s+'));
   return (parts.length > 1 ? parts.last : parts.first).trim();
 }
 

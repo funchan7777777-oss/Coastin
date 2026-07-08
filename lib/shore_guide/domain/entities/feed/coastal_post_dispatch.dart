@@ -1,36 +1,36 @@
-import '../shore_reply_drift.dart';
+import '../shore_comment_tide_mark.dart';
 import '../shoreline_persona.dart';
 
 class CoastalPostDispatch {
   const CoastalPostDispatch({
-    required this.dispatchKey,
-    required this.authorHarbor,
-    required this.topicKey,
-    required this.topicLabel,
-    required this.placeRibbon,
-    required this.clockRibbon,
-    required this.captionCurrent,
-    required this.frameAssets,
-    required this.heartTally,
-    required this.replyTally,
-    required this.relayTally,
-    required this.isInitiallyLoved,
-    required this.isInitiallyFollowed,
-    required this.replyDrifts,
+    required this.shoreDispatchMarker,
+    required this.shorelineKeeper,
+    required this.tideTopicMarker,
+    required this.tideTopicLabel,
+    required this.localApproachRibbon,
+    required this.postedAtRibbon,
+    required this.shorelineCaption,
+    required this.shorelineFrameAssets,
+    required this.shellLikeCount,
+    required this.commentCount,
+    required this.shoreShareCount,
+    required this.startsShellLiked,
+    required this.startsFollowed,
+    required this.commentTideMarks,
   });
 
-  final String dispatchKey;
-  final ShorelinePersona authorHarbor;
-  final String topicKey;
-  final String topicLabel;
-  final String placeRibbon;
-  final String clockRibbon;
-  final String captionCurrent;
-  final List<String> frameAssets;
-  final int heartTally;
-  final int replyTally;
-  final int relayTally;
-  final bool isInitiallyLoved;
-  final bool isInitiallyFollowed;
-  final List<ShoreReplyDrift> replyDrifts;
+  final String shoreDispatchMarker;
+  final ShorelinePersona shorelineKeeper;
+  final String tideTopicMarker;
+  final String tideTopicLabel;
+  final String localApproachRibbon;
+  final String postedAtRibbon;
+  final String shorelineCaption;
+  final List<String> shorelineFrameAssets;
+  final int shellLikeCount;
+  final int commentCount;
+  final int shoreShareCount;
+  final bool startsShellLiked;
+  final bool startsFollowed;
+  final List<ShoreCommentTideMark> commentTideMarks;
 }

@@ -73,7 +73,7 @@ class ShoreSystemNoticeStore {
 
   static const String _noticeLedgerKey = 'coastin.systemNotices.ledger';
   static const String _loginFollowerSeedKey =
-      'coastin.systemNotices.loginFollowerSeeded';
+      'coastin.systemNotices.loginFollowerArrivals';
 
   static const ShoreSafetyStore _safetyStore = ShoreSafetyStore();
 
