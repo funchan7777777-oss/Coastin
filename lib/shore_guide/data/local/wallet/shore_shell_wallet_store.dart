@@ -158,8 +158,20 @@ class ShoreShellWalletStore {
       return false;
     }
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList(_unlockedExpenseKey)?.contains(unlockKey) ??
-        false;
+    final unlockedExpenses =
+        prefs.getStringList(_unlockedExpenseKey)?.toSet() ?? {};
+    if (unlockedExpenses.contains(unlockKey)) {
+      return true;
+    }
+    if (!_matchesLegacySunGuideUnlock(expense, prefs)) {
+      return false;
+    }
+    unlockedExpenses.add(unlockKey);
+    await prefs.setStringList(
+      _unlockedExpenseKey,
+      unlockedExpenses.toList()..sort(),
+    );
+    return true;
   }
 
   Future<void> rememberExpenseUnlock(ShoreShellExpense expense) async {
@@ -177,6 +189,19 @@ class ShoreShellWalletStore {
       _unlockedExpenseKey,
       unlockedExpenses.toList()..sort(),
     );
+  }
+
+  bool _matchesLegacySunGuideUnlock(
+    ShoreShellExpense expense,
+    SharedPreferences prefs,
+  ) {
+    if (expense != ShoreShellExpense.sunGuideAccess) {
+      return false;
+    }
+    if (!(prefs.getBool(_welcomeGiftKey) ?? false)) {
+      return false;
+    }
+    return prefs.getInt(_balanceKey) == welcomeGiftShells - expense.cost;
   }
 
   Future<bool> markPurchaseIfFresh(String purchaseToken) async {

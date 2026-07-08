@@ -452,9 +452,59 @@ class _TopicCard extends StatelessWidget {
               child: Image.asset(
                 topicLane.topicCardAsset,
                 fit: BoxFit.cover,
+                alignment: isLarge ? Alignment.bottomCenter : Alignment.center,
                 filterQuality: FilterQuality.high,
               ),
             ),
+            if (isLarge) ...[
+              Positioned(
+                left: 14,
+                top: 22,
+                right: 12,
+                child: Text(
+                  topicLane.topicLabel,
+                  maxLines: 2,
+                  style: const TextStyle(
+                    color: Color(0xFF2B333B),
+                    fontSize: 16,
+                    height: 1.08,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 14,
+                top: 62,
+                right: 12,
+                child: Text(
+                  topicLane.participationLine,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: TidewashPalette.harborSlate.withValues(alpha: 0.42),
+                    fontSize: 10,
+                    height: 1,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ] else
+              Positioned(
+                left: 12,
+                top: 44,
+                right: 10,
+                child: Text(
+                  topicLane.participationLine,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: TidewashPalette.harborSlate.withValues(alpha: 0.4),
+                    fontSize: 10,
+                    height: 1,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             if (isLarge)
               Positioned(
                 left: 16,

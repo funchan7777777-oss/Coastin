@@ -39,7 +39,7 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-dressing',
       topicLabel: 'Seaside dressing',
       placeRibbon: '23 - Australia',
-      clockRibbon: '12:24',
+      clockRibbon: '18m ago',
       captionCurrent:
           'Breeze by shore, collect seaside romance today. Long coastline, slow down for coastal tiny joys.',
       frameAssets: const [
@@ -47,12 +47,12 @@ class SeededCoastalFeedDeck {
         CoastinAssetRegistry.sunwearMood2,
         CoastinAssetRegistry.sunwearMood3,
       ],
-      heartTally: 958,
-      replyTally: 584,
-      relayTally: 654,
-      isInitiallyLoved: true,
+      heartTally: 24,
+      replyTally: 5,
+      relayTally: 7,
+      isInitiallyLoved: false,
       isInitiallyFollowed: false,
-      replyDrifts: _commentDrifts(0),
+      replyDrifts: _commentDrifts(0, count: 5),
     ),
     CoastalPostDispatch(
       dispatchKey: 'milo-paddle-games',
@@ -60,20 +60,19 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-games',
       topicLabel: 'Seaside games',
       placeRibbon: 'Palm Cove - Cebu',
-      clockRibbon: '09:42',
+      clockRibbon: '42m ago',
       captionCurrent:
           'Small wave races after breakfast, the easy board wins when everyone laughs first.',
       frameAssets: const [
         CoastinAssetRegistry.tideplayArc1,
         CoastinAssetRegistry.tideplayArc2,
-        CoastinAssetRegistry.tideplayArc3,
       ],
-      heartTally: 742,
-      replyTally: 311,
-      relayTally: 286,
+      heartTally: 18,
+      replyTally: 3,
+      relayTally: 5,
       isInitiallyLoved: false,
       isInitiallyFollowed: true,
-      replyDrifts: _commentDrifts(3),
+      replyDrifts: _commentDrifts(3, count: 3),
     ),
     CoastalPostDispatch(
       dispatchKey: 'vivian-citrus-cuisine',
@@ -81,20 +80,18 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-cuisine',
       topicLabel: 'Seaside cuisine',
       placeRibbon: 'Lagoon Market - Aruba',
-      clockRibbon: '11:05',
+      clockRibbon: '1h ago',
       captionCurrent:
           'Citrus bowl, cold juice, and a bench with just enough shade to stay longer.',
       frameAssets: const [
         CoastinAssetRegistry.harborBite1,
-        CoastinAssetRegistry.harborBite2,
-        CoastinAssetRegistry.harborBite3,
       ],
-      heartTally: 889,
-      replyTally: 420,
-      relayTally: 361,
+      heartTally: 31,
+      replyTally: 6,
+      relayTally: 9,
       isInitiallyLoved: false,
       isInitiallyFollowed: false,
-      replyDrifts: _commentDrifts(5),
+      replyDrifts: _commentDrifts(5, count: 6),
     ),
     CoastalPostDispatch(
       dispatchKey: 'sienna-sunwear-loop',
@@ -102,7 +99,7 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-dressing',
       topicLabel: 'Seaside dressing',
       placeRibbon: 'Shell Lane - Kona',
-      clockRibbon: '15:18',
+      clockRibbon: '2h ago',
       captionCurrent:
           'Wide hat, bright wrap, tiny shell earrings. The wind decided the final look.',
       frameAssets: const [
@@ -110,12 +107,12 @@ class SeededCoastalFeedDeck {
         CoastinAssetRegistry.sunwearMood5,
         CoastinAssetRegistry.sunwearMood6,
       ],
-      heartTally: 1120,
-      replyTally: 503,
-      relayTally: 497,
-      isInitiallyLoved: true,
+      heartTally: 27,
+      replyTally: 4,
+      relayTally: 6,
+      isInitiallyLoved: false,
       isInitiallyFollowed: true,
-      replyDrifts: _commentDrifts(8),
+      replyDrifts: _commentDrifts(8, count: 4),
     ),
     CoastalPostDispatch(
       dispatchKey: 'kai-reef-games',
@@ -123,20 +120,19 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-games',
       topicLabel: 'Seaside games',
       placeRibbon: 'Reef Rail - Bali',
-      clockRibbon: '16:44',
+      clockRibbon: '3h ago',
       captionCurrent:
           'The board game was simple: stay balanced, dodge foam, cheer for every fall.',
       frameAssets: const [
         CoastinAssetRegistry.tideplayArc4,
         CoastinAssetRegistry.tideplayArc5,
-        CoastinAssetRegistry.tideplayArc6,
       ],
-      heartTally: 637,
-      replyTally: 228,
-      relayTally: 193,
+      heartTally: 15,
+      replyTally: 2,
+      relayTally: 4,
       isInitiallyLoved: false,
       isInitiallyFollowed: false,
-      replyDrifts: _commentDrifts(10),
+      replyDrifts: _commentDrifts(10, count: 2),
     ),
     CoastalPostDispatch(
       dispatchKey: 'elena-pier-bites',
@@ -144,20 +140,18 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-cuisine',
       topicLabel: 'Seaside cuisine',
       placeRibbon: 'Pier Table - Lisbon',
-      clockRibbon: '13:27',
+      clockRibbon: '4h ago',
       captionCurrent:
           'Late lunch tasted better with salty hair and a chair facing the harbor.',
       frameAssets: const [
         CoastinAssetRegistry.harborBite4,
-        CoastinAssetRegistry.harborBite5,
-        CoastinAssetRegistry.harborBite6,
       ],
-      heartTally: 1014,
-      replyTally: 448,
-      relayTally: 502,
-      isInitiallyLoved: true,
+      heartTally: 22,
+      replyTally: 5,
+      relayTally: 8,
+      isInitiallyLoved: false,
       isInitiallyFollowed: false,
-      replyDrifts: _commentDrifts(13),
+      replyDrifts: _commentDrifts(13, count: 5),
     ),
     CoastalPostDispatch(
       dispatchKey: 'aurora-light-dressing',
@@ -165,7 +159,7 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-dressing',
       topicLabel: 'Seaside dressing',
       placeRibbon: 'Bright Cove - Nice',
-      clockRibbon: '17:36',
+      clockRibbon: '5h ago',
       captionCurrent:
           'Soft linen survived the strongest breeze and still looked made for the walk.',
       frameAssets: const [
@@ -173,12 +167,12 @@ class SeededCoastalFeedDeck {
         CoastinAssetRegistry.sunwearMood8,
         CoastinAssetRegistry.sunwearMood9,
       ],
-      heartTally: 781,
-      replyTally: 304,
-      relayTally: 260,
+      heartTally: 19,
+      replyTally: 3,
+      relayTally: 5,
       isInitiallyLoved: false,
       isInitiallyFollowed: false,
-      replyDrifts: _commentDrifts(16),
+      replyDrifts: _commentDrifts(16, count: 3),
     ),
     CoastalPostDispatch(
       dispatchKey: 'river-sunset-games',
@@ -186,20 +180,19 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-games',
       topicLabel: 'Seaside games',
       placeRibbon: 'Dune Court - Durban',
-      clockRibbon: '18:09',
+      clockRibbon: 'Yesterday',
       captionCurrent:
           'Sunset teams picked by shell color. Somehow the blue shell always wins.',
       frameAssets: const [
         CoastinAssetRegistry.tideplayArc7,
         CoastinAssetRegistry.tideplayArc8,
-        CoastinAssetRegistry.tideplayArc9,
       ],
-      heartTally: 690,
-      replyTally: 277,
-      relayTally: 244,
+      heartTally: 16,
+      replyTally: 4,
+      relayTally: 3,
       isInitiallyLoved: false,
       isInitiallyFollowed: true,
-      replyDrifts: _commentDrifts(19),
+      replyDrifts: _commentDrifts(19, count: 4),
     ),
     CoastalPostDispatch(
       dispatchKey: 'nora-salt-bites',
@@ -207,20 +200,18 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-cuisine',
       topicLabel: 'Seaside cuisine',
       placeRibbon: 'Seaglass Cafe - Crete',
-      clockRibbon: '10:51',
+      clockRibbon: 'Yesterday',
       captionCurrent:
           'A tiny pastry, cold coffee, and the table closest to the open window.',
       frameAssets: const [
         CoastinAssetRegistry.harborBite7,
-        CoastinAssetRegistry.harborBite8,
-        CoastinAssetRegistry.harborBite9,
       ],
-      heartTally: 835,
-      replyTally: 392,
-      relayTally: 318,
+      heartTally: 28,
+      replyTally: 6,
+      relayTally: 6,
       isInitiallyLoved: false,
       isInitiallyFollowed: false,
-      replyDrifts: _commentDrifts(22),
+      replyDrifts: _commentDrifts(22, count: 6),
     ),
     CoastalPostDispatch(
       dispatchKey: 'jade-last-shoreline',
@@ -228,20 +219,19 @@ class SeededCoastalFeedDeck {
       topicKey: 'seaside-dressing',
       topicLabel: 'Seaside dressing',
       placeRibbon: 'Beacon Steps - Sanya',
-      clockRibbon: '19:02',
+      clockRibbon: '2d ago',
       captionCurrent:
           'Last light, one more photo, and a final walk before the sandals come off.',
       frameAssets: const [
         CoastinAssetRegistry.sunwearMood10,
         CoastinAssetRegistry.tideplayArc10,
-        CoastinAssetRegistry.harborBite10,
       ],
-      heartTally: 1196,
-      replyTally: 531,
-      relayTally: 604,
-      isInitiallyLoved: true,
+      heartTally: 20,
+      replyTally: 2,
+      relayTally: 4,
+      isInitiallyLoved: false,
       isInitiallyFollowed: true,
-      replyDrifts: _commentDrifts(25),
+      replyDrifts: _commentDrifts(25, count: 2),
     ),
   ]);
 
@@ -278,7 +268,7 @@ class SeededCoastalFeedDeck {
     ),
   ];
 
-  static List<ShoreReplyDrift> _commentDrifts(int offset) {
+  static List<ShoreReplyDrift> _commentDrifts(int offset, {int count = 4}) {
     const replies = [
       'This looks like the kind of spot that makes the whole walk slower.',
       'The color is so clean today; saving this route for the weekend.',
@@ -289,12 +279,13 @@ class SeededCoastalFeedDeck {
       'The third photo has the calmest light.',
       'This topic is getting better every day.',
     ];
-    return List.generate(4, (index) {
+    const tideMinutes = ['08:45', '09:12', '10:36', '12:28', '14:05', '16:18'];
+    return List.generate(count, (index) {
       final people = SeededShoreMomentDeck.shorelinePeople;
       return ShoreReplyDrift(
         replyMarker: 'feed-reply-$offset-$index',
         replyAuthor: people[(offset + index * 4) % people.length],
-        tideMinute: ['08:45', '09:12', '10:36', '12:28'][index],
+        tideMinute: tideMinutes[index % tideMinutes.length],
         replyText: replies[(offset + index) % replies.length],
         hasFreshSignal: index == 0 || (offset + index).isEven,
       );
