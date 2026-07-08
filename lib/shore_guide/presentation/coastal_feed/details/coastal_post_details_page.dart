@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
+import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../data/local/seeded_shore_moment_deck.dart';
 import '../../../domain/entities/feed/coastal_post_dispatch.dart';
@@ -33,6 +34,7 @@ class CoastalPostDetailsPage extends StatefulWidget {
 
 class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
+  final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
   late bool _isLoved = widget.isLoved;
   late bool _isFollowed = widget.isFollowed;
   late final List<ShoreReplyDrift> _visibleReplies = List.of(
@@ -176,6 +178,10 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
       );
       _replyController.clear();
     });
+    _noticeStore.recordCommentNotice(
+      actorHandle: widget.postDispatch.authorHarbor.tideHandle,
+      noticeLine: 'Your comment was added under this Coastin post.',
+    );
   }
 
   void _openAuthor() {

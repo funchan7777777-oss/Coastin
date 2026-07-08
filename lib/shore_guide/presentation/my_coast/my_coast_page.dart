@@ -6,7 +6,8 @@ import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../app/theme/tidewash_palette.dart';
 import '../../../arrival_gate/data/local/harbor_passage_store.dart';
 import '../../../arrival_gate/domain/entities/harbor_passage_record.dart';
-import '../../data/local/feed/seeded_coastal_feed_deck.dart';
+import '../../../shared/ui/coastin_empty_state.dart';
+import '../../data/local/safety/shore_safety_store.dart';
 import 'edit/my_coast_edit_page.dart';
 import 'network/my_coast_network_page.dart';
 import 'settings/my_coast_settings_page.dart';
@@ -23,7 +24,14 @@ class MyCoastPage extends StatefulWidget {
 
 class _MyCoastPageState extends State<MyCoastPage> {
   final HarborPassageStore _passageStore = const HarborPassageStore();
+  final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
   HarborPassageRecord? _passageRecord;
+  ShoreSafetySnapshot _safetySnapshot = const ShoreSafetySnapshot(
+    blockedHandles: {},
+    reportedContentIds: {},
+    followingHandles: {},
+    approvedFollowerHandles: {},
+  );
   bool _showVideos = true;
 
   @override
@@ -34,10 +42,14 @@ class _MyCoastPageState extends State<MyCoastPage> {
 
   Future<void> _restoreProfile() async {
     final restored = await _passageStore.restoreSettledPassage();
+    final safetySnapshot = await _safetyStore.restoreSnapshot();
     if (!mounted) {
       return;
     }
-    setState(() => _passageRecord = restored);
+    setState(() {
+      _passageRecord = restored;
+      _safetySnapshot = safetySnapshot;
+    });
   }
 
   @override
@@ -87,6 +99,7 @@ class _MyCoastPageState extends State<MyCoastPage> {
                         ),
                         const SizedBox(height: 18),
                         _ProfileStatsRow(
+                          safetySnapshot: _safetySnapshot,
                           onOpen: _openNetworkPage,
                           onLikesTap: _showLikesLedger,
                         ),
@@ -137,9 +150,13 @@ class _MyCoastPageState extends State<MyCoastPage> {
   }
 
   void _openNetworkPage(MyCoastNetworkKind kind) {
-    Navigator.of(context).push(
-      CupertinoPageRoute<void>(builder: (_) => MyCoastNetworkPage(kind: kind)),
-    );
+    Navigator.of(context)
+        .push(
+          CupertinoPageRoute<void>(
+            builder: (_) => MyCoastNetworkPage(kind: kind),
+          ),
+        )
+        .then((_) => _restoreProfile());
   }
 
   void _showLikesLedger() {
@@ -151,7 +168,7 @@ class _MyCoastPageState extends State<MyCoastPage> {
           content: const Padding(
             padding: EdgeInsets.only(top: 8),
             child: Text(
-              'Your videos and posts have gathered 8.6w seaside likes so far.',
+              'No public Coastin likes are recorded for this profile yet.',
             ),
           ),
           actions: [
@@ -327,31 +344,51 @@ class _ProfileAvatar extends StatelessWidget {
 }
 
 class _ProfileStatsRow extends StatelessWidget {
-  const _ProfileStatsRow({required this.onOpen, required this.onLikesTap});
+  const _ProfileStatsRow({
+    required this.safetySnapshot,
+    required this.onOpen,
+    required this.onLikesTap,
+  });
 
+  final ShoreSafetySnapshot safetySnapshot;
   final ValueChanged<MyCoastNetworkKind> onOpen;
   final VoidCallback onLikesTap;
 
   @override
   Widget build(BuildContext context) {
+    final blockedHandles = safetySnapshot.blockedHandles;
+    final followingCount = safetySnapshot.followingHandles
+        .where((handle) => !blockedHandles.contains(handle))
+        .length;
+    final fansCount = safetySnapshot.approvedFollowerHandles
+        .where((handle) => !blockedHandles.contains(handle))
+        .length;
+    final friendCount = safetySnapshot.followingHandles
+        .where(
+          (handle) =>
+              safetySnapshot.approvedFollowerHandles.contains(handle) &&
+              !blockedHandles.contains(handle),
+        )
+        .length;
+
     return Row(
       children: [
         _ProfileStatTile(
-          countText: '32',
+          countText: '$followingCount',
           label: 'Follow',
           onTap: () => onOpen(MyCoastNetworkKind.follow),
         ),
         _ProfileStatTile(
-          countText: '1.2w',
+          countText: '$fansCount',
           label: 'Fans',
           onTap: () => onOpen(MyCoastNetworkKind.fans),
         ),
         _ProfileStatTile(
-          countText: '18',
+          countText: '$friendCount',
           label: 'Friends',
           onTap: () => onOpen(MyCoastNetworkKind.friend),
         ),
-        _ProfileStatTile(countText: '8.6w', label: 'Likes', onTap: onLikesTap),
+        _ProfileStatTile(countText: '0', label: 'Likes', onTap: onLikesTap),
       ],
     );
   }
@@ -565,22 +602,19 @@ class _ProfileGrid extends StatelessWidget {
   const _ProfileGrid({required this.showVideos});
 
   final bool showVideos;
+  static const List<String> _approvedVideoTiles = [];
+  static const List<String> _approvedPostTiles = [];
 
   @override
   Widget build(BuildContext context) {
-    final assets = showVideos
-        ? const [
-            CoastinAssetRegistry.sunwearMood1,
-            CoastinAssetRegistry.sunwearMood2,
-            CoastinAssetRegistry.sunwearMood3,
-            CoastinAssetRegistry.tideplayArc4,
-            CoastinAssetRegistry.harborBite2,
-            CoastinAssetRegistry.sunwearMood8,
-          ]
-        : SeededCoastalFeedDeck.coastalDispatches
-              .take(6)
-              .map((post) => post.frameAssets.first)
-              .toList();
+    final assets = _approvedCoastTiles(showVideos);
+
+    if (assets.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 40, bottom: 20),
+        child: Center(child: CoastinEmptyState(width: 104)),
+      );
+    }
 
     return GridView.builder(
       padding: EdgeInsets.zero,
@@ -617,6 +651,10 @@ class _ProfileGrid extends StatelessWidget {
         );
       },
     );
+  }
+
+  List<String> _approvedCoastTiles(bool showVideos) {
+    return showVideos ? _approvedVideoTiles : _approvedPostTiles;
   }
 }
 

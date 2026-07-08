@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../app/navigation/coastin_home_route.dart';
+import '../../shore_guide/data/local/buddies/shore_system_notice_store.dart';
 import '../data/local/harbor_passage_store.dart';
 import '../presentation/access/harbor_access_page.dart';
 import '../presentation/splash/sailboat_launch_page.dart';
@@ -14,6 +15,7 @@ class CoastinEntryFlow extends StatefulWidget {
 
 class _CoastinEntryFlowState extends State<CoastinEntryFlow> {
   final HarborPassageStore _passageStore = const HarborPassageStore();
+  final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
   _CoastinEntryPhase _entryPhase = _CoastinEntryPhase.loading;
 
   @override
@@ -46,6 +48,10 @@ class _CoastinEntryFlowState extends State<CoastinEntryFlow> {
       return;
     }
     if (restoredPassage != null) {
+      await _noticeStore.ensureLoginFollowerDrift();
+      if (!mounted) {
+        return;
+      }
       setState(() => _entryPhase = _CoastinEntryPhase.morningBoard);
       return;
     }
@@ -54,6 +60,14 @@ class _CoastinEntryFlowState extends State<CoastinEntryFlow> {
   }
 
   void _openMorningBoard() {
+    _seedFollowersAndOpenBoard();
+  }
+
+  Future<void> _seedFollowersAndOpenBoard() async {
+    await _noticeStore.ensureLoginFollowerDrift();
+    if (!mounted) {
+      return;
+    }
     Navigator.of(context).pushAndRemoveUntil(
       CupertinoPageRoute<void>(builder: (_) => CoastinHomeRoute.openingBoard()),
       (_) => false,

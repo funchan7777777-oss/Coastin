@@ -27,7 +27,7 @@ class ShorePersonaCatalog {
           buddyPersona: thread.buddyPersona,
           placeRibbon: thread.placeRibbon,
           lastHarborTime: thread.lastHarborTime,
-          previewLine: 'No messages yet',
+          previewLine: '',
           unreadCount: 0,
           callGreeting: thread.callGreeting,
           notes: const [],
@@ -41,7 +41,7 @@ class ShorePersonaCatalog {
           ? '23 - Australia'
           : 'Reef Rail',
       lastHarborTime: '',
-      previewLine: 'No messages yet',
+      previewLine: '',
       unreadCount: 0,
       callGreeting: persona.coastalStamp,
       notes: const [],

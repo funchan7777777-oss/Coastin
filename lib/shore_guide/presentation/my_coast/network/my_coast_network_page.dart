@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
-import '../../../../app/theme/tidewash_palette.dart';
+import '../../../../shared/ui/coastin_empty_state.dart';
 import '../../../data/local/buddies/seeded_sea_buddy_deck.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../data/local/shore_persona_catalog.dart';
@@ -76,35 +76,15 @@ class _MyCoastNetworkPageState extends State<MyCoastNetworkPage> {
                           CoastPersonRow(
                             persona: persona,
                             placeRibbon: _placeForPersona(persona),
-                            summaryLine:
-                                'Breeze by shore, collect seaside romance today. Long coastline, slow down for coastal tiny joys.',
+                            summaryLine: persona.coastalStamp,
                             actionAsset: _actionAsset(persona),
                             onActionTap: () => _handleAction(persona),
                             onOpen: () => _openPersona(persona),
                           ),
                         if (visiblePeople.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 170),
-                            child: Column(
-                              children: [
-                                Image.asset(
-                                  CoastinAssetRegistry.bluewaterHomeMark,
-                                  width: 64,
-                                  height: 64,
-                                  fit: BoxFit.contain,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'No content',
-                                  style: TextStyle(
-                                    color: TidewashPalette.harborSlate
-                                        .withValues(alpha: 0.3),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 170),
+                            child: CoastinEmptyState(width: 104),
                           ),
                       ],
                     ),
@@ -199,17 +179,27 @@ List<ShorelinePersona> _peopleForKind(
           .toList(),
     MyCoastNetworkKind.follow =>
       people
-          .where((persona) => contains(snapshot.followingHandles, persona))
+          .where(
+            (persona) =>
+                contains(snapshot.followingHandles, persona) &&
+                !contains(snapshot.blockedHandles, persona),
+          )
           .toList(),
     MyCoastNetworkKind.fans =>
       people
           .where(
-            (persona) => contains(snapshot.approvedFollowerHandles, persona),
+            (persona) =>
+                contains(snapshot.approvedFollowerHandles, persona) &&
+                !contains(snapshot.blockedHandles, persona),
           )
           .toList(),
     MyCoastNetworkKind.friend =>
       people
-          .where((persona) => snapshot.isMutualWith(persona.tideHandle))
+          .where(
+            (persona) =>
+                snapshot.isMutualWith(persona.tideHandle) &&
+                !contains(snapshot.blockedHandles, persona),
+          )
           .toList(),
   };
 }

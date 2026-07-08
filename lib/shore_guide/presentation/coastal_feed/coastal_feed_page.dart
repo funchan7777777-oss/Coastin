@@ -5,9 +5,11 @@ import '../../../app/theme/tidewash_palette.dart';
 import '../../../shared/ui/tokens/shore_spacing.dart';
 import '../../data/local/feed/seeded_coastal_feed_deck.dart';
 import '../../data/local/safety/shore_safety_store.dart';
+import '../../data/local/wallet/shore_shell_wallet_store.dart';
 import '../../domain/entities/feed/coastal_post_dispatch.dart';
 import '../../domain/entities/feed/coastal_topic_lane.dart';
 import '../moments/release/shore_release_page.dart';
+import '../my_coast/wallet/shore_shell_reef.dart';
 import '../people/shore_persona_detail_page.dart';
 import '../safety/shore_safety_action.dart';
 import '../safety/shore_safety_reef.dart';
@@ -165,7 +167,14 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     );
   }
 
-  void _openSunGuide() {
+  Future<void> _openSunGuide() async {
+    final canOpen = await ShoreShellReef.confirmAndSpend(
+      context: context,
+      expense: ShoreShellExpense.sunGuideAccess,
+    );
+    if (!canOpen || !mounted) {
+      return;
+    }
     Navigator.of(
       context,
     ).push(CupertinoPageRoute<void>(builder: (_) => const SunGuardGuidePage()));

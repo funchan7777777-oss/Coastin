@@ -27,6 +27,18 @@ class SeaBuddyMessageStore {
     ];
   }
 
+  Future<Map<String, SeaBuddyNote>> restoreLatestNotes() async {
+    final threadKeys = await restoreThreadKeys();
+    final latestNotes = <String, SeaBuddyNote>{};
+    for (final threadKey in threadKeys) {
+      final notes = await restoreNotes(threadKey);
+      if (notes.isNotEmpty) {
+        latestNotes[threadKey] = notes.last;
+      }
+    }
+    return latestNotes;
+  }
+
   Future<void> appendNote(String threadKey, SeaBuddyNote note) async {
     final prefs = await SharedPreferences.getInstance();
     final notes = prefs.getStringList(_threadNotesKey(threadKey)) ?? [];

@@ -7,7 +7,9 @@ import '../../../../arrival_gate/data/local/harbor_passage_store.dart';
 import '../../../../arrival_gate/domain/value_objects/harbor_policy_kind.dart';
 import '../../../../arrival_gate/presentation/policy/harbor_policy_webview_page.dart';
 import '../../../data/local/buddies/sea_buddy_message_store.dart';
+import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
+import '../../../data/local/wallet/shore_shell_wallet_store.dart';
 import '../../safety/shore_safety_reef.dart';
 import '../network/my_coast_network_page.dart';
 import '../widgets/my_coast_top_bar.dart';
@@ -20,6 +22,8 @@ class MyCoastSettingsPage extends StatelessWidget {
   static const HarborPassageStore _passageStore = HarborPassageStore();
   static const ShoreSafetyStore _safetyStore = ShoreSafetyStore();
   static const SeaBuddyMessageStore _messageStore = SeaBuddyMessageStore();
+  static const ShoreSystemNoticeStore _noticeStore = ShoreSystemNoticeStore();
+  static const ShoreShellWalletStore _walletStore = ShoreShellWalletStore();
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +141,8 @@ class MyCoastSettingsPage extends StatelessWidget {
                 if (isDeletion) {
                   await _safetyStore.clearLocalLedger();
                   await _messageStore.clearAllThreads();
+                  await _noticeStore.clearNoticeLedger();
+                  await _walletStore.clearWallet();
                 }
                 if (!context.mounted) {
                   return;

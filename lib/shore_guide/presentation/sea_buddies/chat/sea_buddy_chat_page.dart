@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
+import '../../../../shared/ui/coastin_empty_state.dart';
 import '../../../data/local/buddies/sea_buddy_message_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/buddies/sea_buddy_note.dart';
@@ -70,18 +71,9 @@ class _SeaBuddyChatPageState extends State<SeaBuddyChatPage> {
                         ),
                         const SizedBox(height: 26),
                         if (_notes.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 80),
-                            child: Text(
-                              'No messages yet',
-                              style: TextStyle(
-                                color: TidewashPalette.harborSlate.withValues(
-                                  alpha: 0.42,
-                                ),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 80),
+                            child: CoastinEmptyState(width: 104),
                           )
                         else
                           for (final note in _notes) ...[

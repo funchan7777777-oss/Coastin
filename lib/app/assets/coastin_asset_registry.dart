@@ -4,7 +4,7 @@ class CoastinAssetRegistry {
   static const String sailboatRideBackdrop = 'assets/images/SailboatRide.png';
   static const String saltyRoamBackdrop = 'assets/images/SaltyRoam.png';
   static const String voyageLogBackdrop = 'assets/images/VoyageLog.png';
-  static const String bluewaterHomeMark = 'assets/images/BluewaterHome.png';
+  static const String kayakDateEmptyState = 'assets/images/KayakDate.png';
 
   static const String activePierLogin = 'assets/images/SnorkelFun.png';
   static const String restingPierLogin = 'assets/images/NauticalBoard.png';

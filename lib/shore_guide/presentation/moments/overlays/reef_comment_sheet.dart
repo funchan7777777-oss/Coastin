@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
+import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/shore_reply_drift.dart';
 import '../../../domain/entities/shoreline_persona.dart';
@@ -32,6 +33,7 @@ class ReefCommentSheet extends StatefulWidget {
 
 class _ReefCommentSheetState extends State<ReefCommentSheet> {
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
+  final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
   late List<ShoreReplyDrift> _visibleComments;
   final TextEditingController _commentController = TextEditingController();
 
@@ -193,6 +195,10 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
       );
       _commentController.clear();
     });
+    _noticeStore.recordCommentNotice(
+      actorHandle: widget.viewerPersona.tideHandle,
+      noticeLine: 'Your comment was added to the Coastin discussion.',
+    );
   }
 
   Future<void> _restoreVisibleComments() async {

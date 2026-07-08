@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
+import '../../../shared/ui/coastin_empty_state.dart';
 import '../../data/local/safety/shore_safety_store.dart';
 import '../../data/local/seeded_shore_moment_deck.dart';
 import '../../domain/entities/shore_video_moment.dart';
@@ -77,16 +78,7 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
         child: Stack(
           children: [
             if (visibleMoments.isEmpty)
-              const Center(
-                child: Text(
-                  'No content',
-                  style: TextStyle(
-                    color: Color(0xFFFFFFFF),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              )
+              const Center(child: CoastinEmptyState(width: 112))
             else
               PageView.builder(
                 controller: _momentController,

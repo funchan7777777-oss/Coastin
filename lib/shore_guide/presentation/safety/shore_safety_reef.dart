@@ -79,27 +79,6 @@ class ShoreSafetyReef {
     );
   }
 
-  static Future<bool> showCallChargeConfirm({
-    required BuildContext context,
-    required String displayName,
-  }) async {
-    final confirmed = await showCupertinoDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return _WaveNoticeDialog(
-          wordmark: CoastinAssetRegistry.consumptionConfirmWordmark,
-          iconAsset: CoastinAssetRegistry.detailInfoGlyph,
-          title: 'Video call',
-          message:
-              'The current operation will consume 50 shells. Confirm before calling $displayName.',
-          actionLabel: 'Confirm',
-          onAction: () => Navigator.of(dialogContext).pop(true),
-        );
-      },
-    );
-    return confirmed ?? false;
-  }
-
   static Future<void> showAccountDone({
     required BuildContext context,
     required String title,
@@ -306,6 +285,9 @@ class _SafetyWavePanelState extends State<_SafetyWavePanel> {
       await widget.store.blockHandle(widget.ownerHandle!);
     }
     if (!mounted) {
+      return;
+    }
+    if (!context.mounted) {
       return;
     }
     final rootContext = Navigator.of(context, rootNavigator: true).context;

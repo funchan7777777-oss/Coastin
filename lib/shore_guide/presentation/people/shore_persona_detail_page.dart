@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../app/assets/coastin_asset_registry.dart';
 import '../../../app/theme/tidewash_palette.dart';
+import '../../../shared/ui/coastin_empty_state.dart';
 import '../../data/local/buddies/sea_buddy_message_store.dart';
 import '../../data/local/feed/seeded_coastal_feed_deck.dart';
 import '../../data/local/safety/shore_safety_store.dart';
@@ -188,13 +189,6 @@ class _ShorePersonaDetailPageState extends State<ShorePersonaDetailPage> {
 
   Future<void> _openVideoCall() async {
     if (!await _canStartPrivateAction() || !mounted) {
-      return;
-    }
-    final confirmed = await ShoreSafetyReef.showCallChargeConfirm(
-      context: context,
-      displayName: widget.persona.displayHarborName,
-    );
-    if (!confirmed || !mounted) {
       return;
     }
     final thread = ShorePersonaCatalog.threadForPersona(widget.persona);
@@ -568,18 +562,9 @@ class _PersonaWorkGrid extends StatelessWidget {
         : _tilesForPosts(posts);
 
     if (tiles.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 34),
-        child: Center(
-          child: Text(
-            'No content',
-            style: TextStyle(
-              color: TidewashPalette.harborSlate.withValues(alpha: 0.38),
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
+      return const Padding(
+        padding: EdgeInsets.only(top: 34),
+        child: Center(child: CoastinEmptyState(width: 104)),
       );
     }
 

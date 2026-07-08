@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
+import '../../../../shared/ui/coastin_empty_state.dart';
 import '../../../data/local/buddies/seeded_sea_buddy_deck.dart';
+import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/buddies/sea_buddy_request.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
@@ -19,6 +21,7 @@ class SeaBuddyRequestsPage extends StatefulWidget {
 
 class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
   final ShoreSafetyStore _safetyStore = const ShoreSafetyStore();
+  final ShoreSystemNoticeStore _noticeStore = const ShoreSystemNoticeStore();
   ShoreSafetySnapshot _snapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
     reportedContentIds: {},
@@ -67,18 +70,9 @@ class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
                           const SizedBox(height: 22),
                         ],
                         if (_visibleRequests.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 170),
-                            child: Text(
-                              'No content',
-                              style: TextStyle(
-                                color: TidewashPalette.harborSlate.withValues(
-                                  alpha: 0.3,
-                                ),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 170),
+                            child: CoastinEmptyState(width: 104),
                           ),
                       ],
                     ),
@@ -103,7 +97,7 @@ class _SeaBuddyRequestsPageState extends State<SeaBuddyRequestsPage> {
   }
 
   Future<void> _acceptRequest(SeaBuddyRequest request) async {
-    await _safetyStore.approveFollower(request.requestPersona.tideHandle);
+    await _noticeStore.recordIncomingFollow(request.requestPersona.tideHandle);
     await _restoreSafety();
   }
 
