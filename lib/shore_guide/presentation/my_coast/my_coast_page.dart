@@ -608,7 +608,7 @@ class _MedalShelf extends StatelessWidget {
       _MedalGoal(
         unlockedAsset: CoastinAssetRegistry.summerMedal,
         lockedAsset: CoastinAssetRegistry.summerMedalLocked,
-        title: 'Summer Lover',
+        title: 'Sun Keeper',
         currentCount: postCount,
         goalCount: 5,
         unitLabel: 'posts',

@@ -74,7 +74,7 @@ class SeededSeaBuddyDeck {
       requestPersona: SeededShoreMomentDeck.shorelinePeople[24],
       placeRibbon: '23 - Australia',
       requestLine:
-          'Breeze by shore, collect seaside romance today. Long coastline, slow down for coastal tiny joys.',
+          'Breeze by shore, collect soft light today. Long coastline, slow down for coastal tiny joys.',
       isInitiallyFollowed: false,
     ),
     SeaBuddyRequest(
@@ -90,7 +90,7 @@ class SeededSeaBuddyDeck {
       requestPersona: SeededShoreMomentDeck.shorelinePeople[36],
       placeRibbon: 'Beacon Steps',
       requestLine:
-          'Your sunwear post matched my saved route. Let’s trade shoreline ideas.',
+          'Your sunwear post matched my saved route. I saved the same shoreline notes.',
       isInitiallyFollowed: true,
     ),
     SeaBuddyRequest(

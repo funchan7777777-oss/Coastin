@@ -434,7 +434,7 @@ class _PublicMedalShelf extends StatelessWidget {
 
   static const _medals = [
     (CoastinAssetRegistry.medalNewbie, 'Newbie', '1/3 posts'),
-    (CoastinAssetRegistry.summerMedal, 'Summer Lover', '1/5 posts'),
+    (CoastinAssetRegistry.summerMedal, 'Sun Keeper', '1/5 posts'),
     (CoastinAssetRegistry.medalSurfer, 'Pro Surfer', '1/10 videos'),
     (CoastinAssetRegistry.medalPhotographer, 'Photographer', '1/20 photos'),
   ];
