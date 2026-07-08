@@ -293,6 +293,19 @@ class SeededShoreMomentDeck {
   static final List<ShoreVideoMoment> shoreVideoMoments = List.unmodifiable(
     List.generate(_momentVideoAssets.length, (index) {
       final replyStart = (index * 3 + 8) % shorelinePeople.length;
+      final replyDrifts = List.generate(_replyCounts[index], (replyIndex) {
+        final persona =
+            shorelinePeople[(replyStart + replyIndex * 5) %
+                shorelinePeople.length];
+        return ShoreReplyDrift(
+          replyMarker: 'reply-${index + 1}-$replyIndex',
+          replyAuthor: persona,
+          tideMinute:
+              _replyMinutes[(index + replyIndex) % _replyMinutes.length],
+          replyText: _replyLines[(index * 2 + replyIndex) % _replyLines.length],
+          hasFreshSignal: replyIndex == 0 || (index + replyIndex) % 4 == 0,
+        );
+      });
       return ShoreVideoMoment(
         momentKey: 'shore-drift-${index + 1}',
         creatorPersona: shorelinePeople[index],
@@ -301,24 +314,11 @@ class SeededShoreMomentDeck {
         clockRibbon: _clockRibbons[index],
         captionTide: _captionTides[index],
         likeTally: _likeTallies[index],
-        replyTally: _replyTallies[index],
-        infoTally: _infoTallies[index],
+        replyTally: replyDrifts.length,
+        infoTally: 0,
         isInitiallyFollowed: index % 3 == 0,
         isInitiallyLiked: index == 1 || index == 6 || index == 11,
-        replyDrifts: List.generate(5, (replyIndex) {
-          final persona =
-              shorelinePeople[(replyStart + replyIndex * 5) %
-                  shorelinePeople.length];
-          return ShoreReplyDrift(
-            replyMarker: 'reply-${index + 1}-$replyIndex',
-            replyAuthor: persona,
-            tideMinute:
-                _replyMinutes[(index + replyIndex) % _replyMinutes.length],
-            replyText:
-                _replyLines[(index * 2 + replyIndex) % _replyLines.length],
-            hasFreshSignal: replyIndex == 0 || (index + replyIndex) % 4 == 0,
-          );
-        }),
+        replyDrifts: replyDrifts,
       );
     }),
   );
@@ -342,7 +342,7 @@ class SeededShoreMomentDeck {
   ];
 
   static const List<String> _placeRibbons = [
-    '23 - Australia',
+    'Coral Cove - Australia',
     'Palm Rail - Maui',
     'Cove Lane - Cebu',
     'Blue Steps - Lagos',
@@ -360,25 +360,25 @@ class SeededShoreMomentDeck {
   ];
 
   static const List<String> _clockRibbons = [
-    '12:24',
-    '08:45',
-    '16:10',
-    '10:36',
-    '07:28',
-    '11:52',
-    '15:05',
-    '18:14',
-    '09:09',
-    '13:31',
-    '17:42',
-    '14:06',
-    '19:18',
-    '12:03',
-    '18:55',
+    '12 min ago',
+    '28 min ago',
+    '43 min ago',
+    '1h ago',
+    '1h ago',
+    '2h ago',
+    '2h ago',
+    '3h ago',
+    '3h ago',
+    '4h ago',
+    '5h ago',
+    '5h ago',
+    '6h ago',
+    '7h ago',
+    '8h ago',
   ];
 
   static const List<String> _captionTides = [
-    'Ice players, forever passionate. Repeat skating drills, progress lies in persistence.',
+    'Clear water near the tender lane, so we kept the swim inside the marked cove.',
     'Soft palms, salt air, and one quiet laugh before the shore gets crowded.',
     'The best view was the tiny silver line where the rail met the afternoon sea.',
     'Blue water has its own pace when every paddle waits for the next small lift.',
@@ -396,57 +396,39 @@ class SeededShoreMomentDeck {
   ];
 
   static const List<int> _likeTallies = [
-    1290,
-    884,
-    642,
-    1712,
-    940,
-    773,
-    1208,
-    999,
-    531,
-    1471,
-    808,
-    1134,
-    1510,
-    932,
-    690,
+    42,
+    37,
+    28,
+    51,
+    33,
+    24,
+    46,
+    18,
+    21,
+    39,
+    26,
+    31,
+    44,
+    35,
+    19,
   ];
 
-  static const List<int> _replyTallies = [
-    332,
-    245,
-    188,
-    419,
-    267,
-    205,
-    390,
-    304,
-    141,
-    356,
-    232,
-    315,
-    377,
-    260,
-    174,
-  ];
-
-  static const List<int> _infoTallies = [
-    93,
-    76,
-    52,
-    118,
-    67,
-    61,
-    85,
-    74,
-    43,
-    103,
-    58,
-    88,
-    107,
-    69,
-    47,
+  static const List<int> _replyCounts = [
+    4,
+    3,
+    5,
+    2,
+    4,
+    3,
+    6,
+    2,
+    3,
+    4,
+    2,
+    5,
+    3,
+    4,
+    2,
   ];
 
   static const List<String> _replyMinutes = [
@@ -460,7 +442,7 @@ class SeededShoreMomentDeck {
   ];
 
   static const List<String> _replyLines = [
-    'This hand brewed coffee is very fragrant and has a faint jasmine aroma.',
+    'That cove line looks calm enough for a slow swim.',
     'The light at that rail is unreal when the wind drops.',
     'Saved this spot for my next slow walk.',
     'That shade line looks perfect for late morning.',

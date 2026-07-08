@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart' show TextInputAction;
 
 import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
@@ -17,6 +18,7 @@ class ReefCommentSheet extends StatefulWidget {
     required this.isOpen,
     required this.commentDrifts,
     required this.viewerPersona,
+    required this.bottomDockClearance,
     required this.onClose,
     required this.onChanged,
     required this.onVisibleCountChanged,
@@ -25,6 +27,7 @@ class ReefCommentSheet extends StatefulWidget {
   final bool isOpen;
   final List<ShoreReplyDrift> commentDrifts;
   final ShorelinePersona viewerPersona;
+  final double bottomDockClearance;
   final VoidCallback onClose;
   final VoidCallback onChanged;
   final ValueChanged<int> onVisibleCountChanged;
@@ -64,7 +67,10 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final sheetHeight = MediaQuery.sizeOf(context).height * 0.54;
+    final viewportHeight = MediaQuery.sizeOf(context).height;
+    final sheetHeight = viewportHeight * 0.52;
+    final inputBottom = widget.bottomDockClearance + 10;
+    const inputHeight = 46.0;
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 260),
@@ -76,6 +82,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
       child: IgnorePointer(
         ignoring: !widget.isOpen,
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
             Positioned.fill(
               child: Image.asset(
@@ -85,92 +92,74 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
               ),
             ),
             Positioned(
-              top: 8,
-              right: 16,
+              top: 38,
+              right: 38,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: widget.onClose,
-                child: const SizedBox(
-                  width: 34,
-                  height: 34,
-                  child: Icon(
-                    CupertinoIcons.xmark_circle_fill,
-                    color: Color(0xFFFFFFFF),
-                    size: 28,
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFFFFFFF).withValues(alpha: 0.96),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF095B81).withValues(alpha: 0.24),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    CupertinoIcons.xmark,
+                    color: Color(0xFF2F68D3),
+                    size: 20,
                   ),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(22, 34, 22, 22),
+              padding: const EdgeInsets.fromLTRB(34, 54, 78, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
                     CoastinAssetRegistry.commentSectionWordmark,
-                    width: 178,
-                    height: 24,
+                    width: 150,
+                    height: 19,
                     fit: BoxFit.contain,
                     filterQuality: FilterQuality.high,
                   ),
-                  const SizedBox(height: 18),
-                  Expanded(
-                    child: ListView.separated(
-                      padding: EdgeInsets.zero,
-                      itemCount: _visibleComments.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 16),
-                      itemBuilder: (context, index) {
-                        return _ReefCommentRow(
-                          commentDrift: _visibleComments[index],
-                          onPersonaTap: () =>
-                              _openPersona(_visibleComments[index]),
-                          onReportTap: () =>
-                              _reportComment(_visibleComments[index]),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CupertinoTextField(
-                          controller: _commentController,
-                          placeholder: 'Please enter...',
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 13,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFFFFFFF,
-                            ).withValues(alpha: 0.94),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          style: const TextStyle(
-                            color: TidewashPalette.inkBlue,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: _releaseComment,
-                        child: SizedBox(
-                          width: 84,
-                          height: 44,
-                          child: Image.asset(
-                            CoastinAssetRegistry.commentButtonPlate,
-                            fit: BoxFit.contain,
-                            filterQuality: FilterQuality.high,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
+              ),
+            ),
+            Positioned(
+              left: 36,
+              right: 36,
+              top: 112,
+              bottom: inputBottom + inputHeight + 16,
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                itemCount: _visibleComments.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  return _ReefCommentRow(
+                    commentDrift: _visibleComments[index],
+                    onPersonaTap: () => _openPersona(_visibleComments[index]),
+                    onReportTap: () => _reportComment(_visibleComments[index]),
+                  );
+                },
+              ),
+            ),
+            Positioned(
+              left: 40,
+              right: 40,
+              bottom: inputBottom,
+              height: inputHeight,
+              child: _CommentComposer(
+                controller: _commentController,
+                onSubmit: _releaseComment,
               ),
             ),
           ],
@@ -228,7 +217,7 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
           persona: commentDrift.replyAuthor,
-          placeRibbon: '23 - Australia',
+          placeRibbon: 'Shared shore note',
         ),
       ),
     );
@@ -252,6 +241,69 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
     });
     widget.onVisibleCountChanged(_visibleComments.length);
     widget.onChanged();
+  }
+}
+
+class _CommentComposer extends StatelessWidget {
+  const _CommentComposer({required this.controller, required this.onSubmit});
+
+  final TextEditingController controller;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF).withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(23),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0A6F84).withValues(alpha: 0.14),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: CupertinoTextField(
+              controller: controller,
+              placeholder: 'Please enter...',
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+              decoration: const BoxDecoration(color: Color(0x00000000)),
+              style: const TextStyle(
+                color: TidewashPalette.inkBlue,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+              placeholderStyle: TextStyle(
+                color: TidewashPalette.harborSlate.withValues(alpha: 0.42),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => onSubmit(),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onSubmit,
+            child: SizedBox(
+              width: 72,
+              height: 44,
+              child: Image.asset(
+                CoastinAssetRegistry.commentButtonPlate,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+        ],
+      ),
+    );
   }
 }
 
@@ -285,8 +337,8 @@ class _ReefCommentRow extends StatelessWidget {
               ClipOval(
                 child: Image.asset(
                   commentDrift.replyAuthor.avatarAsset,
-                  width: 48,
-                  height: 48,
+                  width: 42,
+                  height: 42,
                   fit: BoxFit.cover,
                   filterQuality: FilterQuality.high,
                 ),
@@ -294,7 +346,7 @@ class _ReefCommentRow extends StatelessWidget {
               Positioned(
                 right: -3,
                 bottom: -2,
-                child: Image.asset(genderGlyph, width: 16, height: 16),
+                child: Image.asset(genderGlyph, width: 14, height: 14),
               ),
             ],
           ),
@@ -325,40 +377,36 @@ class _ReefCommentRow extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     commentDrift.tideMinute,
-                    style: const TextStyle(
-                      color: TidewashPalette.harborSlate,
+                    style: TextStyle(
+                      color: TidewashPalette.harborSlate.withValues(
+                        alpha: 0.64,
+                      ),
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (commentDrift.hasFreshSignal) ...[
-                    const SizedBox(width: 6),
-                    Image.asset(
-                      CoastinAssetRegistry.aquaInfoGlyph,
-                      width: 13,
-                      height: 13,
-                      fit: BoxFit.contain,
-                    ),
-                  ],
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 10),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: onReportTap,
-                    child: const Icon(
-                      CupertinoIcons.exclamationmark_circle,
-                      color: Color(0xFF41C7D2),
-                      size: 17,
+                    child: Image.asset(
+                      CoastinAssetRegistry.aquaInfoGlyph,
+                      width: 14,
+                      height: 14,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 5),
               Text(
                 commentDrift.replyText,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: TidewashPalette.inkBlue,
-                  fontSize: 14,
-                  height: 1.32,
+                  fontSize: 13,
+                  height: 1.24,
                   fontWeight: FontWeight.w600,
                 ),
               ),

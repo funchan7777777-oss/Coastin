@@ -144,6 +144,7 @@ class _ShareMomentsPageState extends State<ShareMomentsPage> {
                 isOpen: _commentsOpen,
                 commentDrifts: activeMoment.replyDrifts,
                 viewerPersona: SeededShoreMomentDeck.shorelinePeople[36],
+                bottomDockClearance: widget.bottomDockClearance,
                 onClose: () => setState(() => _commentsOpen = false),
                 onChanged: _restoreSafety,
                 onVisibleCountChanged: (count) {
