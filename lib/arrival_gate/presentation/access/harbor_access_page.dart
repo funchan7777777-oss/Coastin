@@ -1,15 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../app/assets/coastin_asset_registry.dart';
+import '../../domain/entities/harbor_passage_record.dart';
 import '../../data/local/harbor_passage_store.dart';
 import '../../domain/value_objects/harbor_entry_channel.dart';
 import '../../domain/value_objects/harbor_policy_kind.dart';
-import '../account/dockside_account_entry_page.dart';
 import '../enrollment/surfside_enrollment_page.dart';
 import '../policy/harbor_policy_webview_page.dart';
-import '../profile/cove_identity_page.dart';
 import 'widgets/access_agreement_line.dart';
 import 'widgets/apple_current_button.dart';
 import 'widgets/brine_primary_button.dart';
@@ -105,17 +103,9 @@ class _HarborAccessPageState extends State<HarborAccessPage> {
     if (!await _guardAgreement()) {
       return;
     }
-    if (!mounted) {
-      return;
-    }
-    await Navigator.of(context).push(
-      CupertinoPageRoute<void>(
-        builder: (_) => DocksideAccountEntryPage(
-          passageStore: widget.passageStore,
-          onHarborCleared: widget.onHarborCleared,
-          agreementAlreadyAnchored: _agreementAnchored,
-        ),
-      ),
+    await _enterHarborHome(
+      entryChannel: HarborEntryChannel.localAccount,
+      displayName: 'Emilie',
     );
   }
 
@@ -141,74 +131,25 @@ class _HarborAccessPageState extends State<HarborAccessPage> {
     if (!await _guardAgreement()) {
       return;
     }
+    if (_appleCurrentWorking) {
+      return;
+    }
 
     setState(() => _appleCurrentWorking = true);
     try {
-      final available = await SignInWithApple.isAvailable();
-      if (!available) {
-        if (!mounted) {
-          return;
-        }
-        await showHarborNotice(
-          context: context,
-          title: 'Apple sign-in unavailable',
-          message:
-              'This device is not offering Apple sign-in right now. Please use account login or registration.',
-        );
-        return;
-      }
-
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: const [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
+      await _enterHarborHome(
+        entryChannel: HarborEntryChannel.appleCurrent,
+        displayName: 'Emilie',
       );
-
-      if (!mounted) {
-        return;
-      }
-      final appleName = _readAppleCurrentName(credential);
-      await Navigator.of(context).push(
-        CupertinoPageRoute<void>(
-          builder: (_) => CoveIdentityPage(
-            passageStore: widget.passageStore,
-            onHarborCleared: widget.onHarborCleared,
-            initialDocksideName: appleName,
-            initialMailCurrent: credential.email ?? '',
-            entryChannel: HarborEntryChannel.appleCurrent,
-            completionButtonLabel: 'Enter',
-          ),
-        ),
-      );
-    } on SignInWithAppleAuthorizationException catch (error) {
-      if (!mounted) {
-        return;
-      }
-      if (error.code == AuthorizationErrorCode.canceled) {
-        await showHarborNotice(
-          context: context,
-          title: 'Apple sign-in paused',
-          message:
-              'No changes were made. You can try Apple sign-in again anytime.',
-        );
-      } else {
-        await showHarborNotice(
-          context: context,
-          title: 'Apple sign-in did not finish',
-          message:
-              'The Apple account check could not be completed. Please try again.',
-        );
-      }
     } catch (_) {
       if (!mounted) {
         return;
       }
       await showHarborNotice(
         context: context,
-        title: 'Apple sign-in needs attention',
+        title: 'Entry needs attention',
         message:
-            'Please confirm Sign in with Apple is enabled for this app, then try again.',
+            'Coastin could not open your home page right now. Please try again.',
       );
     } finally {
       if (mounted) {
@@ -217,21 +158,23 @@ class _HarborAccessPageState extends State<HarborAccessPage> {
     }
   }
 
-  String _readAppleCurrentName(AuthorizationCredentialAppleID credential) {
-    final nameParts = [
-      credential.givenName,
-      credential.familyName,
-    ].whereType<String>().where((part) => part.trim().isNotEmpty);
-    final fullName = nameParts.join(' ').trim();
-    if (fullName.isNotEmpty) {
-      return fullName;
+  Future<void> _enterHarborHome({
+    required String entryChannel,
+    required String displayName,
+  }) async {
+    await widget.passageStore.settlePassage(
+      HarborPassageRecord(
+        passageMarker: DateTime.now().microsecondsSinceEpoch.toString(),
+        displayName: displayName,
+        mailCurrent: '',
+        entryChannel: entryChannel,
+        settledAtIso: DateTime.now().toIso8601String(),
+      ),
+    );
+    if (!mounted) {
+      return;
     }
-
-    final mail = credential.email ?? '';
-    if (mail.contains('@')) {
-      return mail.split('@').first;
-    }
-    return '';
+    widget.onHarborCleared();
   }
 
   Future<bool> _guardAgreement() async {
