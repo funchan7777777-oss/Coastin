@@ -32,6 +32,10 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     for (final post in SeededCoastalFeedDeck.coastalDispatches)
       post.dispatchKey: post.isInitiallyLoved,
   };
+  final Map<String, int> _replyCounts = {
+    for (final post in SeededCoastalFeedDeck.coastalDispatches)
+      post.dispatchKey: post.replyDrifts.length,
+  };
   ShoreSafetySnapshot _safetySnapshot = const ShoreSafetySnapshot(
     blockedHandles: {},
     reportedContentIds: {},
@@ -111,6 +115,9 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
                           isFollowed: _safetySnapshot.isFollowing(
                             post.authorHarbor.tideHandle,
                           ),
+                          replyCount:
+                              _replyCounts[post.dispatchKey] ??
+                              post.replyDrifts.length,
                           onOpen: () => _openPostDetails(post),
                           onLoveTap: () => _toggleLove(post),
                           onFollowTap: () => _toggleFollow(post),
@@ -173,6 +180,9 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
             setState(() => _lovedDispatches[post.dispatchKey] = isLoved);
           },
           onFollowChanged: (_) => _restoreSafety(),
+          onReplyCountChanged: (replyCount) {
+            setState(() => _replyCounts[post.dispatchKey] = replyCount);
+          },
         ),
       ),
     );
@@ -210,55 +220,15 @@ class _CoastalFeedPageState extends State<CoastalFeedPage> {
     setState(() => _safetySnapshot = snapshot);
   }
 
-  void _showPostHarborMenu(CoastalPostDispatch post) {
-    showCupertinoModalPopup<void>(
+  Future<void> _showPostHarborMenu(CoastalPostDispatch post) async {
+    await ShoreSafetyReef.showGuard(
       context: context,
-      builder: (context) {
-        return CupertinoActionSheet(
-          title: Text(post.authorHarbor.displayHarborName),
-          message: Text(post.authorHarbor.coastalStamp),
-          actions: [
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _openPostDetails(post);
-              },
-              child: const Text('View details'),
-            ),
-            CupertinoActionSheetAction(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _toggleFollow(post);
-              },
-              child: Text(
-                _safetySnapshot.isFollowing(post.authorHarbor.tideHandle)
-                    ? 'Unfollow'
-                    : 'Follow creator',
-              ),
-            ),
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await ShoreSafetyReef.showGuard(
-                  context: this.context,
-                  contentId: 'post:${post.dispatchKey}',
-                  contentKind: ShoreSafetyContentKind.post,
-                  ownerName: post.authorHarbor.displayHarborName,
-                  ownerHandle: post.authorHarbor.tideHandle,
-                );
-                await _restoreSafety();
-              },
-              child: const Text('Report post'),
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-        );
-      },
+      contentId: 'post:${post.dispatchKey}',
+      contentKind: ShoreSafetyContentKind.post,
+      ownerName: post.authorHarbor.displayHarborName,
+      ownerHandle: post.authorHarbor.tideHandle,
     );
+    await _restoreSafety();
   }
 }
 

@@ -4,6 +4,7 @@ import '../../../../app/assets/coastin_asset_registry.dart';
 import '../../../../app/theme/tidewash_palette.dart';
 import '../../../domain/entities/feed/coastal_post_dispatch.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
+import 'coastal_post_meta.dart';
 
 class CoastalPostCard extends StatelessWidget {
   const CoastalPostCard({
@@ -11,6 +12,7 @@ class CoastalPostCard extends StatelessWidget {
     required this.postDispatch,
     required this.isLoved,
     required this.isFollowed,
+    required this.replyCount,
     required this.onOpen,
     required this.onLoveTap,
     required this.onFollowTap,
@@ -21,6 +23,7 @@ class CoastalPostCard extends StatelessWidget {
   final CoastalPostDispatch postDispatch;
   final bool isLoved;
   final bool isFollowed;
+  final int replyCount;
   final VoidCallback onOpen;
   final VoidCallback onLoveTap;
   final VoidCallback onFollowTap;
@@ -29,13 +32,7 @@ class CoastalPostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final adjustedHeart =
-        postDispatch.heartTally +
-        (isLoved == postDispatch.isInitiallyLoved
-            ? 0
-            : isLoved
-            ? 1
-            : -1);
+    final adjustedHeart = postDispatch.heartTally + (isLoved ? 1 : 0);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -64,30 +61,14 @@ class CoastalPostCard extends StatelessWidget {
             const SizedBox(height: 12),
             _PostFrameGrid(frameAssets: postDispatch.frameAssets),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                _TopicPill(topicLabel: postDispatch.topicLabel),
-                const Spacer(),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onLoveTap,
-                  child: Image.asset(
-                    isLoved
-                        ? CoastinAssetRegistry.feedHeartFilled
-                        : CoastinAssetRegistry.feedHeartOutline,
-                    width: 24,
-                    height: 24,
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
-                  ),
-                ),
-              ],
-            ),
+            _TopicPill(topicLabel: postDispatch.topicLabel),
             const SizedBox(height: 10),
             _ActionCountRow(
+              isLoved: isLoved,
               heartCount: adjustedHeart,
-              replyCount: postDispatch.replyTally,
+              replyCount: replyCount,
               relayCount: postDispatch.relayTally,
+              onLoveTap: onLoveTap,
               onMoreTap: onMoreTap,
             ),
           ],
@@ -188,7 +169,7 @@ class _AuthorRow extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      postDispatch.placeRibbon,
+                      coastalPostOriginLine(postDispatch),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -292,15 +273,19 @@ class _TopicPill extends StatelessWidget {
 
 class _ActionCountRow extends StatelessWidget {
   const _ActionCountRow({
+    required this.isLoved,
     required this.heartCount,
     required this.replyCount,
     required this.relayCount,
+    required this.onLoveTap,
     required this.onMoreTap,
   });
 
+  final bool isLoved;
   final int heartCount;
   final int replyCount;
   final int relayCount;
+  final VoidCallback onLoveTap;
   final VoidCallback onMoreTap;
 
   @override
@@ -308,8 +293,11 @@ class _ActionCountRow extends StatelessWidget {
     return Row(
       children: [
         _FeedActionCount(
-          asset: CoastinAssetRegistry.feedHeartOutline,
+          asset: isLoved
+              ? CoastinAssetRegistry.feedHeartFilled
+              : CoastinAssetRegistry.feedHeartOutline,
           count: heartCount,
+          onTap: onLoveTap,
         ),
         const SizedBox(width: 26),
         _FeedActionCount(
@@ -339,33 +327,42 @@ class _ActionCountRow extends StatelessWidget {
 }
 
 class _FeedActionCount extends StatelessWidget {
-  const _FeedActionCount({required this.asset, required this.count});
+  const _FeedActionCount({
+    required this.asset,
+    required this.count,
+    this.onTap,
+  });
 
   final String asset;
   final int count;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset(
-          asset,
-          width: 20,
-          height: 20,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
-        ),
-        const SizedBox(width: 5),
-        Text(
-          '$count',
-          style: const TextStyle(
-            color: TidewashPalette.harborSlate,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            asset,
+            width: 20,
+            height: 20,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
           ),
-        ),
-      ],
+          const SizedBox(width: 5),
+          Text(
+            '$count',
+            style: const TextStyle(
+              color: TidewashPalette.harborSlate,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

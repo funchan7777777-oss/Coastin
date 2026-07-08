@@ -11,6 +11,7 @@ import '../../../domain/value_objects/shore_profile_current.dart';
 import '../../people/shore_persona_detail_page.dart';
 import '../../safety/shore_safety_action.dart';
 import '../../safety/shore_safety_reef.dart';
+import '../widgets/coastal_post_meta.dart';
 
 class CoastalPostDetailsPage extends StatefulWidget {
   const CoastalPostDetailsPage({
@@ -20,6 +21,7 @@ class CoastalPostDetailsPage extends StatefulWidget {
     required this.isFollowed,
     required this.onLoveChanged,
     required this.onFollowChanged,
+    required this.onReplyCountChanged,
   });
 
   final CoastalPostDispatch postDispatch;
@@ -27,6 +29,7 @@ class CoastalPostDetailsPage extends StatefulWidget {
   final bool isFollowed;
   final ValueChanged<bool> onLoveChanged;
   final ValueChanged<bool> onFollowChanged;
+  final ValueChanged<int> onReplyCountChanged;
 
   @override
   State<CoastalPostDetailsPage> createState() => _CoastalPostDetailsPageState();
@@ -106,8 +109,8 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
                         const SizedBox(height: 12),
                         _DetailActionRow(
                           isLoved: _isLoved,
-                          heartTally: post.heartTally,
-                          replyTally: post.replyTally,
+                          heartCount: post.heartTally + (_isLoved ? 1 : 0),
+                          replyCount: _visibleReplies.length,
                           relayTally: post.relayTally,
                           topicLabel: post.topicLabel,
                           onLoveTap: _toggleLove,
@@ -184,6 +187,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
       );
       _replyController.clear();
     });
+    widget.onReplyCountChanged(_visibleReplies.length);
     _noticeStore.recordCommentNotice(
       actorHandle: widget.postDispatch.authorHarbor.tideHandle,
       noticeLine: 'Your comment was added under this Coastin post.',
@@ -246,6 +250,7 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
           ),
         );
     });
+    widget.onReplyCountChanged(_visibleReplies.length);
   }
 
   void _showPostInfo() {
@@ -454,7 +459,7 @@ class _DetailAuthorRow extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      postDispatch.placeRibbon,
+                      coastalPostOriginLine(postDispatch),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -523,16 +528,16 @@ class _DetailFrameStrip extends StatelessWidget {
 class _DetailActionRow extends StatelessWidget {
   const _DetailActionRow({
     required this.isLoved,
-    required this.heartTally,
-    required this.replyTally,
+    required this.heartCount,
+    required this.replyCount,
     required this.relayTally,
     required this.topicLabel,
     required this.onLoveTap,
   });
 
   final bool isLoved;
-  final int heartTally;
-  final int replyTally;
+  final int heartCount;
+  final int replyCount;
   final int relayTally;
   final String topicLabel;
   final VoidCallback onLoveTap;
@@ -561,13 +566,13 @@ class _DetailActionRow extends StatelessWidget {
           asset: isLoved
               ? CoastinAssetRegistry.feedHeartFilled
               : CoastinAssetRegistry.feedHeartOutline,
-          count: heartTally,
+          count: heartCount,
           onTap: onLoveTap,
         ),
         const SizedBox(width: 22),
         _DetailCountGlyph(
           asset: CoastinAssetRegistry.feedCommentGlyph,
-          count: replyTally,
+          count: replyCount,
         ),
         const SizedBox(width: 22),
         _DetailCountGlyph(
