@@ -188,6 +188,7 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
       builder: (context) {
         return CupertinoActionSheet(
           title: const Text('Profile photo'),
+          message: const Text('Update the image shown on your Coastin profile.'),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () => Navigator.of(context).pop(ImageSource.camera),
@@ -230,7 +231,7 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
             content: const Padding(
               padding: EdgeInsets.only(top: 8),
               child: Text(
-                'Please allow camera or photo library access, then choose a profile image again.',
+                'Allow camera or photo library access, then choose your profile image again.',
               ),
             ),
             actions: [
@@ -272,7 +273,7 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
     if (name.isEmpty) {
       await _showEditNotice(
         title: 'Nickname needed',
-        message: 'Please enter a Coastin nickname before saving.',
+        message: 'Add the Coastin name other members will see before saving.',
       );
       return;
     }
@@ -443,7 +444,7 @@ class _EditField extends StatelessWidget {
         const SizedBox(height: 10),
         CupertinoTextField(
           controller: controller,
-          placeholder: 'Please enter...',
+          placeholder: 'Your coast name',
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           suffix: trailingAsset == null
               ? null
@@ -538,7 +539,7 @@ class _SignatureField extends StatelessWidget {
         const SizedBox(height: 10),
         CupertinoTextField(
           controller: controller,
-          placeholder: 'Please enter...',
+          placeholder: 'Update your shoreline note',
           minLines: 4,
           maxLines: 5,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),

@@ -83,15 +83,15 @@ const Map<String, String> _countryByMarker = {
   'South Africa': 'South Africa',
   'Thailand': 'Thailand',
   'United States': 'United States',
-  'Venice': 'United States',
+  'Venice': 'Italy',
 };
 
 String _fallbackCountryForPersona(ShorelinePersona persona) {
-  final seed = persona.tideHandle.codeUnits.fold<int>(
+  final shoreHandleScore = persona.tideHandle.codeUnits.fold<int>(
     0,
     (total, unit) => total + unit,
   );
-  return _fallbackCountries[seed % _fallbackCountries.length];
+  return _fallbackCountries[shoreHandleScore % _fallbackCountries.length];
 }
 
 const List<String> _fallbackCountries = [
@@ -105,6 +105,7 @@ const List<String> _fallbackCountries = [
   'China',
   'Thailand',
   'Greece',
+  'Italy',
   'France',
   'South Africa',
 ];

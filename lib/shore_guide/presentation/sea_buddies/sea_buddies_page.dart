@@ -323,7 +323,7 @@ class _SeaSearchField extends StatelessWidget {
     return CupertinoTextField(
       controller: controller,
       onChanged: onChanged,
-      placeholder: 'Search for the specified person ...',
+      placeholder: 'Search Coastin friends',
       prefix: const Padding(
         padding: EdgeInsets.only(left: 16),
         child: Icon(CupertinoIcons.search, color: Color(0xFFB8C7C6), size: 20),

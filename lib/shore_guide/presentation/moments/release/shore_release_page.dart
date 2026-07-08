@@ -111,7 +111,7 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
                         const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'Copywriting',
+                            'Shore note',
                             style: TextStyle(
                               color: TidewashPalette.harborSlate,
                               fontSize: 15,
@@ -122,7 +122,7 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
                         const SizedBox(height: 12),
                         CupertinoTextField(
                           controller: _copyController,
-                          placeholder: 'Please enter...',
+                          placeholder: 'Add a calm caption for this shoreline moment',
                           minLines: 4,
                           maxLines: 5,
                           padding: const EdgeInsets.symmetric(
@@ -169,7 +169,7 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
       _showReleaseNote(
         title: 'Media was not added',
         message:
-            'Please allow camera or photo library access, then choose a shoreline file again.',
+            'Allow camera or photo library access, then choose a shoreline file again.',
       );
       return;
     }
@@ -185,12 +185,12 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
       builder: (sheetContext) {
         return CupertinoActionSheet(
           title: const Text('Shoreline video'),
-          message: const Text('Choose a local video or record one now.'),
+          message: const Text('Pick a library video or record a new shoreline clip.'),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () =>
                   Navigator.of(sheetContext).pop(ImageSource.gallery),
-              child: const Text('Choose from Album'),
+              child: const Text('Choose from Library'),
             ),
             CupertinoActionSheetAction(
               onPressed: () =>
@@ -220,12 +220,12 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
       builder: (sheetContext) {
         return CupertinoActionSheet(
           title: const Text('Shoreline picture'),
-          message: const Text('Choose a local picture or take one now.'),
+          message: const Text('Pick a library image or take a new shoreline photo.'),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () =>
                   Navigator.of(sheetContext).pop(ImageSource.gallery),
-              child: const Text('Choose from Album'),
+              child: const Text('Choose from Library'),
             ),
             CupertinoActionSheetAction(
               onPressed: () =>
@@ -251,7 +251,7 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
     if (_pickedHarborFile == null || caption.isEmpty) {
       _showReleaseNote(
         title: 'Shore draft needs more',
-        message: 'Please add a video or picture and a short caption first.',
+        message: 'Add shoreline media and a short caption before sharing.',
       );
       return;
     }

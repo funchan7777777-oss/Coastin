@@ -300,7 +300,7 @@ class ShoreMomentHarborCatalog {
             shorelinePeople[(commentStart + commentIndex * 5) %
                 shorelinePeople.length];
         return ShoreCommentTideMark(
-          commentMarker: 'comment-${index + 1}-$commentIndex',
+          commentMarker: 'clip-tide-note-${index + 1}-$commentIndex',
           commentHarbor: persona,
           commentClock:
               _commentClockMarks[(index + commentIndex) %
@@ -346,21 +346,21 @@ class ShoreMomentHarborCatalog {
   ];
 
   static const List<String> _localApproachRibbons = [
-    'Coral Cove - Australia',
-    'Palm Rail - Maui',
-    'Cove Lane - Cebu',
-    'Blue Steps - Lagos',
-    'Morning Foam - Bali',
-    'Harbor Cart - Lisbon',
-    'Lagoon Chair - Aruba',
-    'Pier Turn - Sanya',
-    'Outer Sand - Phuket',
-    'Boardwalk - Miami',
-    'Seaglass Cafe - Crete',
-    'Shore Skate - Venice',
-    'Marina Glow - Nice',
-    'Reef Picnic - Kona',
-    'Dune Trail - Durban',
+    'Australia',
+    'United States',
+    'Philippines',
+    'Nigeria',
+    'Indonesia',
+    'Portugal',
+    'Aruba',
+    'China',
+    'Thailand',
+    'United States',
+    'Greece',
+    'Italy',
+    'France',
+    'United States',
+    'South Africa',
   ];
 
   static const List<String> _postedAtRibbons = [

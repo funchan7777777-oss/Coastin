@@ -1,5 +1,6 @@
 import '../../domain/entities/buddies/sea_buddy_harbor_thread.dart';
 import '../../domain/entities/shoreline_persona.dart';
+import '../../domain/value_objects/coastin_country_label.dart';
 import 'buddies/sea_buddy_harbor_catalog.dart';
 import 'shore_moment_harbor_catalog.dart';
 
@@ -37,9 +38,7 @@ class ShorePersonaCatalog {
     return SeaBuddyHarborThread(
       harborThreadMarker: 'harbor-${persona.tideHandle}',
       buddyHarbor: persona,
-      localApproachRibbon: persona.profileCurrent.isFeminine
-          ? '23 - Australia'
-          : 'Reef Rail',
+      localApproachRibbon: coastinCountryForPersona(persona),
       lastSignalTime: '',
       lastSignalPreview: '',
       unreadSignalCount: 0,

@@ -143,7 +143,7 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
       builder: (sheetContext) {
         return CupertinoActionSheet(
           title: const Text('Profile photo'),
-          message: const Text('Choose a clear coastal profile image.'),
+          message: const Text('Add a clear photo for your Coastin profile.'),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () =>
@@ -186,7 +186,7 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
         context: context,
         title: 'Photo was not added',
         message:
-            'Please allow camera or photo library access, then choose a profile image again.',
+            'Allow camera or photo library access, then choose your profile image again.',
       );
     }
   }
@@ -222,7 +222,7 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
       await showHarborNotice(
         context: context,
         title: 'Name needed',
-        message: 'Please add the name you want to use inside Coastin.',
+        message: 'Add the name you want other Coastin members to see.',
       );
       return;
     }
@@ -257,7 +257,7 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
         context: context,
         title: 'Profile choice needed',
         message:
-            'Please choose the profile style that fits you before entering.',
+            'Choose the profile style that best fits your shoreline profile.',
       );
       return;
     }
@@ -266,7 +266,7 @@ class _CoveIdentityPageState extends State<CoveIdentityPage> {
     await showPassageLoadingDialog(
       context: context,
       duration: const Duration(milliseconds: 3600),
-      message: 'Setting your Coastin profile...',
+      message: 'Preparing your Coastin profile...',
     );
     await widget.passageStore.settlePassage(
       HarborPassageRecord(
@@ -363,7 +363,7 @@ class _IdentityPanel extends StatelessWidget {
         const SizedBox(height: 24),
         HarborCredentialField(
           berthLabel: 'Nickname',
-          hintCurrent: 'Please enter...',
+          hintCurrent: 'Your coast name',
           tideController: docksideNameController,
           keyboardTrail: TextInputType.name,
           textInputAction: TextInputAction.next,
@@ -592,7 +592,7 @@ class _SignatureBerth extends StatelessWidget {
           keyboardType: TextInputType.multiline,
           textInputAction: TextInputAction.newline,
           padding: const EdgeInsets.fromLTRB(18, 15, 18, 15),
-          placeholder: 'Please enter...',
+          placeholder: 'A short note about your coast routine',
           placeholderStyle: const TextStyle(
             color: Color(0x4D859BA2),
             fontSize: 13,

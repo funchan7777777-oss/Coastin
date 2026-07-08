@@ -253,7 +253,7 @@ class _AccountEntryPanel extends StatelessWidget {
         const SizedBox(height: 24),
         HarborCredentialField(
           berthLabel: 'Email Address',
-          hintCurrent: 'Please enter...',
+          hintCurrent: 'coastin@example.com',
           tideController: mailCurrentController,
           keyboardTrail: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
@@ -263,7 +263,7 @@ class _AccountEntryPanel extends StatelessWidget {
         const SizedBox(height: 17),
         HarborCredentialField(
           berthLabel: 'Password',
-          hintCurrent: 'Please enter...',
+          hintCurrent: 'Your Coastin password',
           tideController: dockKeyController,
           isHiddenCurrent: !dockKeyVisible,
           keyboardTrail: TextInputType.visiblePassword,

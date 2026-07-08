@@ -12,21 +12,21 @@ class CoastalDispatchHarborCatalog {
     CoastalTopicLane(
       tideTopicMarker: 'seaside-games',
       tideTopicLabel: '# Seaside games',
-      harborParticipationLine: '1.2w people participated',
+      harborParticipationLine: '12.4k tide notes',
       topicHarborCardAsset: CoastinAssetRegistry.gamesTopicCard,
       topicWashTint: 0xFFCFF2FF,
     ),
     CoastalTopicLane(
       tideTopicMarker: 'seaside-cuisine',
       tideTopicLabel: '# Seaside cuisine',
-      harborParticipationLine: '1.2w people',
+      harborParticipationLine: '8.9k snack saves',
       topicHarborCardAsset: CoastinAssetRegistry.cuisineTopicCard,
       topicWashTint: 0xFFFFF4D8,
     ),
     CoastalTopicLane(
       tideTopicMarker: 'seaside-dressing',
       tideTopicLabel: '# Seaside dressing',
-      harborParticipationLine: '1.2w people',
+      harborParticipationLine: '9.6k sunwear saves',
       topicHarborCardAsset: CoastinAssetRegistry.dressingTopicCard,
       topicWashTint: 0xFFE7EAFF,
     ),
@@ -34,11 +34,11 @@ class CoastalDispatchHarborCatalog {
 
   static final List<CoastalPostDispatch> coastalDispatches = List.unmodifiable([
     CoastalPostDispatch(
-      shoreDispatchMarker: 'dora-coral-dressing',
+      shoreDispatchMarker: 'sunwear-soft-light-lane',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[22],
       tideTopicMarker: 'seaside-dressing',
       tideTopicLabel: 'Seaside dressing',
-      localApproachRibbon: '23 - Australia',
+      localApproachRibbon: 'Australia',
       postedAtRibbon: '18m ago',
       shorelineCaption:
           'Breeze by shore, collect soft light today. Long coastline, slow down for coastal tiny joys.',
@@ -55,11 +55,11 @@ class CoastalDispatchHarborCatalog {
       commentTideMarks: _commentTideMarks(0, count: 5),
     ),
     CoastalPostDispatch(
-      shoreDispatchMarker: 'milo-paddle-games',
+      shoreDispatchMarker: 'breakfast-paddle-race',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[5],
       tideTopicMarker: 'seaside-games',
       tideTopicLabel: 'Seaside games',
-      localApproachRibbon: 'Palm Cove - Cebu',
+      localApproachRibbon: 'Philippines',
       postedAtRibbon: '42m ago',
       shorelineCaption:
           'Small wave races after breakfast, the easy board wins when everyone laughs first.',
@@ -75,11 +75,11 @@ class CoastalDispatchHarborCatalog {
       commentTideMarks: _commentTideMarks(3, count: 3),
     ),
     CoastalPostDispatch(
-      shoreDispatchMarker: 'vivian-citrus-cuisine',
+      shoreDispatchMarker: 'lagoon-citrus-bench',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[12],
       tideTopicMarker: 'seaside-cuisine',
       tideTopicLabel: 'Seaside cuisine',
-      localApproachRibbon: 'Lagoon Market - Aruba',
+      localApproachRibbon: 'Aruba',
       postedAtRibbon: '1h ago',
       shorelineCaption:
           'Citrus bowl, cold juice, and a bench with just enough shade to stay longer.',
@@ -92,11 +92,11 @@ class CoastalDispatchHarborCatalog {
       commentTideMarks: _commentTideMarks(5, count: 6),
     ),
     CoastalPostDispatch(
-      shoreDispatchMarker: 'sienna-sunwear-loop',
+      shoreDispatchMarker: 'shell-lane-sunwear-loop',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[24],
       tideTopicMarker: 'seaside-dressing',
       tideTopicLabel: 'Seaside dressing',
-      localApproachRibbon: 'Shell Lane - Kona',
+      localApproachRibbon: 'United States',
       postedAtRibbon: '2h ago',
       shorelineCaption:
           'Wide hat, bright wrap, tiny shell earrings. The wind decided the final look.',
@@ -113,11 +113,11 @@ class CoastalDispatchHarborCatalog {
       commentTideMarks: _commentTideMarks(8, count: 4),
     ),
     CoastalPostDispatch(
-      shoreDispatchMarker: 'kai-reef-games',
+      shoreDispatchMarker: 'reef-rail-balance-game',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[19],
       tideTopicMarker: 'seaside-games',
       tideTopicLabel: 'Seaside games',
-      localApproachRibbon: 'Reef Rail - Bali',
+      localApproachRibbon: 'Indonesia',
       postedAtRibbon: '3h ago',
       shorelineCaption:
           'The board game was simple: stay balanced, dodge foam, cheer for every fall.',
@@ -133,11 +133,11 @@ class CoastalDispatchHarborCatalog {
       commentTideMarks: _commentTideMarks(10, count: 2),
     ),
     CoastalPostDispatch(
-      shoreDispatchMarker: 'elena-pier-bites',
+      shoreDispatchMarker: 'pier-table-late-lunch',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[14],
       tideTopicMarker: 'seaside-cuisine',
       tideTopicLabel: 'Seaside cuisine',
-      localApproachRibbon: 'Pier Table - Lisbon',
+      localApproachRibbon: 'Portugal',
       postedAtRibbon: '4h ago',
       shorelineCaption:
           'Late lunch tasted better with salty hair and a chair facing the harbor.',
@@ -150,11 +150,11 @@ class CoastalDispatchHarborCatalog {
       commentTideMarks: _commentTideMarks(13, count: 5),
     ),
     CoastalPostDispatch(
-      shoreDispatchMarker: 'aurora-light-dressing',
+      shoreDispatchMarker: 'bright-cove-linen-walk',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[22],
       tideTopicMarker: 'seaside-dressing',
       tideTopicLabel: 'Seaside dressing',
-      localApproachRibbon: 'Bright Cove - Nice',
+      localApproachRibbon: 'France',
       postedAtRibbon: '5h ago',
       shorelineCaption:
           'Soft linen survived the strongest breeze and still looked made for the walk.',
@@ -171,11 +171,11 @@ class CoastalDispatchHarborCatalog {
       commentTideMarks: _commentTideMarks(16, count: 3),
     ),
     CoastalPostDispatch(
-      shoreDispatchMarker: 'river-sunset-games',
+      shoreDispatchMarker: 'dune-court-shell-teams',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[25],
       tideTopicMarker: 'seaside-games',
       tideTopicLabel: 'Seaside games',
-      localApproachRibbon: 'Dune Court - Durban',
+      localApproachRibbon: 'South Africa',
       postedAtRibbon: 'Yesterday',
       shorelineCaption:
           'Sunset teams picked by shell color. Somehow the blue shell always wins.',
@@ -191,11 +191,11 @@ class CoastalDispatchHarborCatalog {
       commentTideMarks: _commentTideMarks(19, count: 4),
     ),
     CoastalPostDispatch(
-      shoreDispatchMarker: 'nora-salt-bites',
+      shoreDispatchMarker: 'seaglass-window-pastry',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[10],
       tideTopicMarker: 'seaside-cuisine',
       tideTopicLabel: 'Seaside cuisine',
-      localApproachRibbon: 'Seaglass Cafe - Crete',
+      localApproachRibbon: 'Greece',
       postedAtRibbon: 'Yesterday',
       shorelineCaption:
           'A tiny pastry, cold coffee, and the table closest to the open window.',
@@ -208,11 +208,11 @@ class CoastalDispatchHarborCatalog {
       commentTideMarks: _commentTideMarks(22, count: 6),
     ),
     CoastalPostDispatch(
-      shoreDispatchMarker: 'jade-last-shoreline',
+      shoreDispatchMarker: 'beacon-last-light-sandals',
       shorelineKeeper: ShoreMomentHarborCatalog.shorelinePeople[36],
       tideTopicMarker: 'seaside-dressing',
       tideTopicLabel: 'Seaside dressing',
-      localApproachRibbon: 'Beacon Steps - Sanya',
+      localApproachRibbon: 'China',
       postedAtRibbon: '2d ago',
       shorelineCaption:
           'Last light, one more photo, and a final walk before the sandals come off.',
@@ -287,7 +287,7 @@ class CoastalDispatchHarborCatalog {
     return List.generate(count, (index) {
       final people = ShoreMomentHarborCatalog.shorelinePeople;
       return ShoreCommentTideMark(
-        commentMarker: 'feed-commentTideMark-$offset-$index',
+        commentMarker: 'feed-comment-tide-$offset-$index',
         commentHarbor: people[(offset + index * 4) % people.length],
         commentClock: commentClocks[index % commentClocks.length],
         commentText: replies[(offset + index) % replies.length],

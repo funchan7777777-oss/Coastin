@@ -8,6 +8,7 @@ import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../data/local/shore_moment_harbor_catalog.dart';
 import '../../../domain/entities/feed/coastal_post_dispatch.dart';
 import '../../../domain/entities/shore_comment_tide_mark.dart';
+import '../../../domain/value_objects/coastin_country_label.dart';
 import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
 import '../../people/shore_persona_detail_page.dart';
@@ -233,7 +234,9 @@ class _CoastalPostDetailsPageState extends State<CoastalPostDetailsPage> {
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
           persona: commentTideMark.commentHarbor,
-          localApproachRibbon: '23 - Australia',
+          localApproachRibbon: coastinCountryForPersona(
+            commentTideMark.commentHarbor,
+          ),
         ),
       ),
     );
@@ -884,7 +887,7 @@ class _CommentComposer extends StatelessWidget {
         Expanded(
           child: CupertinoTextField(
             controller: controller,
-            placeholder: 'Please enter...',
+            placeholder: 'Add a shoreline comment',
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
             decoration: BoxDecoration(
               color: const Color(0xFFFFFFFF).withValues(alpha: 0.94),

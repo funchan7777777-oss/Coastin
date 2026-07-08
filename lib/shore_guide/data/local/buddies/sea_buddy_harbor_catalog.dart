@@ -9,7 +9,7 @@ class SeaBuddyHarborCatalog {
     SeaBuddyHarborThread(
       harborThreadMarker: 'leo-board-advice',
       buddyHarbor: ShoreMomentHarborCatalog.shorelinePeople[22],
-      localApproachRibbon: '23 - Australia',
+      localApproachRibbon: 'Australia',
       lastSignalTime: '',
       lastSignalPreview: '',
       unreadSignalCount: 0,
@@ -19,7 +19,7 @@ class SeaBuddyHarborCatalog {
     SeaBuddyHarborThread(
       harborThreadMarker: 'nora-cafe-note',
       buddyHarbor: ShoreMomentHarborCatalog.shorelinePeople[10],
-      localApproachRibbon: 'Seaglass Cafe',
+      localApproachRibbon: 'Greece',
       lastSignalTime: '',
       lastSignalPreview: '',
       unreadSignalCount: 0,
@@ -29,7 +29,7 @@ class SeaBuddyHarborCatalog {
     SeaBuddyHarborThread(
       harborThreadMarker: 'milo-sandbar',
       buddyHarbor: ShoreMomentHarborCatalog.shorelinePeople[5],
-      localApproachRibbon: 'Sandbar Gate',
+      localApproachRibbon: 'Philippines',
       lastSignalTime: '',
       lastSignalPreview: '',
       unreadSignalCount: 0,
@@ -39,7 +39,7 @@ class SeaBuddyHarborCatalog {
     SeaBuddyHarborThread(
       harborThreadMarker: 'isla-palms',
       buddyHarbor: ShoreMomentHarborCatalog.shorelinePeople[6],
-      localApproachRibbon: 'Palm Walk',
+      localApproachRibbon: 'United States',
       lastSignalTime: '',
       lastSignalPreview: '',
       unreadSignalCount: 0,
@@ -49,7 +49,7 @@ class SeaBuddyHarborCatalog {
     SeaBuddyHarborThread(
       harborThreadMarker: 'rowan-rail',
       buddyHarbor: ShoreMomentHarborCatalog.shorelinePeople[3],
-      localApproachRibbon: 'Quiet Pier',
+      localApproachRibbon: 'Nigeria',
       lastSignalTime: '',
       lastSignalPreview: '',
       unreadSignalCount: 0,
@@ -59,7 +59,7 @@ class SeaBuddyHarborCatalog {
     SeaBuddyHarborThread(
       harborThreadMarker: 'celeste-foam',
       buddyHarbor: ShoreMomentHarborCatalog.shorelinePeople[4],
-      localApproachRibbon: 'Foamline',
+      localApproachRibbon: 'Indonesia',
       lastSignalTime: '',
       lastSignalPreview: '',
       unreadSignalCount: 0,
@@ -70,25 +70,25 @@ class SeaBuddyHarborCatalog {
 
   static final List<SeaBuddyFollowRequest> buddyRequests = [
     SeaBuddyFollowRequest(
-      followRequestMarker: 'donald-dressing',
+      followRequestMarker: 'sunwear-soft-light-request',
       requestHarbor: ShoreMomentHarborCatalog.shorelinePeople[24],
-      localApproachRibbon: '23 - Australia',
+      localApproachRibbon: 'Australia',
       approachNote:
           'Breeze by shore, collect soft light today. Long coastline, slow down for coastal tiny joys.',
       startsFollowed: false,
     ),
     SeaBuddyFollowRequest(
-      followRequestMarker: 'evan-cuisine',
+      followRequestMarker: 'lagoon-snack-path-request',
       requestHarbor: ShoreMomentHarborCatalog.shorelinePeople[12],
-      localApproachRibbon: 'Lagoon Market',
+      localApproachRibbon: 'Aruba',
       approachNote:
           'I found a quiet snack path near the lagoon and thought you might like it.',
       startsFollowed: false,
     ),
     SeaBuddyFollowRequest(
-      followRequestMarker: 'dora-shell',
+      followRequestMarker: 'beacon-sunwear-route-request',
       requestHarbor: ShoreMomentHarborCatalog.shorelinePeople[36],
-      localApproachRibbon: 'Beacon Steps',
+      localApproachRibbon: 'China',
       approachNote:
           'Your sunwear post matched my saved route. I saved the same shoreline notes.',
       startsFollowed: true,
@@ -96,7 +96,7 @@ class SeaBuddyHarborCatalog {
     SeaBuddyFollowRequest(
       followRequestMarker: 'kai-reefline',
       requestHarbor: ShoreMomentHarborCatalog.shorelinePeople[19],
-      localApproachRibbon: 'Reef Rail',
+      localApproachRibbon: 'Indonesia',
       approachNote:
           'I keep seeing your coast notes around the same tide window.',
       startsFollowed: false,
@@ -104,7 +104,7 @@ class SeaBuddyHarborCatalog {
     SeaBuddyFollowRequest(
       followRequestMarker: 'opal-breeze',
       requestHarbor: ShoreMomentHarborCatalog.shorelinePeople[30],
-      localApproachRibbon: 'Breeze Point',
+      localApproachRibbon: 'Australia',
       approachNote:
           'Your late walk list is useful. I want to follow the next update.',
       startsFollowed: false,

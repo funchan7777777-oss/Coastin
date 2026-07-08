@@ -289,7 +289,7 @@ class _CommentComposer extends StatelessWidget {
           Expanded(
             child: CupertinoTextField(
               controller: controller,
-              placeholder: 'Please enter...',
+              placeholder: 'Add a shoreline comment',
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
               decoration: const BoxDecoration(color: Color(0x00000000)),
               style: const TextStyle(

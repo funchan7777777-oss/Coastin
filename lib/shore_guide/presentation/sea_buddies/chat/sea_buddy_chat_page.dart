@@ -338,7 +338,7 @@ class _SeaSignalComposer extends StatelessWidget {
         Expanded(
           child: CupertinoTextField(
             controller: controller,
-            placeholder: 'Please enter...',
+            placeholder: 'Write a Coastin message',
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
             decoration: BoxDecoration(
               color: const Color(0xFFFFFFFF).withValues(alpha: 0.94),
