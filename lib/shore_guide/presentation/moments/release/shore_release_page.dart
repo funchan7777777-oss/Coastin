@@ -122,7 +122,8 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
                         const SizedBox(height: 12),
                         CupertinoTextField(
                           controller: _copyController,
-                          placeholder: 'Add a calm caption for this shoreline moment',
+                          placeholder:
+                              'Add a calm caption for this shoreline moment',
                           minLines: 4,
                           maxLines: 5,
                           padding: const EdgeInsets.symmetric(
@@ -185,7 +186,9 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
       builder: (sheetContext) {
         return CupertinoActionSheet(
           title: const Text('Shoreline video'),
-          message: const Text('Pick a library video or record a new shoreline clip.'),
+          message: const Text(
+            'Pick a library video or record a new shoreline clip.',
+          ),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () =>
@@ -220,7 +223,9 @@ class _ShoreReleasePageState extends State<ShoreReleasePage> {
       builder: (sheetContext) {
         return CupertinoActionSheet(
           title: const Text('Shoreline picture'),
-          message: const Text('Pick a library image or take a new shoreline photo.'),
+          message: const Text(
+            'Pick a library image or take a new shoreline photo.',
+          ),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () =>

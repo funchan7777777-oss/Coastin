@@ -188,7 +188,9 @@ class _MyCoastEditPageState extends State<MyCoastEditPage> {
       builder: (context) {
         return CupertinoActionSheet(
           title: const Text('Profile photo'),
-          message: const Text('Update the image shown on your Coastin profile.'),
+          message: const Text(
+            'Update the image shown on your Coastin profile.',
+          ),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () => Navigator.of(context).pop(ImageSource.camera),

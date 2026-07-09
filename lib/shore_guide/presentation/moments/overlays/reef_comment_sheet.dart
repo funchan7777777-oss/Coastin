@@ -7,6 +7,7 @@ import '../../../data/local/buddies/shore_system_notice_store.dart';
 import '../../../data/local/safety/shore_safety_store.dart';
 import '../../../domain/entities/shore_comment_tide_mark.dart';
 import '../../../domain/entities/shoreline_persona.dart';
+import '../../../domain/value_objects/coastin_country_label.dart';
 import '../../../domain/value_objects/shore_content_safety_gate.dart';
 import '../../../domain/value_objects/shore_profile_current.dart';
 import '../../people/shore_persona_detail_page.dart';
@@ -237,7 +238,9 @@ class _ReefCommentSheetState extends State<ReefCommentSheet> {
       CupertinoPageRoute<void>(
         builder: (_) => ShorePersonaDetailPage(
           persona: commentTideMark.commentHarbor,
-          localApproachRibbon: 'Shared shore note',
+          localApproachRibbon: coastinCountryForPersona(
+            commentTideMark.commentHarbor,
+          ),
         ),
       ),
     );
